@@ -111,9 +111,23 @@ export default function App() {
     const savedSuperAdminActive = localStorage.getItem('hader_super_admin_active');
     
     if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
-      setIsSuperAdminMode(true);
-      setSelectedUser('admin');
-      setIsEmployeePortalMode(false);
+      // If there is an explicit tenant specified in the URL search params, and it's a valid tenant
+      // we let the Super Admin preview that tenant's dashboard or portal!
+      if (urlTenantId && currentTenants.some(t => t.id === urlTenantId)) {
+        setIsSuperAdminMode(false);
+        if (resolvedEmployeePortal) {
+          setIsEmployeePortalMode(true);
+          setSelectedUser('');
+        } else {
+          setIsEmployeePortalMode(false);
+          setSelectedUser('admin');
+        }
+      } else {
+        // Normal Super Admin panel dashboard
+        setIsSuperAdminMode(true);
+        setSelectedUser('admin');
+        setIsEmployeePortalMode(false);
+      }
     } else if (savedRole === 'admin') {
       setIsSuperAdminMode(false);
       setSelectedUser('admin');
@@ -559,6 +573,32 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-[#E4E4E7] flex flex-col font-sans" dir="rtl" id="app-wrapper">
+
+      {/* Super Admin Preview Banner */}
+      {localStorage.getItem('hader_super_admin_active') === 'true' && !isSuperAdminMode && (
+        <div className="bg-[#D4AF37] text-slate-950 px-4 py-2.5 text-xs font-extrabold text-center flex flex-col sm:flex-row items-center justify-center gap-2 relative z-50 shadow-md">
+          <div className="flex items-center gap-1.5 justify-center">
+            <Shield className="w-4 h-4 animate-bounce" />
+            <span>وضع معاينة المصمم العام: أنت تستعرض حالياً لوحة تحكم {activeCompanyName}</span>
+          </div>
+          <button
+            onClick={() => {
+              setIsSuperAdminMode(true);
+              const url = new URL(window.location.href);
+              url.searchParams.delete('tenant');
+              url.searchParams.delete('portal');
+              window.history.pushState({}, '', url.toString());
+              setActiveTenantId('default');
+              localStorage.setItem('hader_active_tenant_id', 'default');
+              setSelectedUser('admin');
+              setIsEmployeePortalMode(false);
+            }}
+            className="bg-slate-950 text-[#D4AF37] hover:bg-slate-900 px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer shadow-sm mr-2"
+          >
+            العودة للوحة الإدارة العامة الرئيسية
+          </button>
+        </div>
+      )}
 
       {/* Main Core Application Header */}
       <header className="bg-[#0F0F11] border-b border-[#27272A] py-5 px-6 sticky top-0 z-40">
