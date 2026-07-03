@@ -20,6 +20,9 @@ interface AdminPanelProps {
   onForceCheckOut?: (employeeId: string) => void;
   onArchiveTodayRecords?: () => void;
   onEditEmployee?: (emp: Employee) => void;
+  adminUsername?: string;
+  adminPassword?: string;
+  onUpdateAdminCredentials?: (user: string, pass: string) => void;
 }
 
 export default function AdminPanel({
@@ -35,10 +38,25 @@ export default function AdminPanel({
   onForceCheckOut,
   onArchiveTodayRecords,
   onEditEmployee,
+  adminUsername = 'admin',
+  adminPassword = 'admin123',
+  onUpdateAdminCredentials,
 }: AdminPanelProps) {
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'dashboard' | 'employees' | 'reports' | 'settings'>('dashboard');
   
+  // Credentials update states
+  const [adminUser, setAdminUser] = useState(adminUsername);
+  const [adminPass, setAdminPass] = useState(adminPassword);
+  const [credError, setCredError] = useState('');
+  const [credSuccess, setCredSuccess] = useState('');
+
+  // Keep state updated if props change
+  React.useEffect(() => {
+    setAdminUser(adminUsername);
+    setAdminPass(adminPassword);
+  }, [adminUsername, adminPassword]);
+
   // Side Menu visibility state
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   
@@ -1830,6 +1848,90 @@ export default function AdminPanel({
               >
                 <Save className="w-4 h-4 text-slate-950" />
                 <span>حفظ التغييرات وتحديث قواعد الدوام</span>
+              </button>
+            </form>
+
+            {/* SECTION: Administrator credentials change */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                setCredError('');
+                setCredSuccess('');
+
+                if (!adminUser.trim() || !adminPass.trim()) {
+                  setCredError('اسم المستخدم وكلمة المرور مطلوبان.');
+                  return;
+                }
+
+                if (adminUser.trim().toLowerCase() === 'superadmin') {
+                  setCredError('اسم المستخدم "superadmin" محجوز كلياً ومحمي.');
+                  return;
+                }
+
+                if (onUpdateAdminCredentials) {
+                  onUpdateAdminCredentials(adminUser.trim(), adminPass.trim());
+                  setCredSuccess('تم تحديث بيانات دخول المدير بنجاح!');
+                  setTimeout(() => setCredSuccess(''), 3000);
+                }
+              }} 
+              className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl space-y-5 text-right relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37] opacity-5 blur-[50px] pointer-events-none"></div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-[#E4E4E7] mb-1 flex items-center justify-start gap-2">
+                  <Key className="w-5 h-5 text-[#D4AF37]" />
+                  <span>تعديل بيانات حساب مدير النظام</span>
+                </h3>
+                <p className="text-xs text-[#8E8E93]">
+                  قم بتغيير اسم المستخدم وكلمة المرور الخاصة بلوحة تحكم مدير هذه المؤسسة لمنع الدخول غير المصرح به.
+                </p>
+              </div>
+
+              {credError && (
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-lg font-bold">
+                  {credError}
+                </div>
+              )}
+
+              {credSuccess && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3 rounded-lg font-bold">
+                  {credSuccess}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#27272A]/50">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#8E8E93] block">اسم مستخدم المدير الجديد *</label>
+                  <input
+                    type="text"
+                    required
+                    value={adminUser}
+                    onChange={(e) => setAdminUser(e.target.value)}
+                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                    placeholder="اسم المستخدم"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#8E8E93] block">كلمة المرور الجديدة *</label>
+                  <input
+                    type="text"
+                    required
+                    value={adminPass}
+                    onChange={(e) => setAdminPass(e.target.value)}
+                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                    placeholder="كلمة المرور"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-[#1A1C1E] hover:bg-[#27272A] text-[#D4AF37] border border-[#D4AF37]/30 hover:border-[#D4AF37]/50 font-extrabold text-xs py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+              >
+                <Save className="w-4 h-4 animate-pulse" />
+                <span>حفظ بيانات دخول المدير الجديدة</span>
               </button>
             </form>
 

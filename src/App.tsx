@@ -28,9 +28,15 @@ export default function App() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [activeTenantId, setActiveTenantId] = useState<string>('default');
   const [isSuperAdminMode, setIsSuperAdminMode] = useState<boolean>(false);
+  const [superAdminUsername, setSuperAdminUsername] = useState(() => {
+    return localStorage.getItem('hader_super_admin_username') || 'superadmin';
+  });
+  const [superAdminPassword, setSuperAdminPassword] = useState(() => {
+    return localStorage.getItem('hader_super_admin_password') || 'superadmin123';
+  });
   
   // Simulation selected user state
-  const [selectedUser, setSelectedUser] = useState<string | 'admin'>('admin');
+  const [selectedUser, setSelectedUser] = useState<string | 'admin'>('');
   
   // Employee Portal Mode states
   const [isEmployeePortalMode, setIsEmployeePortalMode] = useState(false);
@@ -58,9 +64,11 @@ export default function App() {
   useEffect(() => {
     // 1. Resolve portal mode from URL
     const params = new URLSearchParams(window.location.search);
+    let resolvedEmployeePortal = false;
     if (params.get('portal') === 'employee') {
       setIsEmployeePortalMode(true);
       setSelectedUser(''); // Force employee login screen
+      resolvedEmployeePortal = true;
     }
 
     // 2. Initialize tenants database
@@ -98,10 +106,31 @@ export default function App() {
     setActiveTenantId(targetTenantId);
     localStorage.setItem('hader_active_tenant_id', targetTenantId);
 
-    // 4. Resolve superadmin mode if saved
-    const superAdminActive = localStorage.getItem('hader_super_admin_active');
-    if (superAdminActive === 'true') {
+    // 4. Resolve superadmin or admin logged in session
+    const savedRole = localStorage.getItem('hader_logged_in_role');
+    const savedSuperAdminActive = localStorage.getItem('hader_super_admin_active');
+    
+    if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
       setIsSuperAdminMode(true);
+      setSelectedUser('admin');
+      setIsEmployeePortalMode(false);
+    } else if (savedRole === 'admin') {
+      setIsSuperAdminMode(false);
+      setSelectedUser('admin');
+      setIsEmployeePortalMode(false);
+    } else if (savedRole === 'employee') {
+      setIsEmployeePortalMode(true);
+      const savedEmpId = localStorage.getItem('hader_logged_in_emp_id');
+      if (savedEmpId) {
+        setSelectedUser(savedEmpId);
+      }
+    } else {
+      // By default, if not explicitly requested as employee portal, show the unified login screen!
+      if (!resolvedEmployeePortal) {
+        setSelectedUser('');
+        setIsEmployeePortalMode(false);
+        setIsSuperAdminMode(false);
+      }
     }
 
     setIsLoaded(true);
@@ -484,12 +513,33 @@ export default function App() {
   const handleSuperAdminLogout = () => {
     setIsSuperAdminMode(false);
     localStorage.removeItem('hader_super_admin_active');
+    localStorage.removeItem('hader_logged_in_role');
     
-    // Fallback to default tenant
+    // Reset states so they return to unified Login Screen
     setActiveTenantId('default');
     localStorage.setItem('hader_active_tenant_id', 'default');
-    setSelectedUser('admin');
+    setSelectedUser('');
     setIsEmployeePortalMode(false);
+  };
+
+  // 5. Update Super Admin Credentials
+  const handleUpdateSuperAdminCredentials = (user: string, pass: string) => {
+    setSuperAdminUsername(user);
+    setSuperAdminPassword(pass);
+    localStorage.setItem('hader_super_admin_username', user);
+    localStorage.setItem('hader_super_admin_password', pass);
+  };
+
+  // 6. Update Active Tenant Admin Credentials
+  const handleUpdateAdminCredentials = (user: string, pass: string) => {
+    const updated = tenants.map(t => {
+      if (t.id === activeTenantId) {
+        return { ...t, username: user, password: pass };
+      }
+      return t;
+    });
+    setTenants(updated);
+    localStorage.setItem('hader_tenants', JSON.stringify(updated));
   };
 
   const activeTenant = tenants.find(t => t.id === activeTenantId);
@@ -564,6 +614,7 @@ export default function App() {
                   onClick={() => {
                     setIsEmployeePortalMode(true);
                     setSelectedUser(''); // Go to portal log-in screen
+                    localStorage.setItem('hader_logged_in_role', 'employee');
                   }}
                   className="inline-flex items-center gap-1.5 bg-[#1A1C1E] hover:bg-[#27272A] text-slate-200 border border-[#27272A] text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
                 >
@@ -581,6 +632,23 @@ export default function App() {
                   <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span>لوحة التحكم والمحاكاة</span>
                 </button>
+
+                {/* Secure Log out for Tenant Admin */}
+                {selectedUser === 'admin' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedUser('');
+                      setIsEmployeePortalMode(false);
+                      setIsSuperAdminMode(false);
+                      localStorage.removeItem('hader_logged_in_role');
+                    }}
+                    className="inline-flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>تسجيل الخروج</span>
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -737,6 +805,9 @@ export default function App() {
             onEditTenant={handleEditTenant}
             onDeleteTenant={handleDeleteTenant}
             onLogout={handleSuperAdminLogout}
+            superAdminUsername={superAdminUsername}
+            superAdminPassword={superAdminPassword}
+            onUpdateSuperAdminCredentials={handleUpdateSuperAdminCredentials}
           />
         ) : isEmployeePortalMode ? (
           selectedUser && employees.some(e => e.id === selectedUser) ? (
@@ -987,6 +1058,141 @@ export default function App() {
 
             </div>
           )
+        ) : selectedUser === '' ? (
+          // RENDER SECURE UNIFIED LOGIN SCREEN!
+          <div className="max-w-md mx-auto space-y-6 animate-in fade-in duration-300">
+            <div className="bg-[#121214] border border-[#27272A] rounded-3xl p-6 sm:p-8 shadow-2xl relative text-right">
+              
+              <div className="text-center pb-6 border-b border-[#27272A] mb-6">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#1A1C1E] to-[#121214] border border-[#D4AF37]/40 rounded-2xl flex items-center justify-center shadow-lg text-[#D4AF37] mx-auto mb-3">
+                  <Shield className="w-7 h-7 animate-pulse" />
+                </div>
+                <h2 className="text-xl font-extrabold text-white">بوابة الدخول الموحدة</h2>
+                <p className="text-xs text-[#8E8E93] mt-1.5">أدخل بيانات الاعتماد للولوج للوحة الإدارة العامة أو الخاصة بالمؤسسة</p>
+              </div>
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const user = adminUsernameInput.trim();
+                  const pass = adminPasswordInput.trim();
+
+                  // 1. Check Super Admin login with dynamic credentials
+                  if (user.toLowerCase() === superAdminUsername.toLowerCase() && pass === superAdminPassword) {
+                    setIsSuperAdminMode(true);
+                    localStorage.setItem('hader_super_admin_active', 'true');
+                    localStorage.setItem('hader_logged_in_role', 'superadmin');
+                    setIsEmployeePortalMode(false);
+                    setSelectedUser('admin');
+                    setAdminUsernameInput('');
+                    setAdminPasswordInput('');
+                    setAdminLoginError('');
+                    return;
+                  }
+
+                  // 2. Check general tenants login list
+                  const matchedTenant = tenants.find(t => t.username.toLowerCase() === user.toLowerCase() && t.password === pass);
+                  if (matchedTenant) {
+                    setActiveTenantId(matchedTenant.id);
+                    localStorage.setItem('hader_active_tenant_id', matchedTenant.id);
+                    localStorage.setItem('hader_logged_in_role', 'admin');
+                    setIsEmployeePortalMode(false);
+                    setIsSuperAdminMode(false);
+                    localStorage.removeItem('hader_super_admin_active');
+                    setSelectedUser('admin');
+                    setAdminUsernameInput('');
+                    setAdminPasswordInput('');
+                    setAdminLoginError('');
+                    
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tenant', matchedTenant.id);
+                    window.history.pushState({}, '', url.toString());
+                    return;
+                  }
+
+                  // 3. Fallback for default admin
+                  if (user === 'admin' && pass === 'admin123') {
+                    setActiveTenantId('default');
+                    localStorage.setItem('hader_active_tenant_id', 'default');
+                    localStorage.setItem('hader_logged_in_role', 'admin');
+                    setIsEmployeePortalMode(false);
+                    setIsSuperAdminMode(false);
+                    localStorage.removeItem('hader_super_admin_active');
+                    setSelectedUser('admin');
+                    setAdminUsernameInput('');
+                    setAdminPasswordInput('');
+                    setAdminLoginError('');
+                    return;
+                  }
+
+                  setAdminLoginError('اسم المستخدم أو كلمة المرور غير صحيحة.');
+                }} 
+                className="space-y-4"
+              >
+                {adminLoginError && (
+                  <p className="text-xs text-rose-400 font-bold bg-rose-950/30 p-3 rounded-xl border border-rose-900/30">
+                    {adminLoginError}
+                  </p>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#8E8E93] block">اسم مستخدم الإدارة</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="ادخل اسم المستخدم هنا..."
+                    value={adminUsernameInput}
+                    onChange={(e) => setAdminUsernameInput(e.target.value)}
+                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-3.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono text-right"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#8E8E93] block">كلمة المرور</label>
+                  <div className="relative">
+                    <input
+                      type={adminLoginPasswordVisible ? 'text' : 'password'}
+                      required
+                      placeholder="••••••••"
+                      value={adminPasswordInput}
+                      onChange={(e) => setAdminPasswordInput(e.target.value)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs pl-10 pr-3 py-3.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono text-right"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setAdminLoginPasswordVisible(!adminLoginPasswordVisible)}
+                      className="absolute left-3 top-3.5 text-[#8E8E93] hover:text-white transition-colors"
+                    >
+                      {adminLoginPasswordVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all shadow-md cursor-pointer text-center mt-2"
+                >
+                  تسجيل الدخول الآمن
+                </button>
+              </form>
+            </div>
+
+            {/* Switch to Employee Portal Link */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEmployeePortalMode(true);
+                  setSelectedUser('');
+                  localStorage.setItem('hader_logged_in_role', 'employee');
+                }}
+                className="text-xs text-[#D4AF37] hover:underline hover:text-[#F3C63F] cursor-pointer inline-flex items-center gap-1.5 font-bold"
+              >
+                <Laptop className="w-3.5 h-3.5" />
+                <span>الدخول لبوابة الخدمة الذاتية للموظفين (التحضير الفوري)</span>
+              </button>
+            </div>
+          </div>
         ) : (
           // Admin Simulator Mode
           selectedUser === 'admin' ? (
@@ -1003,6 +1209,9 @@ export default function App() {
               onUpdateOfficeSettings={handleUpdateOfficeSettings}
               onForceCheckOut={handleAdminCheckOutEmployee}
               onArchiveTodayRecords={handleArchiveTodayRecords}
+              adminUsername={currentAdminUsername}
+              adminPassword={currentAdminPassword}
+              onUpdateAdminCredentials={handleUpdateAdminCredentials}
             />
           ) : (
             (() => {
@@ -1077,9 +1286,10 @@ export default function App() {
                 const pass = adminPasswordInput.trim();
 
                 // 1. Check Super Admin login
-                if (user.toLowerCase() === 'superadmin' && pass === 'superadmin123') {
+                if (user.toLowerCase() === superAdminUsername.toLowerCase() && pass === superAdminPassword) {
                   setIsSuperAdminMode(true);
                   localStorage.setItem('hader_super_admin_active', 'true');
+                  localStorage.setItem('hader_logged_in_role', 'superadmin');
                   setIsEmployeePortalMode(false);
                   setShowAdminLoginModal(false);
                   setAdminUsernameInput('');
@@ -1093,6 +1303,7 @@ export default function App() {
                 if (matchedTenant) {
                   setActiveTenantId(matchedTenant.id);
                   localStorage.setItem('hader_active_tenant_id', matchedTenant.id);
+                  localStorage.setItem('hader_logged_in_role', 'admin');
                   setIsEmployeePortalMode(false);
                   setIsSuperAdminMode(false);
                   localStorage.removeItem('hader_super_admin_active');
@@ -1113,6 +1324,7 @@ export default function App() {
                 if (user === 'admin' && pass === 'admin123') {
                   setActiveTenantId('default');
                   localStorage.setItem('hader_active_tenant_id', 'default');
+                  localStorage.setItem('hader_logged_in_role', 'admin');
                   setIsEmployeePortalMode(false);
                   setIsSuperAdminMode(false);
                   localStorage.removeItem('hader_super_admin_active');

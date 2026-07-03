@@ -11,6 +11,9 @@ interface SuperAdminPanelProps {
   onEditTenant: (tenant: Tenant) => void;
   onDeleteTenant: (id: string) => void;
   onLogout: () => void;
+  superAdminUsername: string;
+  superAdminPassword: string;
+  onUpdateSuperAdminCredentials: (user: string, pass: string) => void;
 }
 
 export default function SuperAdminPanel({
@@ -19,9 +22,19 @@ export default function SuperAdminPanel({
   onEditTenant,
   onDeleteTenant,
   onLogout,
+  superAdminUsername,
+  superAdminPassword,
+  onUpdateSuperAdminCredentials,
 }: SuperAdminPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
+  // SuperAdmin credentials edit state
+  const [showSuperSettings, setShowSuperSettings] = useState(false);
+  const [newSuperUser, setNewSuperUser] = useState(superAdminUsername);
+  const [newSuperPass, setNewSuperPass] = useState(superAdminPassword);
+  const [superError, setSuperError] = useState('');
+  const [superSuccess, setSuperSuccess] = useState('');
+
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -171,6 +184,20 @@ export default function SuperAdminPanel({
           </div>
         </div>
         <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setNewSuperUser(superAdminUsername);
+              setNewSuperPass(superAdminPassword);
+              setSuperError('');
+              setSuperSuccess('');
+              setShowSuperSettings(true);
+            }}
+            className="bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/20 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <Key className="w-4 h-4" />
+            <span>تعديل حساب المصمم (Super Admin)</span>
+          </button>
           <button
             type="button"
             onClick={onLogout}
@@ -649,6 +676,106 @@ export default function SuperAdminPanel({
                   className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
                 >
                   إلغاء الأمر
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* SUPER ADMIN SETTINGS MODAL */}
+      {showSuperSettings && (
+        <div className="fixed inset-0 bg-[#000]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-md p-6 relative animate-in zoom-in-95 duration-150 text-right">
+            <button
+              type="button"
+              onClick={() => setShowSuperSettings(false)}
+              className="absolute left-4 top-4 text-[#8E8E93] hover:text-white cursor-pointer transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="mb-5 pb-3 border-b border-[#27272A]">
+              <h3 className="text-sm font-extrabold text-[#D4AF37] flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                تعديل حساب المصمم العام (Super Admin)
+              </h3>
+              <p className="text-[10px] text-[#8E8E93] mt-1">تعديل بيانات الدخول الخاصة بحساب الإدارة العامة المعزول.</p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSuperError('');
+                setSuperSuccess('');
+
+                if (!newSuperUser.trim() || !newSuperPass.trim()) {
+                  setSuperError('الرجاء تعبئة اسم المستخدم وكلمة المرور.');
+                  return;
+                }
+
+                if (newSuperUser.trim().toLowerCase() === 'admin') {
+                  setSuperError('لا يمكن استخدام اسم المستخدم "admin" لحماية خصوصية حساب المصمم العام.');
+                  return;
+                }
+
+                onUpdateSuperAdminCredentials(newSuperUser.trim(), newSuperPass.trim());
+                setSuperSuccess('تم تحديث بيانات دخول المصمم العام بنجاح!');
+                setTimeout(() => {
+                  setShowSuperSettings(false);
+                  setSuperSuccess('');
+                }, 1500);
+              }}
+              className="space-y-4"
+            >
+              {superError && (
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-2.5 rounded-lg text-xs font-bold">
+                  {superError}
+                </div>
+              )}
+              {superSuccess && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-2.5 rounded-lg text-xs font-bold">
+                  {superSuccess}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-[#8E8E93] block">اسم مستخدم المصمم العام *</label>
+                <input
+                  type="text"
+                  required
+                  value={newSuperUser}
+                  onChange={(e) => setNewSuperUser(e.target.value)}
+                  className="w-full bg-[#0F0F11] border border-[#27272A] focus:border-[#D4AF37] rounded-xl text-xs px-3 py-2.5 focus:outline-none text-white font-mono"
+                  placeholder="superadmin"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-[#8E8E93] block">كلمة المرور الجديدة *</label>
+                <input
+                  type="text"
+                  required
+                  value={newSuperPass}
+                  onChange={(e) => setNewSuperPass(e.target.value)}
+                  className="w-full bg-[#0F0F11] border border-[#27272A] focus:border-[#D4AF37] rounded-xl text-xs px-3 py-2.5 focus:outline-none text-white font-mono"
+                  placeholder="كلمة المرور"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-[#27272A]">
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+                >
+                  حفظ التعديلات
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSuperSettings(false)}
+                  className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] border border-[#27272A] text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+                >
+                  إلغاء
                 </button>
               </div>
             </form>
