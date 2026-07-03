@@ -1,5 +1,5 @@
 {
-  "name": "chekInTime",
+  "name": "checkInTime",
   "description": "نظام ذكي لإدارة الحضور والانصراف بضغطة زر، يدعم التحقق الجغرافي للموظفين الميدانيين والموافقة الفورية للموظفين عن بُعد مع تقارير وإدارة متكاملة للموظفين.",
   "requestFramePermissions": [
     "geolocation"
