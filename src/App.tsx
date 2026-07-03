@@ -9,6 +9,22 @@ import { INITIAL_EMPLOYEES, INITIAL_APPROVAL_REQUESTS, DEFAULT_OFFICE, generateM
 import EmployeePanel from './components/EmployeePanel';
 import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
+import {
+  getTenantsFromFirebase,
+  saveTenantToFirebase,
+  deleteTenantFromFirebase,
+  getSuperAdminCredentialsFromFirebase,
+  saveSuperAdminCredentialsToFirebase,
+  getEmployeesFromFirebase,
+  saveEmployeeToFirebase,
+  deleteEmployeeFromFirebase,
+  getAttendanceFromFirebase,
+  saveAttendanceToFirebase,
+  getRequestsFromFirebase,
+  saveRequestToFirebase,
+  getOfficeSettingsFromFirebase,
+  saveOfficeSettingsToFirebase
+} from './firebase';
 
 
 // Avatar background colors list
@@ -62,58 +78,42 @@ export default function App() {
 
   // Load Tenants & Active Tenant configuration on mount
   useEffect(() => {
-    // 1. Resolve portal mode from URL
     const params = new URLSearchParams(window.location.search);
     let resolvedEmployeePortal = false;
     if (params.get('portal') === 'employee') {
       setIsEmployeePortalMode(true);
-      setSelectedUser(''); // Force employee login screen
+      setSelectedUser('');
       resolvedEmployeePortal = true;
     }
 
-    // 2. Initialize tenants database
+    // 1. Initial local load for instant rendering
     const storedTenants = localStorage.getItem('hader_tenants');
     let currentTenants: Tenant[] = [];
     if (storedTenants) {
       currentTenants = JSON.parse(storedTenants);
-    } else {
-      currentTenants = [
-        {
-          id: 'default',
-          companyName: 'حاضر - الفرع الرئيسي',
-          adminName: 'مدير النظام الافتراضي',
-          username: 'admin',
-          password: 'admin123',
-          createdAt: '2026-07-03'
-        }
-      ];
-      localStorage.setItem('hader_tenants', JSON.stringify(currentTenants));
+      setTenants(currentTenants);
     }
-    setTenants(currentTenants);
 
-    // 3. Resolve active tenant ID
+    // Resolve active tenant ID from local storage or URL
     const urlTenantId = params.get('tenant');
     let targetTenantId = 'default';
-
-    if (urlTenantId && currentTenants.some(t => t.id === urlTenantId)) {
+    if (urlTenantId && (currentTenants.some(t => t.id === urlTenantId) || urlTenantId === 'default')) {
       targetTenantId = urlTenantId;
     } else {
       const storedActiveId = localStorage.getItem('hader_active_tenant_id');
-      if (storedActiveId && currentTenants.some(t => t.id === storedActiveId)) {
+      if (storedActiveId) {
         targetTenantId = storedActiveId;
       }
     }
     setActiveTenantId(targetTenantId);
     localStorage.setItem('hader_active_tenant_id', targetTenantId);
 
-    // 4. Resolve superadmin or admin logged in session
+    // Resolve role/session
     const savedRole = localStorage.getItem('hader_logged_in_role');
     const savedSuperAdminActive = localStorage.getItem('hader_super_admin_active');
     
     if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
-      // If there is an explicit tenant specified in the URL search params, and it's a valid tenant
-      // we let the Super Admin preview that tenant's dashboard or portal!
-      if (urlTenantId && currentTenants.some(t => t.id === urlTenantId)) {
+      if (urlTenantId) {
         setIsSuperAdminMode(false);
         if (resolvedEmployeePortal) {
           setIsEmployeePortalMode(true);
@@ -123,7 +123,6 @@ export default function App() {
           setSelectedUser('admin');
         }
       } else {
-        // Normal Super Admin panel dashboard
         setIsSuperAdminMode(true);
         setSelectedUser('admin');
         setIsEmployeePortalMode(false);
@@ -139,7 +138,6 @@ export default function App() {
         setSelectedUser(savedEmpId);
       }
     } else {
-      // By default, if not explicitly requested as employee portal, show the unified login screen!
       if (!resolvedEmployeePortal) {
         setSelectedUser('');
         setIsEmployeePortalMode(false);
@@ -147,10 +145,23 @@ export default function App() {
       }
     }
 
+    // 2. Fetch live global configs from Firebase
+    getTenantsFromFirebase().then(liveTenants => {
+      setTenants(liveTenants);
+      localStorage.setItem('hader_tenants', JSON.stringify(liveTenants));
+    });
+
+    getSuperAdminCredentialsFromFirebase().then(creds => {
+      setSuperAdminUsername(creds.username);
+      setSuperAdminPassword(creds.password);
+      localStorage.setItem('hader_super_admin_username', creds.username);
+      localStorage.setItem('hader_super_admin_password', creds.password);
+    });
+
     setIsLoaded(true);
   }, []);
 
-  // Sync / load workspace data whenever activeTenantId changes
+  // Sync / load workspace data from LocalStorage & Firebase
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -159,44 +170,44 @@ export default function App() {
     const reqKey = activeTenantId === 'default' ? 'hader_requests' : `hader_requests_${activeTenantId}`;
     const offKey = activeTenantId === 'default' ? 'hader_office' : `hader_office_${activeTenantId}`;
 
-    // A. Employees
-    const storedEmployees = localStorage.getItem(empKey);
-    let currentEmployees = INITIAL_EMPLOYEES;
-    if (storedEmployees) {
-      currentEmployees = JSON.parse(storedEmployees);
-      setEmployees(currentEmployees);
-    } else {
-      setEmployees(INITIAL_EMPLOYEES);
-      localStorage.setItem(empKey, JSON.stringify(INITIAL_EMPLOYEES));
+    // A. Local cached load
+    const cachedEmp = localStorage.getItem(empKey);
+    if (cachedEmp) {
+      setEmployees(JSON.parse(cachedEmp));
+    }
+    const cachedAtt = localStorage.getItem(attKey);
+    if (cachedAtt) {
+      setAttendanceRecords(JSON.parse(cachedAtt));
+    }
+    const cachedReq = localStorage.getItem(reqKey);
+    if (cachedReq) {
+      setPendingRequests(JSON.parse(cachedReq));
+    }
+    const cachedOff = localStorage.getItem(offKey);
+    if (cachedOff) {
+      setOfficeSettings(JSON.parse(cachedOff));
     }
 
-    // B. Attendance History
-    const storedAttendance = localStorage.getItem(attKey);
-    if (storedAttendance) {
-      setAttendanceRecords(JSON.parse(storedAttendance));
-    } else {
-      const generated = generateMockHistory(currentEmployees);
-      setAttendanceRecords(generated);
-      localStorage.setItem(attKey, JSON.stringify(generated));
-    }
+    // B. Fetch live data from Firebase
+    getEmployeesFromFirebase(activeTenantId).then(list => {
+      setEmployees(list);
+      localStorage.setItem(empKey, JSON.stringify(list));
+    });
 
-    // C. Pending Requests
-    const storedRequests = localStorage.getItem(reqKey);
-    if (storedRequests) {
-      setPendingRequests(JSON.parse(storedRequests));
-    } else {
-      setPendingRequests(INITIAL_APPROVAL_REQUESTS);
-      localStorage.setItem(reqKey, JSON.stringify(INITIAL_APPROVAL_REQUESTS));
-    }
+    getAttendanceFromFirebase(activeTenantId).then(list => {
+      setAttendanceRecords(list);
+      localStorage.setItem(attKey, JSON.stringify(list));
+    });
 
-    // D. Office Settings
-    const storedSettings = localStorage.getItem(offKey);
-    if (storedSettings) {
-      setOfficeSettings(JSON.parse(storedSettings));
-    } else {
-      setOfficeSettings(DEFAULT_OFFICE);
-      localStorage.setItem(offKey, JSON.stringify(DEFAULT_OFFICE));
-    }
+    getRequestsFromFirebase(activeTenantId).then(list => {
+      setPendingRequests(list);
+      localStorage.setItem(reqKey, JSON.stringify(list));
+    });
+
+    getOfficeSettingsFromFirebase(activeTenantId).then(settings => {
+      setOfficeSettings(settings);
+      localStorage.setItem(offKey, JSON.stringify(settings));
+    });
   }, [activeTenantId, isLoaded]);
 
   // Sync state helper to write to localStorage for the active tenant
@@ -268,6 +279,7 @@ export default function App() {
 
     const updated = [newRecord, ...attendanceRecords];
     saveState(undefined, updated);
+    saveAttendanceToFirebase(activeTenantId, newRecord);
   };
 
   // 2. On-Site Check Out
@@ -287,6 +299,7 @@ export default function App() {
     record.totalHours = calculateHoursDiff(record.checkIn, checkOutTime);
 
     saveState(undefined, updated);
+    saveAttendanceToFirebase(activeTenantId, record);
   };
 
   // 2b. Admin Force Check Out Employee
@@ -306,6 +319,7 @@ export default function App() {
     record.totalHours = calculateHoursDiff(record.checkIn, checkOutTime);
 
     saveState(undefined, updated);
+    saveAttendanceToFirebase(activeTenantId, record);
   };
 
   // 2c. Archive Today's Records
@@ -313,7 +327,9 @@ export default function App() {
     const todayStr = new Date().toISOString().split('T')[0];
     const updated = attendanceRecords.map(r => {
       if (r.date === todayStr) {
-        return { ...r, archived: true };
+        const archivedRec = { ...r, archived: true };
+        saveAttendanceToFirebase(activeTenantId, archivedRec);
+        return archivedRec;
       }
       return r;
     });
@@ -341,6 +357,7 @@ export default function App() {
 
     const updated = [newRequest, ...pendingRequests];
     saveState(undefined, undefined, updated);
+    saveRequestToFirebase(activeTenantId, newRequest);
   };
 
   // 4. Remote Check Out Request
@@ -364,6 +381,7 @@ export default function App() {
 
     const updated = [newRequest, ...pendingRequests];
     saveState(undefined, undefined, updated);
+    saveRequestToFirebase(activeTenantId, newRequest);
   };
 
   // --- ADMIN ACTIONS ---
@@ -415,13 +433,29 @@ export default function App() {
     }
 
     saveState(undefined, updatedRecords, updatedRequests);
+    saveRequestToFirebase(activeTenantId, request);
+    if (request.type === 'check-in') {
+      const newRecord = updatedRecords[0];
+      if (newRecord) {
+        saveAttendanceToFirebase(activeTenantId, newRecord);
+      }
+    } else if (request.type === 'check-out') {
+      const record = updatedRecords.find(
+        r => r.employeeId === request.employeeId && r.date === request.date && r.checkOut === request.time
+      );
+      if (record) {
+        saveAttendanceToFirebase(activeTenantId, record);
+      }
+    }
   };
 
   // 2. Reject Remote Request
   const handleRejectRequest = (requestId: string) => {
     const updatedRequests = pendingRequests.map(r => {
       if (r.id === requestId) {
-        return { ...r, status: 'rejected' as const };
+        const rejectedReq = { ...r, status: 'rejected' as const };
+        saveRequestToFirebase(activeTenantId, rejectedReq);
+        return rejectedReq;
       }
       return r;
     });
@@ -442,6 +476,7 @@ export default function App() {
 
     const updated = [...employees, empRecord];
     saveState(updated);
+    saveEmployeeToFirebase(activeTenantId, empRecord);
   };
 
   // 3b. Edit Employee
@@ -450,22 +485,27 @@ export default function App() {
     // Propagate updated name to existing records
     const updatedRecords = attendanceRecords.map(r => {
       if (r.employeeId === updatedEmp.id) {
-        return { ...r, employeeName: updatedEmp.name };
+        const updatedRec = { ...r, employeeName: updatedEmp.name };
+        saveAttendanceToFirebase(activeTenantId, updatedRec);
+        return updatedRec;
       }
       return r;
     });
     saveState(updated, updatedRecords);
+    saveEmployeeToFirebase(activeTenantId, updatedEmp);
   };
 
   // 4. Delete Employee
   const handleDeleteEmployee = (empId: string) => {
     const updated = employees.filter(e => e.id !== empId);
     saveState(updated);
+    deleteEmployeeFromFirebase(empId);
   };
 
   // 5. Update Office GPS Coordinates
   const handleUpdateOfficeSettings = (settings: OfficeSettings) => {
     saveState(undefined, undefined, undefined, settings);
+    saveOfficeSettingsToFirebase(activeTenantId, settings);
   };
 
   // 6. Hard Reset System Data (Convenient for testers)
@@ -496,6 +536,7 @@ export default function App() {
     const updated = [...tenants, created];
     setTenants(updated);
     localStorage.setItem('hader_tenants', JSON.stringify(updated));
+    saveTenantToFirebase(created);
   };
 
   // 2. Edit Tenant
@@ -503,6 +544,7 @@ export default function App() {
     const updated = tenants.map(t => t.id === updatedTenant.id ? updatedTenant : t);
     setTenants(updated);
     localStorage.setItem('hader_tenants', JSON.stringify(updated));
+    saveTenantToFirebase(updatedTenant);
   };
 
   // 3. Delete Tenant
@@ -517,6 +559,8 @@ export default function App() {
     localStorage.removeItem(`hader_requests_${id}`);
     localStorage.removeItem(`hader_office_${id}`);
     
+    deleteTenantFromFirebase(id);
+
     if (activeTenantId === id) {
       setActiveTenantId('default');
       localStorage.setItem('hader_active_tenant_id', 'default');
@@ -542,13 +586,16 @@ export default function App() {
     setSuperAdminPassword(pass);
     localStorage.setItem('hader_super_admin_username', user);
     localStorage.setItem('hader_super_admin_password', pass);
+    saveSuperAdminCredentialsToFirebase(user, pass);
   };
 
   // 6. Update Active Tenant Admin Credentials
   const handleUpdateAdminCredentials = (user: string, pass: string) => {
     const updated = tenants.map(t => {
       if (t.id === activeTenantId) {
-        return { ...t, username: user, password: pass };
+        const updatedTenant = { ...t, username: user, password: pass };
+        saveTenantToFirebase(updatedTenant);
+        return updatedTenant;
       }
       return t;
     });

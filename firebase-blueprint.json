@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "Tenant": {
+      "title": "Tenant",
+      "description": "Company branch or department under the system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "companyName": { "type": "string" },
+        "adminName": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "companyName", "adminName", "username", "password", "createdAt"]
+    },
+    "Employee": {
+      "title": "Employee",
+      "description": "Employee record under a tenant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "employee"] },
+        "workModel": { "type": "string", "enum": ["onsite", "remote", "field"] },
+        "avatarColor": { "type": "string" },
+        "joinDate": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "tenantId": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "role", "workModel", "avatarColor", "joinDate", "status", "tenantId"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Clock in and clock out events",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "employeeName": { "type": "string" },
+        "date": { "type": "string" },
+        "checkIn": { "type": "string" },
+        "checkOut": { "type": "string" },
+        "workModel": { "type": "string", "enum": ["onsite", "remote", "field"] },
+        "status": { "type": "string", "enum": ["present", "late", "absent", "excused"] },
+        "totalHours": { "type": "number" },
+        "isApproved": { "type": "boolean" },
+        "approvedAt": { "type": "string" },
+        "archived": { "type": "boolean" },
+        "tenantId": { "type": "string" }
+      },
+      "required": ["id", "employeeId", "employeeName", "date", "checkIn", "workModel", "status", "tenantId"]
+    },
+    "ApprovalRequest": {
+      "title": "ApprovalRequest",
+      "description": "Requests from remote employees waiting for approval",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "employeeName": { "type": "string" },
+        "role": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "type": { "type": "string", "enum": ["check-in", "check-out"] },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "notes": { "type": "string" },
+        "tenantId": { "type": "string" }
+      },
+      "required": ["id", "employeeId", "employeeName", "role", "date", "time", "type", "status", "tenantId"]
+    },
+    "OfficeSettings": {
+      "title": "OfficeSettings",
+      "description": "Geographical office location parameters for a tenant",
+      "type": "object",
+      "properties": {
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "radius": { "type": "number" },
+        "address": { "type": "string" }
+      },
+      "required": ["lat", "lng", "radius", "address"]
+    },
+    "SuperAdminSettings": {
+      "title": "SuperAdminSettings",
+      "description": "Super Admin credentials and main configurations",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "required": ["username", "password"]
+    }
+  },
+  "firestore": {
+    "tenants/{tenantId}": {
+      "schema": "Tenant",
+      "description": "Company registration directory"
+    },
+    "employees/{employeeId}": {
+      "schema": "Employee",
+      "description": "Staff files"
+    },
+    "attendance/{attendanceId}": {
+      "schema": "AttendanceRecord",
+      "description": "Daily attendance punch-cards"
+    },
+    "requests/{requestId}": {
+      "schema": "ApprovalRequest",
+      "description": "Pending requests for approval"
+    },
+    "officeSettings/{tenantId}": {
+      "schema": "OfficeSettings",
+      "description": "Tenant geofencing boundaries"
+    },
+    "settings/{settingId}": {
+      "schema": "SuperAdminSettings",
+      "description": "Global administrator controls"
+    }
+  }
+}
