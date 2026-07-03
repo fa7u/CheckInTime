@@ -113,16 +113,20 @@ export default function App() {
     const savedRole = localStorage.getItem('hader_logged_in_role');
     const savedSuperAdminActive = localStorage.getItem('hader_super_admin_active');
     
-    if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
+    if (resolvedEmployeePortal) {
+      setIsSuperAdminMode(false);
+      setIsEmployeePortalMode(true);
+      const savedEmpId = localStorage.getItem('hader_logged_in_emp_id');
+      if (savedRole === 'employee' && savedEmpId) {
+        setSelectedUser(savedEmpId);
+      } else {
+        setSelectedUser('');
+      }
+    } else if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
       if (urlTenantId) {
         setIsSuperAdminMode(false);
-        if (resolvedEmployeePortal) {
-          setIsEmployeePortalMode(true);
-          setSelectedUser('');
-        } else {
-          setIsEmployeePortalMode(false);
-          setSelectedUser('admin');
-        }
+        setIsEmployeePortalMode(false);
+        setSelectedUser('admin');
       } else {
         setIsSuperAdminMode(true);
         setSelectedUser('admin');
@@ -139,11 +143,9 @@ export default function App() {
         setSelectedUser(savedEmpId);
       }
     } else {
-      if (!resolvedEmployeePortal) {
-        setSelectedUser('');
-        setIsEmployeePortalMode(false);
-        setIsSuperAdminMode(false);
-      }
+      setSelectedUser('');
+      setIsEmployeePortalMode(false);
+      setIsSuperAdminMode(false);
     }
 
     // 2. Fetch live global configs from Firebase
