@@ -1,0 +1,10 @@
+{
+  "name": "حاضر - نظام التحضير الذكي",
+  "description": "نظام ذكي لإدارة الحضور والانصراف بضغطة زر، يدعم التحقق الجغرافي للموظفين الميدانيين والموافقة الفورية للموظفين عن بُعد مع تقارير وإدارة متكاملة للموظفين.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
