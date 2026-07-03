@@ -70,6 +70,59 @@ export async function saveTenantToFirebase(tenant: Tenant): Promise<void> {
   }
 }
 
+export async function migrateTenantInFirebase(oldId: string, newId: string, updatedTenant: Tenant): Promise<void> {
+  try {
+    // 1. Save new tenant document
+    await saveTenantToFirebase(updatedTenant);
+    
+    // 2. Migrate officeSettings doc
+    const oldSettingsRef = doc(db, 'officeSettings', oldId);
+    const oldSettingsSnap = await getDoc(oldSettingsRef);
+    if (oldSettingsSnap.exists()) {
+      await setDoc(doc(db, 'officeSettings', newId), oldSettingsSnap.data());
+      await deleteDoc(oldSettingsRef);
+    }
+    
+    // 3. Migrate employees
+    const empQuery = query(collection(db, 'employees'), where('tenantId', '==', oldId));
+    const empSnap = await getDocs(empQuery);
+    for (const d of empSnap.docs) {
+      const empData = d.data();
+      await setDoc(doc(db, 'employees', d.id), {
+        ...empData,
+        tenantId: newId
+      });
+    }
+    
+    // 4. Migrate attendance
+    const attQuery = query(collection(db, 'attendance'), where('tenantId', '==', oldId));
+    const attSnap = await getDocs(attQuery);
+    for (const d of attSnap.docs) {
+      const attData = d.data();
+      await setDoc(doc(db, 'attendance', d.id), {
+        ...attData,
+        tenantId: newId
+      });
+    }
+    
+    // 5. Migrate requests
+    const reqQuery = query(collection(db, 'requests'), where('tenantId', '==', oldId));
+    const reqSnap = await getDocs(reqQuery);
+    for (const d of reqSnap.docs) {
+      const reqData = d.data();
+      await setDoc(doc(db, 'requests', d.id), {
+        ...reqData,
+        tenantId: newId
+      });
+    }
+    
+    // 6. Delete old tenant document
+    await deleteDoc(doc(db, 'tenants', oldId));
+  } catch (error) {
+    console.error(`Error migrating tenant from ${oldId} to ${newId} in Firebase:`, error);
+  }
+}
+
 export async function deleteTenantFromFirebase(tenantId: string): Promise<void> {
   try {
     const tenantDocRef = doc(db, 'tenants', tenantId);

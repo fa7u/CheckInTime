@@ -13,6 +13,7 @@ import {
   getTenantsFromFirebase,
   saveTenantToFirebase,
   deleteTenantFromFirebase,
+  migrateTenantInFirebase,
   getSuperAdminCredentialsFromFirebase,
   saveSuperAdminCredentialsToFirebase,
   getEmployeesFromFirebase,
@@ -525,26 +526,71 @@ export default function App() {
   // --- SUPER ADMIN ACTIONS ---
   
   // 1. Add Tenant
-  const handleAddTenant = (newTenant: Omit<Tenant, 'id' | 'createdAt'>) => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const created: Tenant = {
-      ...newTenant,
-      id: `tenant-${Date.now().toString().slice(-4)}`,
-      createdAt: todayStr,
-    };
-    
-    const updated = [...tenants, created];
+  const handleAddTenant = (createdTenant: Tenant) => {
+    const updated = [...tenants, createdTenant];
     setTenants(updated);
     localStorage.setItem('hader_tenants', JSON.stringify(updated));
-    saveTenantToFirebase(created);
+    saveTenantToFirebase(createdTenant);
   };
 
   // 2. Edit Tenant
-  const handleEditTenant = (updatedTenant: Tenant) => {
-    const updated = tenants.map(t => t.id === updatedTenant.id ? updatedTenant : t);
+  const handleEditTenant = async (oldId: string, updatedTenant: Tenant) => {
+    let updated = [...tenants];
+    if (oldId !== updatedTenant.id) {
+      // The ID has changed!
+      updated = tenants.map(t => t.id === oldId ? updatedTenant : t);
+      
+      // If the currently active tenant ID is the one being modified, we should update the active tenant ID
+      if (activeTenantId === oldId) {
+        setActiveTenantId(updatedTenant.id);
+        localStorage.setItem('hader_active_tenant_id', updatedTenant.id);
+      }
+      
+      // Migrate localStorage keys
+      const oldKeys = {
+        emp: oldId === 'default' ? 'hader_employees' : `hader_employees_${oldId}`,
+        att: oldId === 'default' ? 'hader_attendance' : `hader_attendance_${oldId}`,
+        req: oldId === 'default' ? 'hader_requests' : `hader_requests_${oldId}`,
+        off: oldId === 'default' ? 'hader_office' : `hader_office_${oldId}`
+      };
+      const newKeys = {
+        emp: updatedTenant.id === 'default' ? 'hader_employees' : `hader_employees_${updatedTenant.id}`,
+        att: updatedTenant.id === 'default' ? 'hader_attendance' : `hader_attendance_${updatedTenant.id}`,
+        req: updatedTenant.id === 'default' ? 'hader_requests' : `hader_requests_${updatedTenant.id}`,
+        off: updatedTenant.id === 'default' ? 'hader_office' : `hader_office_${updatedTenant.id}`
+      };
+      
+      const empData = localStorage.getItem(oldKeys.emp);
+      if (empData) {
+        localStorage.setItem(newKeys.emp, empData);
+        localStorage.removeItem(oldKeys.emp);
+      }
+      const attData = localStorage.getItem(oldKeys.att);
+      if (attData) {
+        localStorage.setItem(newKeys.att, attData);
+        localStorage.removeItem(oldKeys.att);
+      }
+      const reqData = localStorage.getItem(oldKeys.req);
+      if (reqData) {
+        localStorage.setItem(newKeys.req, reqData);
+        localStorage.removeItem(oldKeys.req);
+      }
+      const offData = localStorage.getItem(oldKeys.off);
+      if (offData) {
+        localStorage.setItem(newKeys.off, offData);
+        localStorage.removeItem(oldKeys.off);
+      }
+      
+      // Call firebase update helper
+      await migrateTenantInFirebase(oldId, updatedTenant.id, updatedTenant);
+    } else {
+      // Normal edit, only properties changed
+      updated = tenants.map(t => t.id === updatedTenant.id ? updatedTenant : t);
+      await saveTenantToFirebase(updatedTenant);
+    }
+    
     setTenants(updated);
     localStorage.setItem('hader_tenants', JSON.stringify(updated));
-    saveTenantToFirebase(updatedTenant);
   };
 
   // 3. Delete Tenant

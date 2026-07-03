@@ -5,6 +5,20 @@ import {
   Trash2, Edit, Save, Check, X, Shield, Download, RefreshCw,
   LayoutDashboard, Key, Eye, EyeOff, Menu, Link2, Copy, Archive
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  AreaChart,
+  Area
+} from 'recharts';
 import { Employee, AttendanceRecord, OfficeSettings, ApprovalRequest, WorkModel } from '../types';
 
 interface AdminPanelProps {
@@ -326,6 +340,43 @@ export default function AdminPanel({
     r => r.date === todayStr && r.checkIn && !r.checkOut
   ).length;
 
+  const todayUnarchivedRecords = attendanceRecords.filter(r => r.date === todayStr && !r.archived);
+  const countPresent = todayUnarchivedRecords.filter(r => r.status === 'حاضر').length;
+  const countLate = todayUnarchivedRecords.filter(r => r.status === 'متأخر').length;
+  const countAbsent = todayUnarchivedRecords.filter(r => r.status === 'غياب').length;
+  const countNotCheckedIn = Math.max(0, employees.length - todayUnarchivedRecords.length);
+  const countCheckedOut = todayUnarchivedRecords.filter(r => r.checkIn && r.checkOut && r.status !== 'غياب').length;
+  const countOnDuty = Math.max(0, (countPresent + countLate) - countCheckedOut);
+
+  // Generate Trend Data for last 7 days
+  const trendData = React.useMemo(() => {
+    const dates: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      dates.push(d.toISOString().split('T')[0]);
+    }
+
+    return dates.map(dStr => {
+      const dayRecords = attendanceRecords.filter(r => r.date === dStr);
+      const totalPossible = employees.length || 1;
+      const attended = dayRecords.filter(r => r.status === 'حاضر' || r.status === 'متأخر').length;
+      const departed = dayRecords.filter(r => r.checkIn && r.checkOut && r.status !== 'غياب').length;
+      
+      const attendanceRate = Math.round((attended / totalPossible) * 100);
+      const departureRate = attended > 0 ? Math.round((departed / attended) * 100) : 0;
+      
+      const [_, m, d] = dStr.split('-');
+      const formattedDate = `${d}/${m}`;
+      
+      return {
+        date: formattedDate,
+        'نسبة الحضور': attendanceRate,
+        'نسبة الانصراف': departureRate,
+      };
+    });
+  }, [attendanceRecords, employees.length]);
+
   // Export alerts
   const handleExport = (format: 'PDF' | 'Excel') => {
     alert(`تم البدء في استخراج التقرير بصيغة ${format} لشهر ${reportMonth}. سيتم تحميل الملف تلقائياً.`);
@@ -641,6 +692,248 @@ export default function AdminPanel({
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-amber-950/30 text-[#D4AF37] border border-amber-900/20 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Recharts Graphical Dashboard Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="dashboard-charts-grid">
+              {/* Chart 1: Daily Attendance Status (Pie Chart) */}
+              <div className="bg-[#121214] border border-[#27272A] rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute -top-12 -left-12 w-24 h-24 bg-emerald-500 opacity-[0.02] blur-3xl pointer-events-none"></div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#E4E4E7] flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                    <span>توزيع حالات التحضير (اليوم)</span>
+                  </h3>
+                  <p className="text-[11px] text-[#8E8E93] mb-4">النسبة المئوية لحالات حضور وغياب جميع الموظفين المسجلين لليوم</p>
+                </div>
+                
+                <div className="h-[220px] w-full flex items-center justify-center relative">
+                  {employees.length === 0 ? (
+                    <span className="text-xs text-[#8E8E93]">لا توجد بيانات كافية</span>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'حاضر بالوقت', value: countPresent, color: '#10B981' },
+                            { name: 'متأخر عن العمل', value: countLate, color: '#F59E0B' },
+                            { name: 'غياب مسجل', value: countAbsent, color: '#EF4444' },
+                            { name: 'لم يحضر بعد', value: countNotCheckedIn, color: '#3F3F46' }
+                          ].filter(d => d.value > 0)}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {[
+                            { name: 'حاضر بالوقت', value: countPresent, color: '#10B981' },
+                            { name: 'متأخر عن العمل', value: countLate, color: '#F59E0B' },
+                            { name: 'غياب مسجل', value: countAbsent, color: '#EF4444' },
+                            { name: 'لم يحضر بعد', value: countNotCheckedIn, color: '#3F3F46' }
+                          ].filter(d => d.value > 0).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#121214',
+                            borderColor: '#27272A',
+                            borderRadius: '12px',
+                            color: '#E4E4E7',
+                            fontSize: '11px',
+                            textAlign: 'right',
+                          }}
+                          itemStyle={{ color: '#E4E4E7' }}
+                          formatter={(value: any) => [`${value} موظف`, 'العدد']}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
+                  {/* Central Text for Pie Chart */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-[10px] text-[#8E8E93]">نسبة الحضور</span>
+                    <span className="text-xl font-extrabold text-[#E4E4E7] font-mono mt-0.5">
+                      {Math.round(((countPresent + countLate) / (employees.length || 1)) * 100)}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customized Legends with Counts */}
+                <div className="grid grid-cols-2 gap-2 mt-4 text-[10px] text-[#E4E4E7]">
+                  <div className="flex items-center gap-1.5 justify-start">
+                    <span className="w-2.5 h-2.5 rounded bg-[#10B981] shrink-0"></span>
+                    <span className="truncate">حاضر بالوقت ({countPresent})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 justify-start">
+                    <span className="w-2.5 h-2.5 rounded bg-[#F59E0B] shrink-0"></span>
+                    <span className="truncate">متأخر ({countLate})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 justify-start">
+                    <span className="w-2.5 h-2.5 rounded bg-[#EF4444] shrink-0"></span>
+                    <span className="truncate">غياب ({countAbsent})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 justify-start">
+                    <span className="w-2.5 h-2.5 rounded bg-[#3F3F46] shrink-0"></span>
+                    <span className="truncate">لم يحضر ({countNotCheckedIn})</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart 2: Departure Status Today (Bar Chart / Progress Stack) */}
+              <div className="bg-[#121214] border border-[#27272A] rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute -top-12 -left-12 w-24 h-24 bg-[#F43F5E] opacity-[0.02] blur-3xl pointer-events-none"></div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#E4E4E7] flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                    <span>حالة الانصراف اليومية</span>
+                  </h3>
+                  <p className="text-[11px] text-[#8E8E93] mb-4">مقارنة بين عدد الموظفين على رأس العمل والذين سجلوا انصرافهم</p>
+                </div>
+
+                <div className="h-[220px] w-full flex items-center justify-center relative">
+                  {employees.length === 0 ? (
+                    <span className="text-xs text-[#8E8E93]">لا توجد بيانات كافية</span>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={[
+                          { name: 'على رأس العمل', 'الموظفين': countOnDuty, color: '#3B82F6' },
+                          { name: 'سجل الانصراف', 'الموظفين': countCheckedOut, color: '#F43F5E' },
+                        ]}
+                        barSize={32}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1F1F22" vertical={false} />
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="#8E8E93" 
+                          fontSize={10} 
+                          tickLine={false}
+                          axisLine={false} 
+                        />
+                        <YAxis 
+                          stroke="#8E8E93" 
+                          fontSize={10} 
+                          tickLine={false}
+                          axisLine={false} 
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          cursor={{ fill: '#1A1C1E', opacity: 0.3 }}
+                          contentStyle={{
+                            backgroundColor: '#121214',
+                            borderColor: '#27272A',
+                            borderRadius: '12px',
+                            color: '#E4E4E7',
+                            fontSize: '11px',
+                            textAlign: 'right',
+                          }}
+                        />
+                        <Bar dataKey="الموظفين" radius={[6, 6, 0, 0]}>
+                          <Cell fill="#3B82F6" />
+                          <Cell fill="#F43F5E" />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+
+                {/* Customized Stats summary */}
+                <div className="grid grid-cols-2 gap-4 mt-4 text-center border-t border-[#1F1F22] pt-3 text-xs">
+                  <div>
+                    <span className="text-[#8E8E93] block text-[9px] mb-0.5">المغادرون</span>
+                    <span className="text-rose-400 font-extrabold font-mono text-sm">{countCheckedOut} موظف</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8E8E93] block text-[9px] mb-0.5">على رأس العمل</span>
+                    <span className="text-blue-400 font-extrabold font-mono text-sm">{countOnDuty} موظف</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart 3: Weekly Attendance & Departure Trend (Area Chart) */}
+              <div className="bg-[#121214] border border-[#27272A] rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute -top-12 -left-12 w-24 h-24 bg-[#D4AF37] opacity-[0.02] blur-3xl pointer-events-none"></div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#E4E4E7] flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                    <span>معدل الحضور والانصراف (أسبوعي)</span>
+                  </h3>
+                  <p className="text-[11px] text-[#8E8E93] mb-4">معدل الانضباط والالتزام اليومي لآخر 7 أيام عمل بالمنشأة</p>
+                </div>
+
+                <div className="h-[220px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trendData}>
+                      <defs>
+                        <linearGradient id="colorAttendance" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorDeparture" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#F43F5E" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1F1F22" vertical={false} />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="#8E8E93" 
+                        fontSize={10} 
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        stroke="#8E8E93" 
+                        fontSize={10} 
+                        tickLine={false}
+                        axisLine={false}
+                        domain={[0, 100]}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#121214',
+                          borderColor: '#27272A',
+                          borderRadius: '12px',
+                          color: '#E4E4E7',
+                          fontSize: '11px',
+                          textAlign: 'right',
+                        }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="نسبة الحضور" 
+                        stroke="#10B981" 
+                        fillOpacity={1} 
+                        fill="url(#colorAttendance)" 
+                        strokeWidth={2}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="نسبة الانصراف" 
+                        stroke="#F43F5E" 
+                        fillOpacity={1} 
+                        fill="url(#colorDeparture)" 
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Legend indicator for Area chart */}
+                <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#E4E4E7]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                    <span>معدل الحضور اليومي</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#F43F5E]"></span>
+                    <span>معدل الانصراف اليومي</span>
+                  </div>
                 </div>
               </div>
             </div>

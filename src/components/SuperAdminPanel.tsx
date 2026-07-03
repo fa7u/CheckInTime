@@ -7,8 +7,8 @@ import { Tenant } from '../types';
 
 interface SuperAdminPanelProps {
   tenants: Tenant[];
-  onAddTenant: (tenant: Omit<Tenant, 'id' | 'createdAt'>) => void;
-  onEditTenant: (tenant: Tenant) => void;
+  onAddTenant: (tenant: Tenant) => void;
+  onEditTenant: (oldId: string, tenant: Tenant) => void;
   onDeleteTenant: (id: string) => void;
   onLogout: () => void;
   superAdminUsername: string;
@@ -45,6 +45,7 @@ export default function SuperAdminPanel({
   const [adminName, setAdminName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [customId, setCustomId] = useState('');
   const [formError, setFormError] = useState('');
 
   // Edit form fields
@@ -52,6 +53,7 @@ export default function SuperAdminPanel({
   const [editAdminName, setEditAdminName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
+  const [editCustomId, setEditCustomId] = useState('');
   const [editFormError, setEditFormError] = useState('');
 
   // Delete confirmation
@@ -83,13 +85,36 @@ export default function SuperAdminPanel({
     });
   };
 
+  // Open Add modal with default custom ID prefilled
+  const handleOpenAddModal = () => {
+    setCompanyName('');
+    setAdminName('');
+    setUsername('');
+    setPassword('');
+    setCustomId(`tenant-${Date.now().toString().slice(-4)}`);
+    setFormError('');
+    setShowAddModal(true);
+  };
+
   // Submit new tenant
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
-    if (!companyName.trim() || !adminName.trim() || !username.trim() || !password.trim()) {
+    const finalId = customId.trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '');
+
+    if (!companyName.trim() || !adminName.trim() || !username.trim() || !password.trim() || !finalId) {
       setFormError('الرجاء ملء جميع الحقول المطلوبة.');
+      return;
+    }
+
+    if (finalId === 'default' || finalId === 'superadmin') {
+      setFormError('هذا المعرّف محجوز للأنظمة.');
+      return;
+    }
+
+    if (tenants.some(t => t.id.toLowerCase() === finalId)) {
+      setFormError('معرّف الرابط هذا مستخدم بالفعل لدى مؤسسة أخرى. يرجى اختيار معرّف فريد.');
       return;
     }
 
@@ -104,11 +129,15 @@ export default function SuperAdminPanel({
       return;
     }
 
+    const todayStr = new Date().toISOString().split('T')[0];
+
     onAddTenant({
+      id: finalId,
       companyName: companyName.trim(),
       adminName: adminName.trim(),
       username: username.trim(),
       password: password.trim(),
+      createdAt: todayStr,
     });
 
     // Reset and close
@@ -116,6 +145,7 @@ export default function SuperAdminPanel({
     setAdminName('');
     setUsername('');
     setPassword('');
+    setCustomId('');
     setShowAddModal(false);
   };
 
@@ -124,12 +154,24 @@ export default function SuperAdminPanel({
     e.preventDefault();
     setEditFormError('');
 
-    if (!editCompanyName.trim() || !editAdminName.trim() || !editUsername.trim() || !editPassword.trim()) {
+    const finalId = editCustomId.trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '');
+
+    if (!editCompanyName.trim() || !editAdminName.trim() || !editUsername.trim() || !editPassword.trim() || !finalId) {
       setEditFormError('الرجاء ملء جميع الحقول المطلوبة.');
       return;
     }
 
     if (editingTenant) {
+      if (finalId === 'default' || finalId === 'superadmin') {
+        setEditFormError('هذا المعرّف محجوز للأنظمة.');
+        return;
+      }
+
+      if (tenants.some(t => t.id !== editingTenant.id && t.id.toLowerCase() === finalId)) {
+        setEditFormError('معرّف الرابط هذا مستخدم بالفعل لدى مؤسسة أخرى. يرجى اختيار معرّف فريد.');
+        return;
+      }
+
       if (editUsername.toLowerCase() === 'superadmin') {
         setEditFormError('اسم المستخدم "superadmin" محجوز للمصمم العام.');
         return;
@@ -140,8 +182,9 @@ export default function SuperAdminPanel({
         return;
       }
 
-      onEditTenant({
+      onEditTenant(editingTenant.id, {
         ...editingTenant,
+        id: finalId,
         companyName: editCompanyName.trim(),
         adminName: editAdminName.trim(),
         username: editUsername.trim(),
@@ -159,6 +202,7 @@ export default function SuperAdminPanel({
     setEditAdminName(tenant.adminName);
     setEditUsername(tenant.username);
     setEditPassword(tenant.password);
+    setEditCustomId(tenant.id);
     setEditFormError('');
     setShowEditModal(true);
   };
@@ -271,7 +315,7 @@ export default function SuperAdminPanel({
 
           <button
             type="button"
-            onClick={() => setShowAddModal(true)}
+            onClick={handleOpenAddModal}
             className="w-full sm:w-auto bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 text-xs font-extrabold px-5 py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -497,9 +541,36 @@ export default function SuperAdminPanel({
                   required
                   placeholder="مثال: شركة التطوير العقاري المحدودة"
                   value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
+                  onChange={(e) => {
+                    setCompanyName(e.target.value);
+                    // Generate suggested clean English slug if value contains alphanumeric characters
+                    const cleanVal = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s\-]/g, '')
+                      .trim()
+                      .replace(/\s+/g, '-');
+                    if (cleanVal && /^[a-z0-9\-]+$/.test(cleanVal)) {
+                      setCustomId(cleanVal);
+                    }
+                  }}
                   className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#D4AF37] block">رابط المعرّف الفريد للمؤسسة (ID) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="مثال: my-company"
+                  value={customId}
+                  onChange={(e) => setCustomId(e.target.value.toLowerCase().replace(/[^a-z0-9_\-]/g, ''))}
+                  className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono text-left"
+                  dir="ltr"
+                />
+                <p className="text-[10px] text-[#8E8E93] text-left mt-1 font-mono" dir="ltr">
+                  URL: {window.location.origin}?tenant={customId || 'id'}
+                </p>
               </div>
 
               <div className="space-y-1">
@@ -611,6 +682,22 @@ export default function SuperAdminPanel({
                   onChange={(e) => setEditCompanyName(e.target.value)}
                   className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#D4AF37] block">رابط المعرّف الفريد للمؤسسة (ID) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="مثال: my-company"
+                  value={editCustomId}
+                  onChange={(e) => setEditCustomId(e.target.value.toLowerCase().replace(/[^a-z0-9_\-]/g, ''))}
+                  className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono text-left"
+                  dir="ltr"
+                />
+                <p className="text-[10px] text-[#8E8E93] text-left mt-1 font-mono" dir="ltr">
+                  URL: {window.location.origin}?tenant={editCustomId || 'id'}
+                </p>
               </div>
 
               <div className="space-y-1">
