@@ -1319,6 +1319,7 @@ export default function App() {
               adminUsername={currentAdminUsername}
               adminPassword={currentAdminPassword}
               onUpdateAdminCredentials={handleUpdateAdminCredentials}
+              activeTenantId={activeTenantId}
             />
           ) : (
             (() => {

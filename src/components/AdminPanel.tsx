@@ -23,6 +23,7 @@ interface AdminPanelProps {
   adminUsername?: string;
   adminPassword?: string;
   onUpdateAdminCredentials?: (user: string, pass: string) => void;
+  activeTenantId?: string;
 }
 
 export default function AdminPanel({
@@ -41,6 +42,7 @@ export default function AdminPanel({
   adminUsername = 'admin',
   adminPassword = 'admin123',
   onUpdateAdminCredentials,
+  activeTenantId = 'default',
 }: AdminPanelProps) {
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'dashboard' | 'employees' | 'reports' | 'settings'>('dashboard');
@@ -1105,14 +1107,14 @@ export default function AdminPanel({
                 <input
                   type="text"
                   readOnly
-                  value={`${window.location.origin}${window.location.pathname}?portal=employee`}
+                  value={`${window.location.origin}${window.location.pathname}?portal=employee&tenant=${activeTenantId}`}
                   className="w-full lg:w-64 bg-[#0F0F11] border border-[#27272A] rounded-xl px-3 py-2 text-xs text-[#E4E4E7] font-mono focus:outline-none text-left select-all focus:border-[#D4AF37]"
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    const link = `${window.location.origin}${window.location.pathname}?portal=employee`;
+                    const link = `${window.location.origin}${window.location.pathname}?portal=employee&tenant=${activeTenantId}`;
                     navigator.clipboard.writeText(link);
                     setCopiedTableLink(true);
                     setTimeout(() => setCopiedTableLink(false), 2500);
