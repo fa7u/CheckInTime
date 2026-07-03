@@ -710,47 +710,49 @@ export default function App() {
               </div>
             ) : (
               <>
-                {/* Switch to Employee Portal view manually */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEmployeePortalMode(true);
-                    setSelectedUser(''); // Go to portal log-in screen
-                    localStorage.setItem('hader_logged_in_role', 'employee');
-                  }}
-                  className="inline-flex items-center gap-1.5 bg-[#1A1C1E] hover:bg-[#27272A] text-slate-200 border border-[#27272A] text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
-                >
-                  <Laptop className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>بوابة الموظفين</span>
-                </button>
+                {selectedUser === 'admin' ? (
+                  <>
+                    {/* Switch to Employee Portal view manually */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEmployeePortalMode(true);
+                        setSelectedUser(''); // Go to portal log-in screen
+                        localStorage.setItem('hader_logged_in_role', 'employee');
+                      }}
+                      className="inline-flex items-center gap-1.5 bg-[#1A1C1E] hover:bg-[#27272A] text-slate-200 border border-[#27272A] text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
+                    >
+                      <Laptop className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>بوابة الموظفين</span>
+                    </button>
 
-                {/* Trigger button for Admin Side Drawer Menu */}
-                <button
-                  id="btn-toggle-admin-drawer"
-                  type="button"
-                  onClick={() => setIsAdminDrawerOpen(true)}
-                  className="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
-                >
-                  <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>لوحة التحكم والمحاكاة</span>
-                </button>
+                    {/* Trigger button for Admin Side Drawer Menu */}
+                    <button
+                      id="btn-toggle-admin-drawer"
+                      type="button"
+                      onClick={() => setIsAdminDrawerOpen(true)}
+                      className="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>لوحة التحكم والمحاكاة</span>
+                    </button>
 
-                {/* Secure Log out for Tenant Admin */}
-                {selectedUser === 'admin' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedUser('');
-                      setIsEmployeePortalMode(false);
-                      setIsSuperAdminMode(false);
-                      localStorage.removeItem('hader_logged_in_role');
-                    }}
-                    className="inline-flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>تسجيل الخروج</span>
-                  </button>
-                )}
+                    {/* Secure Log out for Tenant Admin */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedUser('');
+                        setIsEmployeePortalMode(false);
+                        setIsSuperAdminMode(false);
+                        localStorage.removeItem('hader_logged_in_role');
+                      }}
+                      className="inline-flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>تسجيل الخروج</span>
+                    </button>
+                  </>
+                ) : null}
               </>
             )}
           </div>
