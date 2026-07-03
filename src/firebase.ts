@@ -29,8 +29,9 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
     const tenantSnapshot = await getDocs(tenantsCol);
     const tenantList = tenantSnapshot.docs.map(doc => doc.data() as Tenant);
     
-    if (tenantList.length === 0) {
-      // Initialize with default tenant
+    // Ensure the default tenant always exists
+    const hasDefault = tenantList.some(t => t.id === 'default');
+    if (!hasDefault) {
       const defaultTenant: Tenant = {
         id: 'default',
         companyName: 'حاضر - الفرع الرئيسي',
@@ -40,7 +41,7 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
         createdAt: '2026-07-03'
       };
       await saveTenantToFirebase(defaultTenant);
-      return [defaultTenant];
+      tenantList.unshift(defaultTenant);
     }
     
     return tenantList;

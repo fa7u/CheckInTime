@@ -442,16 +442,14 @@ export default function SuperAdminPanel({
                               <Edit className="w-4 h-4" />
                             </button>
                             
-                            {tenant.id !== 'default' && (
-                              <button
-                                type="button"
-                                onClick={() => setDeleteConfirmId(tenant.id)}
-                                className="text-rose-400 hover:text-rose-300 p-2 hover:bg-rose-950/20 rounded-lg transition-all cursor-pointer"
-                                title="حذف المؤسسة نهائياً"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirmId(tenant.id)}
+                              className="text-rose-400 hover:text-rose-300 p-2 hover:bg-rose-950/20 rounded-lg transition-all cursor-pointer"
+                              title="حذف المؤسسة نهائياً"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </>
                         )}
                       </div>

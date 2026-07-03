@@ -591,14 +591,29 @@ export default function App() {
 
   // 6. Update Active Tenant Admin Credentials
   const handleUpdateAdminCredentials = (user: string, pass: string) => {
-    const updated = tenants.map(t => {
-      if (t.id === activeTenantId) {
-        const updatedTenant = { ...t, username: user, password: pass };
-        saveTenantToFirebase(updatedTenant);
-        return updatedTenant;
-      }
-      return t;
-    });
+    let tenantExists = tenants.some(t => t.id === activeTenantId);
+    let updated: Tenant[];
+    if (!tenantExists) {
+      const newTenant: Tenant = {
+        id: activeTenantId,
+        companyName: activeTenantId === 'default' ? 'حاضر - الفرع الرئيسي' : 'مؤسسة جديدة',
+        adminName: activeTenantId === 'default' ? 'مدير النظام الافتراضي' : 'مدير جديد',
+        username: user,
+        password: pass,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+      saveTenantToFirebase(newTenant);
+      updated = [...tenants, newTenant];
+    } else {
+      updated = tenants.map(t => {
+        if (t.id === activeTenantId) {
+          const updatedTenant = { ...t, username: user, password: pass };
+          saveTenantToFirebase(updatedTenant);
+          return updatedTenant;
+        }
+        return t;
+      });
+    }
     setTenants(updated);
     localStorage.setItem('hader_tenants', JSON.stringify(updated));
   };
@@ -1198,7 +1213,10 @@ export default function App() {
                   }
 
                   // 3. Fallback for default admin
-                  if (user === 'admin' && pass === 'admin123') {
+                  const defaultTenant = tenants.find(t => t.id === 'default');
+                  const fallbackUser = defaultTenant ? defaultTenant.username : 'admin';
+                  const fallbackPass = defaultTenant ? defaultTenant.password : 'admin123';
+                  if (user.toLowerCase() === fallbackUser.toLowerCase() && pass === fallbackPass) {
                     setActiveTenantId('default');
                     localStorage.setItem('hader_active_tenant_id', 'default');
                     localStorage.setItem('hader_logged_in_role', 'admin');
@@ -1408,7 +1426,10 @@ export default function App() {
                 }
 
                 // 3. Fallback for default admin
-                if (user === 'admin' && pass === 'admin123') {
+                const defaultTenant = tenants.find(t => t.id === 'default');
+                const fallbackUser = defaultTenant ? defaultTenant.username : 'admin';
+                const fallbackPass = defaultTenant ? defaultTenant.password : 'admin123';
+                if (user.toLowerCase() === fallbackUser.toLowerCase() && pass === fallbackPass) {
                   setActiveTenantId('default');
                   localStorage.setItem('hader_active_tenant_id', 'default');
                   localStorage.setItem('hader_logged_in_role', 'admin');
