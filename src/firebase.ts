@@ -293,6 +293,15 @@ export async function saveAttendanceToFirebase(tenantId: string, record: Attenda
   }
 }
 
+export async function deleteAttendanceFromFirebase(recordId: string): Promise<void> {
+  try {
+    const docRef = doc(db, 'attendance', recordId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error('Error deleting attendance record from Firebase:', error);
+  }
+}
+
 // 5. Requests Operations (Per tenant)
 export async function getRequestsFromFirebase(tenantId: string): Promise<ApprovalRequest[]> {
   try {

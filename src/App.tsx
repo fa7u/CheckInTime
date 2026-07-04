@@ -23,6 +23,7 @@ import {
   deleteEmployeeFromFirebase,
   getAttendanceFromFirebase,
   saveAttendanceToFirebase,
+  deleteAttendanceFromFirebase,
   getRequestsFromFirebase,
   saveRequestToFirebase,
   getOfficeSettingsFromFirebase,
@@ -651,6 +652,20 @@ export default function App() {
     const updated = employees.filter(e => e.id !== empId);
     saveState(updated);
     deleteEmployeeFromFirebase(empId);
+  };
+
+  // 4a. Delete Attendance Record
+  const handleDeleteAttendanceRecord = (recordId: string) => {
+    const updated = attendanceRecords.filter(r => r.id !== recordId);
+    saveState(undefined, updated);
+    deleteAttendanceFromFirebase(recordId);
+  };
+
+  // 4b. Update Attendance Record
+  const handleUpdateAttendanceRecord = (updatedRecord: AttendanceRecord) => {
+    const updated = attendanceRecords.map(r => r.id === updatedRecord.id ? updatedRecord : r);
+    saveState(undefined, updated);
+    saveAttendanceToFirebase(activeTenantId, updatedRecord);
   };
 
   // 5. Update Office GPS Coordinates
@@ -1530,6 +1545,8 @@ export default function App() {
               onUpdateOfficeSettings={handleUpdateOfficeSettings}
               onForceCheckOut={handleAdminCheckOutEmployee}
               onArchiveTodayRecords={handleArchiveTodayRecords}
+              onDeleteAttendance={handleDeleteAttendanceRecord}
+              onUpdateAttendance={handleUpdateAttendanceRecord}
               adminUsername={currentAdminUsername}
               adminPassword={currentAdminPassword}
               onUpdateAdminCredentials={handleUpdateAdminCredentials}
