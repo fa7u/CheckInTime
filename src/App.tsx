@@ -231,11 +231,14 @@ export default function App() {
         return {
           id: doc.id,
           name: data.name,
+          email: data.email,
           role: data.role,
-          password: data.password,
           workModel: data.workModel,
-          joinDate: data.joinDate,
           avatarColor: data.avatarColor,
+          joinDate: data.joinDate,
+          status: data.status || 'active',
+          username: data.username,
+          password: data.password,
         } as Employee;
       });
       setEmployees(list);
