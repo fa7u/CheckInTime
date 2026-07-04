@@ -9,7 +9,9 @@ import { INITIAL_EMPLOYEES, INITIAL_APPROVAL_REQUESTS, DEFAULT_OFFICE, generateM
 import EmployeePanel from './components/EmployeePanel';
 import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
+import { collection, onSnapshot, query, where, doc } from 'firebase/firestore';
 import {
+  db,
   getTenantsFromFirebase,
   saveTenantToFirebase,
   deleteTenantFromFirebase,
@@ -72,6 +74,7 @@ export default function App() {
   
   // App initialization state
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
 
   // Admin Side Drawer Menu visibility
   const [isAdminDrawerOpen, setIsAdminDrawerOpen] = useState(false);
@@ -108,6 +111,11 @@ export default function App() {
     }
     setActiveTenantId(targetTenantId);
     localStorage.setItem('hader_active_tenant_id', targetTenantId);
+
+    if (!urlTenantId) {
+      params.set('tenant', targetTenantId);
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
 
     // Resolve role/session in a tenant-scoped manner to isolate tabs/urls
     const savedRole = localStorage.getItem(`hader_logged_in_role_${targetTenantId}`);
@@ -164,7 +172,17 @@ export default function App() {
     setIsLoaded(true);
   }, []);
 
-  // Sync / load workspace data from LocalStorage & Firebase
+  // Keep URL in sync with activeTenantId to isolate multiple tabs
+  useEffect(() => {
+    if (!isLoaded) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tenant') !== activeTenantId) {
+      params.set('tenant', activeTenantId);
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  }, [activeTenantId, isLoaded]);
+
+  // Sync / load workspace data from LocalStorage & Firebase using real-time listeners
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -173,7 +191,9 @@ export default function App() {
     const reqKey = activeTenantId === 'default' ? 'hader_requests' : `hader_requests_${activeTenantId}`;
     const offKey = activeTenantId === 'default' ? 'hader_office' : `hader_office_${activeTenantId}`;
 
-    // A. Local cached load
+    setIsInitialDataLoaded(false);
+
+    // A. Local cached load to render immediately if possible
     const cachedEmp = localStorage.getItem(empKey);
     if (cachedEmp) {
       setEmployees(JSON.parse(cachedEmp));
@@ -191,26 +211,130 @@ export default function App() {
       setOfficeSettings(JSON.parse(cachedOff));
     }
 
-    // B. Fetch live data from Firebase
-    getEmployeesFromFirebase(activeTenantId).then(list => {
+    // B. Setup real-time listeners (onSnapshot)
+    let empFirst = false;
+    let attFirst = false;
+    let reqFirst = false;
+    let offFirst = false;
+
+    const checkFirstLoads = () => {
+      if (empFirst && attFirst && reqFirst && offFirst) {
+        setIsInitialDataLoaded(true);
+      }
+    };
+
+    // 1. Employees Subscriber
+    const qEmp = query(collection(db, 'employees'), where('tenantId', '==', activeTenantId));
+    const unsubscribeEmp = onSnapshot(qEmp, (snapshot) => {
+      const list = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name,
+          role: data.role,
+          password: data.password,
+          workModel: data.workModel,
+          joinDate: data.joinDate,
+          avatarColor: data.avatarColor,
+        } as Employee;
+      });
       setEmployees(list);
       localStorage.setItem(empKey, JSON.stringify(list));
+      empFirst = true;
+      checkFirstLoads();
+    }, (error) => {
+      console.error("Error subscribing to employees:", error);
+      empFirst = true;
+      checkFirstLoads();
     });
 
-    getAttendanceFromFirebase(activeTenantId).then(list => {
-      setAttendanceRecords(list);
-      localStorage.setItem(attKey, JSON.stringify(list));
+    // 2. Attendance Subscriber
+    const qAtt = query(collection(db, 'attendance'), where('tenantId', '==', activeTenantId));
+    const unsubscribeAtt = onSnapshot(qAtt, (snapshot) => {
+      const records = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          employeeId: data.employeeId,
+          employeeName: data.employeeName,
+          date: data.date,
+          checkIn: data.checkIn,
+          checkOut: data.checkOut,
+          workModel: data.workModel,
+          status: data.status,
+          totalHours: data.totalHours,
+          isApproved: data.isApproved,
+          approvedAt: data.approvedAt,
+        } as AttendanceRecord;
+      });
+      // Sort descending by date / time
+      const sorted = records.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.checkIn}`);
+        const dateB = new Date(`${b.date}T${b.checkIn}`);
+        return dateB.getTime() - dateA.getTime();
+      });
+      setAttendanceRecords(sorted);
+      localStorage.setItem(attKey, JSON.stringify(sorted));
+      attFirst = true;
+      checkFirstLoads();
+    }, (error) => {
+      console.error("Error subscribing to attendance:", error);
+      attFirst = true;
+      checkFirstLoads();
     });
 
-    getRequestsFromFirebase(activeTenantId).then(list => {
-      setPendingRequests(list);
-      localStorage.setItem(reqKey, JSON.stringify(list));
+    // 3. Requests Subscriber
+    const qReq = query(collection(db, 'requests'), where('tenantId', '==', activeTenantId));
+    const unsubscribeReq = onSnapshot(qReq, (snapshot) => {
+      const requests = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          employeeId: data.employeeId,
+          employeeName: data.employeeName,
+          role: data.role,
+          date: data.date,
+          time: data.time,
+          type: data.type,
+          status: data.status,
+          notes: data.notes
+        } as ApprovalRequest;
+      });
+      const sorted = requests.sort((a, b) => b.id.localeCompare(a.id));
+      setPendingRequests(sorted);
+      localStorage.setItem(reqKey, JSON.stringify(sorted));
+      reqFirst = true;
+      checkFirstLoads();
+    }, (error) => {
+      console.error("Error subscribing to requests:", error);
+      reqFirst = true;
+      checkFirstLoads();
     });
 
-    getOfficeSettingsFromFirebase(activeTenantId).then(settings => {
-      setOfficeSettings(settings);
-      localStorage.setItem(offKey, JSON.stringify(settings));
+    // 4. Office Settings Subscriber
+    const docRef = doc(db, 'officeSettings', activeTenantId);
+    const unsubscribeOff = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const settings = docSnap.data() as OfficeSettings;
+        setOfficeSettings(settings);
+        localStorage.setItem(offKey, JSON.stringify(settings));
+      } else {
+        saveOfficeSettingsToFirebase(activeTenantId, DEFAULT_OFFICE);
+      }
+      offFirst = true;
+      checkFirstLoads();
+    }, (error) => {
+      console.error("Error subscribing to officeSettings:", error);
+      offFirst = true;
+      checkFirstLoads();
     });
+
+    return () => {
+      unsubscribeEmp();
+      unsubscribeAtt();
+      unsubscribeReq();
+      unsubscribeOff();
+    };
   }, [activeTenantId, isLoaded]);
 
   // Sync state helper to write to localStorage for the active tenant
@@ -672,7 +796,7 @@ export default function App() {
   const currentAdminPassword = activeTenant ? activeTenant.password : 'admin123';
   const currentAdminName = activeTenant ? activeTenant.adminName : 'مدير النظام (الرئيسي)';
 
-  if (!isLoaded) {
+  if (!isLoaded || !isInitialDataLoaded) {
     return (
       <div className="min-h-screen bg-[#0A0A0B] flex flex-col items-center justify-center p-4">
         <Clock className="w-12 h-12 text-[#D4AF37] animate-spin mb-4" />
