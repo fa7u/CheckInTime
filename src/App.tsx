@@ -518,13 +518,18 @@ export default function App() {
 
   // 1. Approve Remote Request
   const handleApproveRequest = (requestId: string) => {
-    const requestIndex = pendingRequests.findIndex(r => r.id === requestId);
-    if (requestIndex === -1) return;
+    const targetReq = pendingRequests.find(r => r.id === requestId);
+    if (!targetReq) return;
 
-    const updatedRequests = [...pendingRequests];
-    const request = updatedRequests[requestIndex];
-    request.status = 'approved';
+    // Create non-mutated copy of the requests list with the target request approved
+    const updatedRequests = pendingRequests.map(r => {
+      if (r.id === requestId) {
+        return { ...r, status: 'approved' as const };
+      }
+      return r;
+    });
 
+    const request = updatedRequests.find(r => r.id === requestId)!;
     const updatedRecords = [...attendanceRecords];
 
     if (request.type === 'check-in') {
@@ -556,9 +561,11 @@ export default function App() {
       );
 
       if (recordIndex !== -1) {
-        const record = updatedRecords[recordIndex];
-        record.checkOut = request.time;
-        record.totalHours = calculateHoursDiff(record.checkIn, request.time);
+        updatedRecords[recordIndex] = {
+          ...updatedRecords[recordIndex],
+          checkOut: request.time,
+          totalHours: calculateHoursDiff(updatedRecords[recordIndex].checkIn, request.time),
+        };
       }
     }
 

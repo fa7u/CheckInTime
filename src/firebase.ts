@@ -20,6 +20,17 @@ const app = initializeApp(firebaseConfig);
 // Use custom firestoreDatabaseId if provided, else default
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || "ai-studio-099ab2a7-7e36-45c1-9989-fbb077471437");
 
+// Helper to strip any undefined values from an object before sending to Firestore
+function cleanUndefined<T extends object>(obj: T): T {
+  const clean = { ...obj } as any;
+  Object.keys(clean).forEach(key => {
+    if (clean[key] === undefined) {
+      delete clean[key];
+    }
+  });
+  return clean;
+}
+
 // --- FIREBASE ASSISTANT ACTIONS ---
 
 // 1. Tenants Operations
@@ -64,7 +75,7 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
 export async function saveTenantToFirebase(tenant: Tenant): Promise<void> {
   try {
     const tenantDocRef = doc(db, 'tenants', tenant.id);
-    await setDoc(tenantDocRef, tenant);
+    await setDoc(tenantDocRef, cleanUndefined(tenant));
   } catch (error) {
     console.error('Error saving tenant to Firebase:', error);
   }
@@ -217,10 +228,10 @@ export async function getEmployeesFromFirebase(tenantId: string): Promise<Employ
 export async function saveEmployeeToFirebase(tenantId: string, employee: Employee): Promise<void> {
   try {
     const docRef = doc(db, 'employees', employee.id);
-    await setDoc(docRef, {
+    await setDoc(docRef, cleanUndefined({
       ...employee,
       tenantId
-    });
+    }));
   } catch (error) {
     console.error('Error saving employee to Firebase:', error);
   }
@@ -273,10 +284,10 @@ export async function getAttendanceFromFirebase(tenantId: string): Promise<Atten
 export async function saveAttendanceToFirebase(tenantId: string, record: AttendanceRecord): Promise<void> {
   try {
     const docRef = doc(db, 'attendance', record.id);
-    await setDoc(docRef, {
+    await setDoc(docRef, cleanUndefined({
       ...record,
       tenantId
-    });
+    }));
   } catch (error) {
     console.error('Error saving attendance record to Firebase:', error);
   }
@@ -312,10 +323,10 @@ export async function getRequestsFromFirebase(tenantId: string): Promise<Approva
 export async function saveRequestToFirebase(tenantId: string, request: ApprovalRequest): Promise<void> {
   try {
     const docRef = doc(db, 'requests', request.id);
-    await setDoc(docRef, {
+    await setDoc(docRef, cleanUndefined({
       ...request,
       tenantId
-    });
+    }));
   } catch (error) {
     console.error('Error saving request to Firebase:', error);
   }
@@ -341,7 +352,7 @@ export async function getOfficeSettingsFromFirebase(tenantId: string): Promise<O
 export async function saveOfficeSettingsToFirebase(tenantId: string, settings: OfficeSettings): Promise<void> {
   try {
     const docRef = doc(db, 'officeSettings', tenantId);
-    await setDoc(docRef, settings);
+    await setDoc(docRef, cleanUndefined(settings));
   } catch (error) {
     console.error('Error saving office settings to Firebase:', error);
   }
