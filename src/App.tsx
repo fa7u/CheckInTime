@@ -270,11 +270,14 @@ export default function App() {
           approvedAt: data.approvedAt,
         } as AttendanceRecord;
       });
-      // Sort descending by date / time
+      // Sort descending by date / time safely
       const sorted = records.sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.checkIn}`);
-        const dateB = new Date(`${b.date}T${b.checkIn}`);
-        return dateB.getTime() - dateA.getTime();
+        const timeA = new Date(`${a.date}T${a.checkIn || '00:00'}`).getTime();
+        const timeB = new Date(`${b.date}T${b.checkIn || '00:00'}`).getTime();
+        if (isNaN(timeA) || isNaN(timeB)) {
+          return b.date.localeCompare(a.date);
+        }
+        return timeB - timeA;
       });
       setAttendanceRecords(sorted);
       localStorage.setItem(attKey, JSON.stringify(sorted));
@@ -377,13 +380,20 @@ export default function App() {
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   };
 
-  // Helper to calculate hours between two HH:MM strings
-  const calculateHoursDiff = (time1: string, time2: string): number => {
-    const [h1, m1] = time1.split(':').map(Number);
-    const [h2, m2] = time2.split(':').map(Number);
-    const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
-    const hours = diffMin / 60;
-    return parseFloat(Math.max(0, hours).toFixed(2));
+  // Helper to calculate hours between two HH:MM strings safely
+  const calculateHoursDiff = (time1: string | null | undefined, time2: string | null | undefined): number => {
+    if (!time1 || !time2) return 0;
+    try {
+      const [h1, m1] = time1.split(':').map(Number);
+      const [h2, m2] = time2.split(':').map(Number);
+      if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
+      const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
+      const hours = diffMin / 60;
+      return parseFloat(Math.max(0, hours).toFixed(2));
+    } catch (e) {
+      console.error("Error calculating hours diff:", e);
+      return 0;
+    }
   };
 
   // --- EMPLOYEE ACTIONS ---
@@ -532,11 +542,13 @@ export default function App() {
     const request = updatedRequests.find(r => r.id === requestId)!;
     const updatedRecords = [...attendanceRecords];
 
+    const requestTime = request.time || getFormattedTime();
+
     if (request.type === 'check-in') {
       // Work hour policy: Starts dynamically based on officeSettings.workStartTime
-      const [hour, min] = request.time.split(':').map(Number);
+      const [hour, min] = requestTime.split(':').map(Number);
       const [startHour, startMin] = (officeSettings.workStartTime || "08:30").split(':').map(Number);
-      const isLate = hour > startHour || (hour === startHour && min > startMin);
+      const isLate = isNaN(hour) || isNaN(min) ? false : (hour > startHour || (hour === startHour && min > startMin));
       const attendanceStatus = isLate ? 'متأخر' : 'حاضر';
 
       const isOutOfRangeOnSite = request.notes?.includes('خارج النطاق');
@@ -546,7 +558,7 @@ export default function App() {
         employeeId: request.employeeId,
         employeeName: request.employeeName,
         date: request.date,
-        checkIn: request.time,
+        checkIn: requestTime,
         checkOut: null,
         workModel: isOutOfRangeOnSite ? 'on-site' : 'remote',
         status: attendanceStatus,
@@ -555,35 +567,29 @@ export default function App() {
         approvedAt: getFormattedTime(),
       };
       updatedRecords.unshift(newRecord);
+      
+      // Save directly to Firebase
+      saveAttendanceToFirebase(activeTenantId, newRecord);
     } else if (request.type === 'check-out') {
       const recordIndex = updatedRecords.findIndex(
         r => r.employeeId === request.employeeId && r.date === request.date && !r.checkOut
       );
 
       if (recordIndex !== -1) {
-        updatedRecords[recordIndex] = {
+        const updatedRecord = {
           ...updatedRecords[recordIndex],
-          checkOut: request.time,
-          totalHours: calculateHoursDiff(updatedRecords[recordIndex].checkIn, request.time),
+          checkOut: requestTime,
+          totalHours: calculateHoursDiff(updatedRecords[recordIndex].checkIn, requestTime),
         };
+        updatedRecords[recordIndex] = updatedRecord;
+        
+        // Save directly to Firebase
+        saveAttendanceToFirebase(activeTenantId, updatedRecord);
       }
     }
 
     saveState(undefined, updatedRecords, updatedRequests);
     saveRequestToFirebase(activeTenantId, request);
-    if (request.type === 'check-in') {
-      const newRecord = updatedRecords[0];
-      if (newRecord) {
-        saveAttendanceToFirebase(activeTenantId, newRecord);
-      }
-    } else if (request.type === 'check-out') {
-      const record = updatedRecords.find(
-        r => r.employeeId === request.employeeId && r.date === request.date && r.checkOut === request.time
-      );
-      if (record) {
-        saveAttendanceToFirebase(activeTenantId, record);
-      }
-    }
   };
 
   // 2. Reject Remote Request
