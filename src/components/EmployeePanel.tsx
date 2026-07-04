@@ -12,8 +12,8 @@ interface EmployeePanelProps {
   officeSettings: OfficeSettings;
   onCheckInOnSite: (status: 'حاضر' | 'متأخر', simulatedLocation?: { lat: number; lng: number }) => void;
   onCheckOutOnSite: (simulatedLocation?: { lat: number; lng: number }) => void;
-  onCheckInRemote: (notes?: string) => void;
-  onCheckOutRemote: (notes?: string) => void;
+  onCheckInRemote: (notes?: string, employeeId?: string) => void;
+  onCheckOutRemote: (notes?: string, employeeId?: string) => void;
 }
 
 // Distance calculation helper (Haversine formula in meters)
@@ -130,6 +130,14 @@ export default function EmployeePanel({
     (r) => r.employeeId === employee.id && r.date === todayStr && r.type === 'check-out' && r.status === 'pending'
   );
 
+  const todayCheckInRequest = pendingRequests.find(
+    (r) => r.employeeId === employee.id && r.date === todayStr && r.type === 'check-in'
+  );
+
+  const todayCheckOutRequest = pendingRequests.find(
+    (r) => r.employeeId === employee.id && r.date === todayStr && r.type === 'check-out'
+  );
+
   const currentDistance = realDistance;
   const isWithinRadius = currentDistance !== null && currentDistance <= officeSettings.radius;
 
@@ -211,14 +219,14 @@ export default function EmployeePanel({
           setTimeout(() => setErrorMessage(null), 3000);
           return;
         }
-        onCheckInRemote();
+        onCheckInRemote(undefined, employee.id);
       } else if (todayRecord && !todayRecord.checkOut) {
         if (pendingCheckOutRequest) {
           setErrorMessage('طلب الانصراف عن بعد قيد المراجعة بالفعل من قبل الإدارة.');
           setTimeout(() => setErrorMessage(null), 3000);
           return;
         }
-        onCheckOutRemote();
+        onCheckOutRemote(undefined, employee.id);
       }
     }
   };
@@ -431,9 +439,9 @@ export default function EmployeePanel({
                   onClick={() => {
                     const notes = `خارج النطاق بـ ${Math.round(outOfRangeDistance)} متر`;
                     if (outOfRangeActionType === 'check-in') {
-                      onCheckInRemote(notes);
+                      onCheckInRemote(notes, employee.id);
                     } else {
-                      onCheckOutRemote(notes);
+                      onCheckOutRemote(notes, employee.id);
                     }
                     setShowOutOfRangeConfirm(false);
                   }}
@@ -464,40 +472,67 @@ export default function EmployeePanel({
           )}
 
           {/* Success Status Info */}
-          <div className="w-full relative z-10">
+          <div className="w-full relative z-10 space-y-4">
             {todayRecord ? (
-              <div className="bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-4 space-y-2">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
-                  <span>تأكيد تسجيل الحضور لليوم:</span>
+              <div className="space-y-4">
+                <div className="bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <span>تأكيد تسجيل الحضور لليوم:</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs text-[#E4E4E7] border-t border-[#27272A] pt-2">
+                    <div>
+                      <span className="text-[#8E8E93] block">وقت الحضور:</span>
+                      <strong className="text-sm font-bold font-mono text-emerald-400">{todayRecord.checkIn}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[#8E8E93] block">وقت الانصراف:</span>
+                      <strong className="text-sm font-bold font-mono text-rose-400">{todayRecord.checkOut || 'قيد العمل...'}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[#8E8E93] block">حالة التحضير:</span>
+                      <strong className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                        todayRecord.status === 'حاضر' ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/30' : 'bg-amber-900/20 text-amber-400 border border-amber-900/30'
+                      }`}>
+                        {todayRecord.status}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-[#8E8E93] block">ساعات العمل اليوم:</span>
+                      <strong className="text-sm font-bold text-[#D4AF37] font-serif italic">
+                        {todayRecord.checkOut ? `${todayRecord.totalHours} ساعة` : 'جار الحساب...'}
+                      </strong>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs text-[#E4E4E7] border-t border-[#27272A] pt-2">
-                  <div>
-                    <span className="text-[#8E8E93] block">وقت الحضور:</span>
-                    <strong className="text-sm font-bold font-mono text-emerald-400">{todayRecord.checkIn}</strong>
+
+                {/* If they checked in but checkout is pending */}
+                {pendingCheckOutRequest && (
+                  <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 flex items-start gap-3 text-amber-400 animate-in fade-in duration-300">
+                    <Clock className="w-5 h-5 text-amber-500 animate-spin mt-0.5 shrink-0" />
+                    <div className="text-right">
+                      <p className="font-bold text-xs">طلب تسجيل الانصراف قيد المراجعة ⏳</p>
+                      <p className="text-[11px] text-[#8E8E93] mt-0.5">لقد قمت بإرسال طلب انصراف في انتظار موافقة المدير وتأكيده.</p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[#8E8E93] block">وقت الانصراف:</span>
-                    <strong className="text-sm font-bold font-mono text-rose-400">{todayRecord.checkOut || 'قيد العمل...'}</strong>
+                )}
+
+                {/* If checkout request was rejected */}
+                {!pendingCheckOutRequest && todayCheckOutRequest && todayCheckOutRequest.status === 'rejected' && (
+                  <div className="bg-rose-950/20 border border-rose-900/40 rounded-xl p-4 flex items-start gap-3 text-rose-400 animate-in fade-in duration-300">
+                    <XCircle className="w-5 h-5 text-rose-500 mt-0.5 shrink-0" />
+                    <div className="text-right">
+                      <p className="font-bold text-xs">تم رفض طلب تسجيل الانصراف ❌</p>
+                      <p className="text-[11px] text-[#8E8E93] mt-0.5">تم رفض طلب تسجيل الانصراف الخاص بك من قبل الإدارة. يرجى إعادة تقديم الطلب بالضغط على زر تسجيل الانصراف أعلاه.</p>
+                      {todayCheckOutRequest.notes && (
+                        <p className="text-[11px] text-rose-400 font-bold mt-1">الملاحظة من الإدارة: {todayCheckOutRequest.notes}</p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[#8E8E93] block">حالة التحضير:</span>
-                    <strong className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                      todayRecord.status === 'حاضر' ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/30' : 'bg-amber-900/20 text-amber-400 border border-amber-900/30'
-                    }`}>
-                      {todayRecord.status}
-                    </strong>
-                  </div>
-                  <div>
-                    <span className="text-[#8E8E93] block">ساعات العمل اليوم:</span>
-                    <strong className="text-sm font-bold text-[#D4AF37] font-serif italic">
-                      {todayRecord.checkOut ? `${todayRecord.totalHours} ساعة` : 'جار الحساب...'}
-                    </strong>
-                  </div>
-                </div>
+                )}
               </div>
             ) : (pendingCheckInRequest || pendingCheckOutRequest) ? (
-              <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 space-y-2 text-right">
+              <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 space-y-2 text-right animate-in fade-in duration-300">
                 <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                   <Clock className="w-5 h-5 text-amber-500 animate-spin" />
                   <span>بانتظار موافقة الإدارة:</span>
@@ -506,8 +541,23 @@ export default function EmployeePanel({
                   لقد قمت بإرسال طلب التحضير عن بعد للعمل في تاريخ اليوم. ستتلقى إشعاراً فور مراجعة المدير للطلب وقبوله.
                 </p>
               </div>
+            ) : (todayCheckInRequest && todayCheckInRequest.status === 'rejected') ? (
+              <div className="bg-rose-950/20 border border-rose-900/40 rounded-xl p-4 space-y-2 text-right animate-in fade-in duration-300 font-sans">
+                <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
+                  <XCircle className="w-5 h-5 text-rose-500" />
+                  <span>تم رفض طلب الحضور من قبل الإدارة ❌</span>
+                </div>
+                <p className="text-xs text-[#8E8E93] leading-relaxed">
+                  تم رفض طلب تسجيل حضورك لليوم من قبل المدير. يمكنك محاولة تسجيل الحضور مرة أخرى بالضغط على زر تسجيل الحضور أعلاه، أو التواصل مع الإدارة للاستفسار.
+                </p>
+                {todayCheckInRequest.notes && (
+                  <p className="text-xs text-rose-400 font-bold mt-1">
+                    الملاحظة من الإدارة: {todayCheckInRequest.notes}
+                  </p>
+                )}
+              </div>
             ) : (
-              <div className="bg-[#0A0A0B] border border-[#27272A] rounded-xl p-4 text-center text-xs text-[#8E8E93]">
+              <div className="bg-[#0A0A0B] border border-[#27272A] rounded-xl p-4 text-center text-xs text-[#8E8E93] animate-in fade-in duration-300">
                 أنت لم تقم بتسجيل الحضور أو الانصراف لليوم بعد. يرجى اختيار طبيعة العمل والضغط على الزر أعلاه.
               </div>
             )}

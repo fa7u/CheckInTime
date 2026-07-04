@@ -477,9 +477,13 @@ export default function App() {
   };
 
   // 3. Remote Check In Request
-  const handleCheckInRemote = (notes?: string) => {
-    const activeEmp = employees.find(e => e.id === selectedUser);
-    if (!activeEmp) return;
+  const handleCheckInRemote = (notes?: string, employeeId?: string) => {
+    const targetEmpId = employeeId || selectedUser;
+    const activeEmp = employees.find(e => e.id === targetEmpId);
+    if (!activeEmp) {
+      console.error("No active employee found for remote check in!");
+      return;
+    }
 
     const todayStr = new Date().toISOString().split('T')[0];
     
@@ -501,9 +505,13 @@ export default function App() {
   };
 
   // 4. Remote Check Out Request
-  const handleCheckOutRemote = (notes?: string) => {
-    const activeEmp = employees.find(e => e.id === selectedUser);
-    if (!activeEmp) return;
+  const handleCheckOutRemote = (notes?: string, employeeId?: string) => {
+    const targetEmpId = employeeId || selectedUser;
+    const activeEmp = employees.find(e => e.id === targetEmpId);
+    if (!activeEmp) {
+      console.error("No active employee found for remote check out!");
+      return;
+    }
 
     const todayStr = new Date().toISOString().split('T')[0];
     
