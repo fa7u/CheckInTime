@@ -69,11 +69,13 @@ export default function SuperAdminPanel({
       if (type === 'portal') {
         url += `?portal=employee&tenant=${tenantId}`;
       } else {
-        url += `?tenant=${tenantId}`;
+        url += `?portal=admin&tenant=${tenantId}`;
       }
     } else {
       if (type === 'portal') {
         url += `?portal=employee`;
+      } else {
+        url += `?portal=admin`;
       }
     }
     
@@ -435,7 +437,7 @@ export default function SuperAdminPanel({
                               )}
                             </button>
                             <a 
-                              href={`?tenant=${tenant.id}`}
+                              href={`?portal=admin${tenant.id !== 'default' ? `&tenant=${tenant.id}` : ''}`}
                               target="_blank"
                               rel="noreferrer"
                               className="text-[#8E8E93] hover:text-white p-0.5"
