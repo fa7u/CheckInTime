@@ -113,25 +113,27 @@ export default function App() {
 
     let targetPortal: 'employee' | 'admin' | 'superadmin' = 'admin';
 
-    // FIRST PRIORITY: Active Logged-In Session on this device
-    if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
-      targetPortal = 'superadmin';
-    } else if (savedRole === 'employee' && savedEmpId) {
+    if (urlPortal === 'employee') {
       targetPortal = 'employee';
-    } else if (savedRole === 'admin') {
+    } else if (urlPortal === 'superadmin') {
+      targetPortal = 'superadmin';
+    } else if (urlPortal === 'admin') {
       targetPortal = 'admin';
     } else {
-      // SECOND PRIORITY: URL Parameter (if not logged in)
-      if (urlPortal === 'employee' || urlPortal === 'admin' || urlPortal === 'superadmin') {
-        targetPortal = urlPortal as 'employee' | 'admin' | 'superadmin';
-      } else {
-        // THIRD PRIORITY: Last saved/visited portal preference for this tenant (or default to admin)
-        const lastPortal = localStorage.getItem(`hader_last_portal_preference_${targetTenantId}`);
-        if (lastPortal === 'employee' || lastPortal === 'admin' || lastPortal === 'superadmin') {
-          targetPortal = lastPortal as 'employee' | 'admin' | 'superadmin';
+      // No portal specified in the URL
+      if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
+        targetPortal = 'superadmin';
+      } else if (savedRole === 'admin') {
+        targetPortal = 'admin';
+      } else if (savedRole === 'employee' && savedEmpId) {
+        // Only auto-resume employee portal if they didn't explicitly open a tenant URL without portal parameter
+        if (urlTenantId) {
+          targetPortal = 'admin';
         } else {
-          targetPortal = 'admin'; // fallback default
+          targetPortal = 'employee';
         }
+      } else {
+        targetPortal = 'admin';
       }
     }
 
@@ -193,9 +195,6 @@ export default function App() {
       portal = 'admin';
       params.set('portal', 'admin');
     }
-    
-    // Persist last used portal preference for this tenant
-    localStorage.setItem(`hader_last_portal_preference_${activeTenantId}`, portal);
     
     const newSearch = params.toString();
     if (window.location.search !== `?${newSearch}`) {
