@@ -278,7 +278,7 @@ export default function EmployeePanel({
         <div className="flex items-center gap-3 bg-[#0F0F11] px-4 py-3 rounded-xl border border-[#27272A] relative z-10">
           <Clock className="w-5 h-5 text-[#D4AF37] animate-pulse" />
           <div className="text-right">
-            <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider">الوقت والتاريخ الحالي</p>
+            <p className="text-[10px] text-[#8E8E93] uppercase tracking-normal">الوقت والتاريخ الحالي</p>
             <p className="text-sm font-bold text-[#E4E4E7] font-serif">
               {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
@@ -395,7 +395,7 @@ export default function EmployeePanel({
               }`}
             >
               <Clock className="w-6 h-6 mb-1 text-[#D4AF37]" />
-              <span className="tracking-wide">
+              <span className="tracking-normal">
                 {todayRecord && todayRecord.checkOut
                   ? 'عمل مكتمل'
                   : pendingCheckInRequest

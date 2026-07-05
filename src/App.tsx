@@ -809,7 +809,7 @@ export default function App() {
     if (!tenantExists) {
       const newTenant: Tenant = {
         id: activeTenantId,
-        companyName: activeTenantId === 'default' ? 'حاضر - الفرع الرئيسي' : 'مؤسسة جديدة',
+        companyName: activeTenantId === 'default' ? 'checkInTime - الفرع الرئيسي' : 'مؤسسة جديدة',
         adminName: activeTenantId === 'default' ? 'مدير النظام الافتراضي' : 'مدير جديد',
         username: user,
         password: pass,
@@ -832,7 +832,7 @@ export default function App() {
   };
 
   const activeTenant = tenants.find(t => t.id === activeTenantId);
-  const activeCompanyName = activeTenant ? activeTenant.companyName : 'حاضر - الفرع الرئيسي';
+  const activeCompanyName = activeTenant ? activeTenant.companyName : 'checkInTime - الفرع الرئيسي';
   const currentAdminUsername = activeTenant ? activeTenant.username : 'admin';
   const currentAdminPassword = activeTenant ? activeTenant.password : 'admin123';
   const currentAdminName = activeTenant ? activeTenant.adminName : 'مدير النظام (الرئيسي)';
@@ -841,7 +841,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#0A0A0B] flex flex-col items-center justify-center p-4">
         <Clock className="w-12 h-12 text-[#D4AF37] animate-spin mb-4" />
-        <p className="text-sm font-bold text-[#E4E4E7] font-serif italic">جاري تحميل نظام حاضر للتحضير الذكي...</p>
+        <p className="text-sm font-bold text-[#E4E4E7] font-serif italic">جاري تحميل نظام checkInTime للتحضير الذكي...</p>
       </div>
     );
   }
@@ -885,10 +885,10 @@ export default function App() {
               <ClipboardList className="w-5 h-5 text-[#0A0A0B]" />
             </div>
             <div className="text-right">
-              <h1 className="text-lg font-serif italic text-[#D4AF37] tracking-wide leading-tight">
-                {isSuperAdminMode ? 'حاضر | لوحة المصمم العام' : `${activeCompanyName}`}
+              <h1 className="text-lg font-serif italic text-[#D4AF37] tracking-normal leading-tight">
+                {isSuperAdminMode ? 'checkInTime | لوحة المصمم العام' : `${activeCompanyName}`}
               </h1>
-              <p className="text-[10px] text-[#8E8E93] mt-0.5 uppercase tracking-[0.1em] font-medium">
+              <p className="text-[10px] text-[#8E8E93] mt-0.5 uppercase tracking-normal font-medium">
                 {isSuperAdminMode ? 'إدارة كافة المؤسسات والمشاريع وعمليات التهيئة' : 'النظام الذكي لإدارة الموارد البشرية والتحضير'}
               </p>
             </div>
@@ -925,31 +925,6 @@ export default function App() {
               <>
                 {selectedUser === 'admin' ? (
                   <>
-                    {/* Switch to Employee Portal view manually */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsEmployeePortalMode(true);
-                        setSelectedUser(''); // Go to portal log-in screen
-                        sessionStorage.setItem(`hader_logged_in_role_${activeTenantId}`, 'employee');
-                      }}
-                      className="inline-flex items-center gap-1.5 bg-[#1A1C1E] hover:bg-[#27272A] text-slate-200 border border-[#27272A] text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
-                    >
-                      <Laptop className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>بوابة الموظفين</span>
-                    </button>
-
-                    {/* Trigger button for Admin Side Drawer Menu */}
-                    <button
-                      id="btn-toggle-admin-drawer"
-                      type="button"
-                      onClick={() => setIsAdminDrawerOpen(true)}
-                      className="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150"
-                    >
-                      <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>لوحة التحكم والمحاكاة</span>
-                    </button>
-
                     {/* Secure Log out for Tenant Admin */}
                     <button
                       type="button"
@@ -1745,7 +1720,7 @@ export default function App() {
       {/* Pure, Honest Footer */}
       <footer className="bg-[#0A0A0B] border-t border-[#27272A] py-6 text-center text-xs text-[#8E8E93]" id="footer-system">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© 2026 حاضر - تطبيق التحضير والمراقبة الذكي. جميع الحقوق محفوظة.</p>
+          <p>© 2026 checkInTime - تطبيق التحضير والمراقبة الذكي. جميع الحقوق محفوظة.</p>
           <div className="flex gap-4">
             <span className="hover:text-[#D4AF37] transition-colors font-medium cursor-pointer">سياسة الخصوصية</span>
             <span className="hover:text-[#D4AF37] transition-colors font-medium cursor-pointer">شروط الخدمة</span>

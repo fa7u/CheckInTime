@@ -45,7 +45,7 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
     if (!hasDefault) {
       const defaultTenant: Tenant = {
         id: 'default',
-        companyName: 'حاضر - الفرع الرئيسي',
+        companyName: 'checkInTime - الفرع الرئيسي',
         adminName: 'مدير النظام الافتراضي',
         username: 'admin',
         password: 'admin123',
@@ -63,7 +63,7 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
     if (stored) return JSON.parse(stored);
     return [{
       id: 'default',
-      companyName: 'حاضر - الفرع الرئيسي',
+      companyName: 'checkInTime - الفرع الرئيسي',
       adminName: 'مدير النظام الافتراضي',
       username: 'admin',
       password: 'admin123',

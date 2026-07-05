@@ -629,7 +629,7 @@ export default function AdminPanel({
       <body>
         <div class="header">
           <div class="logo-area">
-            <h1 class="company-name">نظام حَاضِر لضبط الحضور والانصراف</h1>
+            <h1 class="company-name">نظام checkInTime لضبط الحضور والانصراف</h1>
             <p class="company-sub">لوحة المراقبة والإشراف الإداري المتكاملة</p>
           </div>
           <div class="report-meta">
@@ -1423,7 +1423,7 @@ export default function AdminPanel({
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-xl border border-[#27272A]">
-                  <table className="w-full text-right border-collapse text-xs">
+                  <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
                     <thead>
                       <tr className="bg-[#0F0F11] border-b border-[#27272A] text-[#8E8E93] font-bold">
                         <th className="px-4 py-3 text-right">الموظف</th>
@@ -1663,7 +1663,7 @@ export default function AdminPanel({
               {/* Employees List Directory Table */}
               {employees.length > 0 ? (
                 <div className="overflow-x-auto rounded-xl border border-[#27272A]">
-                  <table className="w-full text-right border-collapse text-sm">
+                  <table className="w-full min-w-[950px] text-right border-collapse text-sm whitespace-nowrap">
                     <thead>
                       <tr className="bg-[#0F0F11] border-b border-[#27272A] text-[#8E8E93] font-bold">
                         <th className="px-4 py-3 text-right">الموظف</th>
@@ -2255,7 +2255,7 @@ export default function AdminPanel({
                       }
 
                       return (
-                        <table className="w-full text-right border-collapse text-xs">
+                        <table className="w-full min-w-[600px] text-right border-collapse text-xs whitespace-nowrap">
                           <thead>
                             <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
                               <th className="px-4 py-3">الموظف</th>
@@ -2362,7 +2362,7 @@ export default function AdminPanel({
                 <h4 className="text-sm font-bold text-[#E4E4E7]">كشف تفصيلي لحضور وانصراف الموظفين</h4>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-right border-collapse">
+                <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
                   <thead>
                     <tr className="bg-[#0F0F11] text-[#8E8E93] text-xs border-b border-[#27272A]">
                       <th className="px-4 py-3 font-bold">الموظف</th>
@@ -2575,7 +2575,7 @@ export default function AdminPanel({
                     لا توجد سجلات حضور وانصراف مرصودة تطابق الفلاتر المحددة لهذه الفترة.
                   </div>
                 ) : (
-                  <table className="w-full text-right border-collapse text-xs">
+                  <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
                     <thead>
                       <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
                         <th className="px-4 py-3 text-right">الموظف</th>
