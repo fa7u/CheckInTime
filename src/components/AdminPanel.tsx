@@ -2870,9 +2870,10 @@ export default function AdminPanel({
                       type="number"
                       step="0.00000001"
                       required
+                      readOnly
                       value={officeForm.latitude}
-                      onChange={(e) => setOfficeForm({ ...officeForm, latitude: Number(e.target.value) })}
-                      className="w-full bg-[#0F0F11]/60 border border-[#27272A] rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                      className="w-full bg-neutral-900/30 border border-[#27272A] rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none text-[#A1A1AA] cursor-not-allowed opacity-80"
+                      placeholder="تلقائي عبر الرابط"
                     />
                   </div>
 
@@ -2883,9 +2884,10 @@ export default function AdminPanel({
                       type="number"
                       step="0.00000001"
                       required
+                      readOnly
                       value={officeForm.longitude}
-                      onChange={(e) => setOfficeForm({ ...officeForm, longitude: Number(e.target.value) })}
-                      className="w-full bg-[#0F0F11]/60 border border-[#27272A] rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                      className="w-full bg-neutral-900/30 border border-[#27272A] rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none text-[#A1A1AA] cursor-not-allowed opacity-80"
+                      placeholder="تلقائي عبر الرابط"
                     />
                   </div>
                 </div>
