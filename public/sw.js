@@ -38,16 +38,19 @@ self.addEventListener('fetch', (e) => {
   if (url.pathname === '/manifest.json') {
     const tenant = url.searchParams.get('tenant') || 'default';
     const portal = url.searchParams.get('portal') || 'admin';
+    const company = url.searchParams.get('company') || 'checkInTime';
 
     e.respondWith(
       fetch('/manifest.json')
         .then((response) => response.json())
         .then((manifest) => {
-          // Forcefully override the start_url with current active portal and tenant parameters
+          // Forcefully override the name, short_name, and start_url with current active portal, tenant and company parameters
+          manifest.name = company === 'checkInTime' ? 'checkInTime - النظام الذكي للحضور والانصراف' : `${company} - checkInTime`;
+          manifest.short_name = company;
           manifest.start_url = `/?tenant=${tenant}&portal=${portal}`;
           
           return new Response(JSON.stringify(manifest), {
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
           });
         })
         .catch(() => {
@@ -56,15 +59,17 @@ self.addEventListener('fetch', (e) => {
             .then((res) => res ? res.json() : null)
             .then((manifest) => {
               if (manifest) {
+                manifest.name = company === 'checkInTime' ? 'checkInTime - النظام الذكي للحضور والانصراف' : `${company} - checkInTime`;
+                manifest.short_name = company;
                 manifest.start_url = `/?tenant=${tenant}&portal=${portal}`;
                 return new Response(JSON.stringify(manifest), {
-                  headers: { 'Content-Type': 'application/json' }
+                  headers: { 'Content-Type': 'application/json; charset=utf-8' }
                 });
               }
               // Absolute fallback if no cache
               const fallbackManifest = {
-                "name": "checkInTime - النظام الذكي للحضور والانصراف",
-                "short_name": "checkInTime",
+                "name": company === 'checkInTime' ? 'checkInTime - النظام الذكي للحضور والانصراف' : `${company} - checkInTime`,
+                "short_name": company,
                 "start_url": `/?tenant=${tenant}&portal=${portal}`,
                 "display": "standalone",
                 "background_color": "#0A0A0B",
@@ -78,7 +83,7 @@ self.addEventListener('fetch', (e) => {
                 ]
               };
               return new Response(JSON.stringify(fallbackManifest), {
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
               });
             });
         })

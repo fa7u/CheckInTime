@@ -171,11 +171,15 @@ export default function App() {
     params.set('tenant', activeTenantId);
     
     // Set portal
+    let portal = 'admin';
     if (isSuperAdminMode) {
+      portal = 'superadmin';
       params.set('portal', 'superadmin');
     } else if (isEmployeePortalMode) {
+      portal = 'employee';
       params.set('portal', 'employee');
     } else {
+      portal = 'admin';
       params.set('portal', 'admin');
     }
     
@@ -183,7 +187,21 @@ export default function App() {
     if (window.location.search !== `?${newSearch}`) {
       window.history.replaceState({}, '', `${window.location.pathname}?${newSearch}`);
     }
-  }, [activeTenantId, isEmployeePortalMode, isSuperAdminMode, isLoaded]);
+
+    // Dynamic Manifest updates for custom installed app names based on tenant & portal
+    const manifestLink = document.getElementById('pwa-manifest') as HTMLLinkElement;
+    if (manifestLink) {
+      const activeTenantObj = tenants.find(t => t.id === activeTenantId);
+      const companyName = activeTenantObj ? activeTenantObj.companyName : 'checkInTime';
+      
+      const manifestParams = new URLSearchParams();
+      manifestParams.set('tenant', activeTenantId);
+      manifestParams.set('portal', portal);
+      manifestParams.set('company', companyName);
+      
+      manifestLink.href = `/manifest.json?${manifestParams.toString()}`;
+    }
+  }, [activeTenantId, isEmployeePortalMode, isSuperAdminMode, isLoaded, tenants]);
 
   // Sync / load workspace data from LocalStorage & Firebase using real-time listeners
   useEffect(() => {
