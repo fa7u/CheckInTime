@@ -126,12 +126,8 @@ export default function App() {
       } else if (savedRole === 'admin') {
         targetPortal = 'admin';
       } else if (savedRole === 'employee' && savedEmpId) {
-        // Only auto-resume employee portal if they didn't explicitly open a tenant URL without portal parameter
-        if (urlTenantId) {
-          targetPortal = 'admin';
-        } else {
-          targetPortal = 'employee';
-        }
+        // Safe employee session resumption
+        targetPortal = 'employee';
       } else {
         targetPortal = 'admin';
       }
@@ -159,20 +155,24 @@ export default function App() {
       }
     }
 
-    // 2. Fetch live global configs from Firebase
-    getTenantsFromFirebase().then(liveTenants => {
+    // 2. Fetch live global configs from Firebase BEFORE marking app as fully loaded
+    Promise.all([
+      getTenantsFromFirebase(),
+      getSuperAdminCredentialsFromFirebase()
+    ]).then(([liveTenants, creds]) => {
       setTenants(liveTenants);
       localStorage.setItem('hader_tenants', JSON.stringify(liveTenants));
-    });
-
-    getSuperAdminCredentialsFromFirebase().then(creds => {
+      
       setSuperAdminUsername(creds.username);
       setSuperAdminPassword(creds.password);
       localStorage.setItem('hader_super_admin_username', creds.username);
       localStorage.setItem('hader_super_admin_password', creds.password);
+      
+      setIsLoaded(true);
+    }).catch(error => {
+      console.error("Initialization error:", error);
+      setIsLoaded(true); // fallback to local/cached load so app is not stuck
     });
-
-    setIsLoaded(true);
   }, []);
 
   // Synchronize URL search parameters with the actual current state
@@ -863,10 +863,12 @@ export default function App() {
   };
 
   const activeTenant = tenants.find(t => t.id === activeTenantId);
-  const activeCompanyName = activeTenant ? activeTenant.companyName : 'checkInTime - الفرع الرئيسي';
-  const currentAdminUsername = activeTenant ? activeTenant.username : 'admin';
-  const currentAdminPassword = activeTenant ? activeTenant.password : 'admin123';
-  const currentAdminName = activeTenant ? activeTenant.adminName : 'مدير النظام (الرئيسي)';
+  const activeCompanyName = activeTenant 
+    ? activeTenant.companyName 
+    : (activeTenantId === 'default' ? 'checkInTime - الفرع الرئيسي' : activeTenantId);
+  const currentAdminUsername = activeTenant ? activeTenant.username : (activeTenantId === 'default' ? 'admin' : '');
+  const currentAdminPassword = activeTenant ? activeTenant.password : (activeTenantId === 'default' ? 'admin123' : '');
+  const currentAdminName = activeTenant ? activeTenant.adminName : (activeTenantId === 'default' ? 'مدير النظام (الرئيسي)' : '');
 
   if (!isLoaded || !isInitialDataLoaded) {
     return (
