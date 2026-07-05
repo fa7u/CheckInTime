@@ -235,45 +235,14 @@ export default function App() {
         appleTitle.setAttribute('content', cleanCompany);
       }
 
-      // Generate a dynamic Base64 Data URI for the manifest so that iOS Safari can read the custom start_url, name, and short_name instantly
-      const manifestData = {
-        name: cleanCompany === 'checkInTime' ? 'checkInTime - النظام الذكي للحضور والانصراف' : `${cleanCompany} - checkInTime`,
-        short_name: cleanCompany,
-        description: "النظام الذكي لإدارة الموارد البشرية وضبط حضور وانصراف الموظفين",
-        start_url: `${window.location.origin}/?tenant=${activeTenantId}&portal=${portal}`,
-        display: "standalone",
-        background_color: "#0A0A0B",
-        theme_color: "#D4AF37",
-        orientation: "portrait-primary",
-        icons: [
-          {
-            src: "/icon.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any"
-          },
-          {
-            src: "/icon.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable"
-          }
-        ]
-      };
-      
-      try {
-        const manifestString = JSON.stringify(manifestData);
-        const manifestBase64 = btoa(unescape(encodeURIComponent(manifestString)));
-        manifestLink.href = `data:application/manifest+json;base64,${manifestBase64}`;
-      } catch (err) {
-        console.error("Error generating dynamic manifest URI:", err);
-        // Fallback to query parameters if base64 encoding fails
-        const manifestParams = new URLSearchParams();
-        manifestParams.set('tenant', activeTenantId);
-        manifestParams.set('portal', portal);
-        manifestParams.set('company', cleanCompany);
-        manifestLink.href = `/manifest.json?${manifestParams.toString()}`;
-      }
+      // Set manifest link with query parameters directly so Safari can fetch it correctly.
+      // iOS Safari does not support Base64 Data URIs for manifest, so we must use query parameters.
+      // The Service Worker (sw.js) intercepts this request and overrides the start_url, name, and short_name dynamically.
+      const manifestParams = new URLSearchParams();
+      manifestParams.set('tenant', activeTenantId);
+      manifestParams.set('portal', portal);
+      manifestParams.set('company', cleanCompany);
+      manifestLink.href = `/manifest.json?${manifestParams.toString()}`;
     }
   }, [activeTenantId, isEmployeePortalMode, isSuperAdminMode, isLoaded, tenants]);
 
