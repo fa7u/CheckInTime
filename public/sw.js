@@ -32,6 +32,60 @@ self.addEventListener('activate', (e) => {
 
 // Fetch Interceptor (Network-first with Cache fallback)
 self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+
+  // Dynamic PWA Manifest interception for absolute link isolation
+  if (url.pathname === '/manifest.json') {
+    const tenant = url.searchParams.get('tenant') || 'default';
+    const portal = url.searchParams.get('portal') || 'admin';
+
+    e.respondWith(
+      fetch('/manifest.json')
+        .then((response) => response.json())
+        .then((manifest) => {
+          // Forcefully override the start_url with current active portal and tenant parameters
+          manifest.start_url = `/?tenant=${tenant}&portal=${portal}`;
+          
+          return new Response(JSON.stringify(manifest), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+        .catch(() => {
+          // Fallback if network fails, fetch cached static manifest and inject dynamic params
+          return caches.match('/manifest.json')
+            .then((res) => res ? res.json() : null)
+            .then((manifest) => {
+              if (manifest) {
+                manifest.start_url = `/?tenant=${tenant}&portal=${portal}`;
+                return new Response(JSON.stringify(manifest), {
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+              // Absolute fallback if no cache
+              const fallbackManifest = {
+                "name": "checkInTime - النظام الذكي للحضور والانصراف",
+                "short_name": "checkInTime",
+                "start_url": `/?tenant=${tenant}&portal=${portal}`,
+                "display": "standalone",
+                "background_color": "#0A0A0B",
+                "theme_color": "#D4AF37",
+                "icons": [
+                  {
+                    "src": "/icon.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                  }
+                ]
+              };
+              return new Response(JSON.stringify(fallbackManifest), {
+                headers: { 'Content-Type': 'application/json' }
+              });
+            });
+        })
+    );
+    return;
+  }
+
   // Only handle GET requests and local assets
   if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) {
     return;
