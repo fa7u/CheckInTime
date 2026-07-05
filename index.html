@@ -6,7 +6,29 @@
     <title>checkInTime</title>
     
     <!-- PWA Manifest & Meta Tags -->
-    <link id="pwa-manifest" rel="manifest" href="/manifest.json" />
+    <script>
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        var tenant = params.get('tenant') || 'default';
+        var portal = params.get('portal') || 'admin';
+        var company = params.get('company') || 'checkInTime';
+        
+        // Also fallback to localStorage if available
+        if (tenant === 'default' && window.localStorage) {
+          var storedTenant = window.localStorage.getItem('hader_active_tenant_id');
+          if (storedTenant) {
+            tenant = storedTenant;
+          }
+        }
+        
+        var manifestUrl = '/manifest.json?tenant=' + encodeURIComponent(tenant) + '&portal=' + encodeURIComponent(portal) + '&company=' + encodeURIComponent(company);
+        var link = document.createElement('link');
+        link.id = 'pwa-manifest';
+        link.rel = 'manifest';
+        link.href = manifestUrl;
+        document.head.appendChild(link);
+      })();
+    </script>
     <meta name="theme-color" content="#D4AF37" />
     
     <!-- iOS / Apple Add to Home Screen Support -->

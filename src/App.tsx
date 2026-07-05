@@ -169,8 +169,14 @@ export default function App() {
     // 2. Fetch live global configs from Firebase BEFORE marking app as fully loaded
     Promise.all([
       getTenantsFromFirebase(),
-      getSuperAdminCredentialsFromFirebase()
-    ]).then(([liveTenants, creds]) => {
+      getSuperAdminCredentialsFromFirebase(),
+      'caches' in window 
+        ? window.caches.open('checkintime-config')
+            .then(c => c.match('/sw-active-config.json'))
+            .then(r => r ? r.json() : null)
+            .catch(() => null)
+        : Promise.resolve(null)
+    ]).then(([liveTenants, creds, cachedConfig]) => {
       setTenants(liveTenants);
       localStorage.setItem('hader_tenants', JSON.stringify(liveTenants));
       
@@ -179,8 +185,13 @@ export default function App() {
       localStorage.setItem('hader_super_admin_username', creds.username);
       localStorage.setItem('hader_super_admin_password', creds.password);
       
+      let finalTargetId = targetTenantId;
+      if (finalTargetId === 'default' && cachedConfig && cachedConfig.tenant) {
+        finalTargetId = cachedConfig.tenant;
+      }
+
       // Dynamic fallback check to make sure the active tenant exists, otherwise pick the first one
-      const resolvedId = resolveFallbackTenantId(liveTenants, targetTenantId);
+      const resolvedId = resolveFallbackTenantId(liveTenants, finalTargetId);
       setActiveTenantId(resolvedId);
       localStorage.setItem('hader_active_tenant_id', resolvedId);
       
@@ -243,6 +254,23 @@ export default function App() {
       manifestParams.set('portal', portal);
       manifestParams.set('company', cleanCompany);
       manifestLink.href = `/manifest.json?${manifestParams.toString()}`;
+
+      // Save this configuration to Cache Storage so the Service Worker can access it even if query parameters are stripped or missing
+      if (activeTenantId && activeTenantId !== 'default' && 'caches' in window) {
+        try {
+          const configData = { tenant: activeTenantId, portal, company: cleanCompany, timestamp: Date.now() };
+          window.caches.open('checkintime-config').then(cache => {
+            cache.put(
+              new Request('/sw-active-config.json'),
+              new Response(JSON.stringify(configData), {
+                headers: { 'Content-Type': 'application/json' }
+              })
+            );
+          });
+        } catch (err) {
+          console.error('Error storing dynamic manifest config in CacheStorage:', err);
+        }
+      }
     }
   }, [activeTenantId, isEmployeePortalMode, isSuperAdminMode, isLoaded, tenants]);
 
