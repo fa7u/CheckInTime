@@ -37,6 +37,16 @@ const AVATAR_COLORS = [
   'bg-pink-500', 'bg-cyan-500', 'bg-rose-500', 'bg-teal-500'
 ];
 
+const resolveFallbackTenantId = (tenantsList: Tenant[], preferredId: string): string => {
+  if (tenantsList.some(t => t.id === preferredId)) {
+    return preferredId;
+  }
+  if (tenantsList.length > 0) {
+    return tenantsList[0].id;
+  }
+  return 'default';
+};
+
 export default function App() {
   // Global States
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -88,7 +98,8 @@ export default function App() {
     // 1. Initial local load for instant rendering
     const storedTenants = localStorage.getItem('hader_tenants');
     if (storedTenants) {
-      setTenants(JSON.parse(storedTenants));
+      const parsed = JSON.parse(storedTenants) as Tenant[];
+      setTenants(parsed.filter(t => t.id !== 'default'));
     }
 
     // Resolve active tenant ID from URL or localStorage
@@ -168,6 +179,11 @@ export default function App() {
       localStorage.setItem('hader_super_admin_username', creds.username);
       localStorage.setItem('hader_super_admin_password', creds.password);
       
+      // Dynamic fallback check to make sure the active tenant exists, otherwise pick the first one
+      const resolvedId = resolveFallbackTenantId(liveTenants, targetTenantId);
+      setActiveTenantId(resolvedId);
+      localStorage.setItem('hader_active_tenant_id', resolvedId);
+      
       setIsLoaded(true);
     }).catch(error => {
       console.error("Initialization error:", error);
@@ -242,7 +258,11 @@ export default function App() {
     }
     const cachedOff = localStorage.getItem(offKey);
     if (cachedOff) {
-      setOfficeSettings(JSON.parse(cachedOff));
+      const parsed = JSON.parse(cachedOff) as OfficeSettings;
+      if (parsed.lateGracePeriod === undefined) {
+        parsed.lateGracePeriod = 10;
+      }
+      setOfficeSettings(parsed);
     }
 
     // B. Setup real-time listeners (onSnapshot)
@@ -356,6 +376,9 @@ export default function App() {
     const unsubscribeOff = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const settings = docSnap.data() as OfficeSettings;
+        if (settings.lateGracePeriod === undefined) {
+          settings.lateGracePeriod = 10;
+        }
         setOfficeSettings(settings);
         localStorage.setItem(offKey, JSON.stringify(settings));
       } else {
@@ -587,10 +610,13 @@ export default function App() {
     const requestTime = request.time || getFormattedTime();
 
     if (request.type === 'check-in') {
-      // Work hour policy: Starts dynamically based on officeSettings.workStartTime
+      // Work hour policy: Starts dynamically based on officeSettings.workStartTime + lateGracePeriod
       const [hour, min] = requestTime.split(':').map(Number);
       const [startHour, startMin] = (officeSettings.workStartTime || "08:30").split(':').map(Number);
-      const isLate = isNaN(hour) || isNaN(min) ? false : (hour > startHour || (hour === startHour && min > startMin));
+      const graceMinutes = typeof officeSettings.lateGracePeriod === 'number' ? officeSettings.lateGracePeriod : 10;
+      const startTimeInMinutes = startHour * 60 + startMin;
+      const checkInTimeInMinutes = hour * 60 + min;
+      const isLate = isNaN(hour) || isNaN(min) ? false : (checkInTimeInMinutes > (startTimeInMinutes + graceMinutes));
       const attendanceStatus = isLate ? 'متأخر' : 'حاضر';
 
       const isOutOfRangeOnSite = request.notes?.includes('خارج النطاق');
@@ -806,8 +832,9 @@ export default function App() {
     deleteTenantFromFirebase(id);
 
     if (activeTenantId === id) {
-      setActiveTenantId('default');
-      localStorage.setItem('hader_active_tenant_id', 'default');
+      const fallbackId = resolveFallbackTenantId(updated, 'default');
+      setActiveTenantId(fallbackId);
+      localStorage.setItem('hader_active_tenant_id', fallbackId);
     }
   };
 
@@ -818,8 +845,9 @@ export default function App() {
     localStorage.removeItem(`hader_logged_in_role_${activeTenantId}`);
     
     // Reset states so they return to unified Login Screen
-    setActiveTenantId('default');
-    localStorage.setItem('hader_active_tenant_id', 'default');
+    const fallbackId = resolveFallbackTenantId(tenants, 'default');
+    setActiveTenantId(fallbackId);
+    localStorage.setItem('hader_active_tenant_id', fallbackId);
     setSelectedUser('');
     setIsEmployeePortalMode(false);
   };
@@ -901,8 +929,9 @@ export default function App() {
               url.searchParams.delete('tenant');
               url.searchParams.delete('portal');
               window.history.pushState({}, '', url.toString());
-              setActiveTenantId('default');
-              localStorage.setItem('hader_active_tenant_id', 'default');
+              const fallbackId = resolveFallbackTenantId(tenants, 'default');
+              setActiveTenantId(fallbackId);
+              localStorage.setItem('hader_active_tenant_id', fallbackId);
               setSelectedUser('admin');
               setIsEmployeePortalMode(false);
             }}
@@ -1453,25 +1482,23 @@ export default function App() {
                   }
 
                   // 3. Fallback for default admin
-                  const defaultTenant = tenants.find(t => t.id === 'default');
-                  const fallbackUser = defaultTenant ? defaultTenant.username : 'admin';
-                  const fallbackPass = defaultTenant ? defaultTenant.password : 'admin123';
-                  if (user.toLowerCase() === fallbackUser.toLowerCase() && pass === fallbackPass) {
-                    if (activeTenantId !== 'default') {
-                      setAdminLoginError('بيانات الاعتماد المدخلة لا تنتمي لهذه المؤسسة. يرجى التأكد من الرابط الصحيح لمؤسستك.');
+                  if (activeTenantId === 'default') {
+                    const defaultTenant = tenants.find(t => t.id === 'default');
+                    const fallbackUser = defaultTenant ? defaultTenant.username : 'admin';
+                    const fallbackPass = defaultTenant ? defaultTenant.password : 'admin123';
+                    if (user.toLowerCase() === fallbackUser.toLowerCase() && pass === fallbackPass) {
+                      setActiveTenantId('default');
+                      localStorage.setItem('hader_active_tenant_id', 'default');
+                      localStorage.setItem(`hader_logged_in_role_default`, 'admin');
+                      setIsEmployeePortalMode(false);
+                      setIsSuperAdminMode(false);
+                      localStorage.removeItem(`hader_super_admin_active_default`);
+                      setSelectedUser('admin');
+                      setAdminUsernameInput('');
+                      setAdminPasswordInput('');
+                      setAdminLoginError('');
                       return;
                     }
-                    setActiveTenantId('default');
-                    localStorage.setItem('hader_active_tenant_id', 'default');
-                    localStorage.setItem(`hader_logged_in_role_default`, 'admin');
-                    setIsEmployeePortalMode(false);
-                    setIsSuperAdminMode(false);
-                    localStorage.removeItem(`hader_super_admin_active_default`);
-                    setSelectedUser('admin');
-                    setAdminUsernameInput('');
-                    setAdminPasswordInput('');
-                    setAdminLoginError('');
-                    return;
                   }
 
                   setAdminLoginError('اسم المستخدم أو كلمة المرور غير صحيحة.');
@@ -1680,26 +1707,24 @@ export default function App() {
                 }
 
                 // 3. Fallback for default admin
-                const defaultTenant = tenants.find(t => t.id === 'default');
-                const fallbackUser = defaultTenant ? defaultTenant.username : 'admin';
-                const fallbackPass = defaultTenant ? defaultTenant.password : 'admin123';
-                if (user.toLowerCase() === fallbackUser.toLowerCase() && pass === fallbackPass) {
-                  if (activeTenantId !== 'default') {
-                    setAdminLoginError('بيانات الاعتماد المدخلة لا تنتمي لهذه المؤسسة. يرجى التأكد من الرابط الصحيح لمؤسستك.');
+                if (activeTenantId === 'default') {
+                  const defaultTenant = tenants.find(t => t.id === 'default');
+                  const fallbackUser = defaultTenant ? defaultTenant.username : 'admin';
+                  const fallbackPass = defaultTenant ? defaultTenant.password : 'admin123';
+                  if (user.toLowerCase() === fallbackUser.toLowerCase() && pass === fallbackPass) {
+                    setActiveTenantId('default');
+                    localStorage.setItem('hader_active_tenant_id', 'default');
+                    localStorage.setItem(`hader_logged_in_role_default`, 'admin');
+                    setIsEmployeePortalMode(false);
+                    setIsSuperAdminMode(false);
+                    localStorage.removeItem(`hader_super_admin_active_default`);
+                    setSelectedUser('admin');
+                    setShowAdminLoginModal(false);
+                    setAdminUsernameInput('');
+                    setAdminPasswordInput('');
+                    setAdminLoginError('');
                     return;
                   }
-                  setActiveTenantId('default');
-                  localStorage.setItem('hader_active_tenant_id', 'default');
-                  localStorage.setItem(`hader_logged_in_role_default`, 'admin');
-                  setIsEmployeePortalMode(false);
-                  setIsSuperAdminMode(false);
-                  localStorage.removeItem(`hader_super_admin_active_default`);
-                  setSelectedUser('admin');
-                  setShowAdminLoginModal(false);
-                  setAdminUsernameInput('');
-                  setAdminPasswordInput('');
-                  setAdminLoginError('');
-                  return;
                 }
 
                 setAdminLoginError('اسم المستخدم أو كلمة المرور غير صحيحة.');

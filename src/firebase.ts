@@ -38,21 +38,14 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
   try {
     const tenantsCol = collection(db, 'tenants');
     const tenantSnapshot = await getDocs(tenantsCol);
-    const tenantList = tenantSnapshot.docs.map(doc => doc.data() as Tenant);
+    let tenantList = tenantSnapshot.docs.map(doc => doc.data() as Tenant);
     
-    // Ensure the default tenant always exists
+    // If 'default' exists in the fetched list, we delete it from Firestore and filter it out of the returned list
     const hasDefault = tenantList.some(t => t.id === 'default');
-    if (!hasDefault) {
-      const defaultTenant: Tenant = {
-        id: 'default',
-        companyName: 'checkInTime - الفرع الرئيسي',
-        adminName: 'مدير النظام الافتراضي',
-        username: 'admin',
-        password: 'admin123',
-        createdAt: '2026-07-03'
-      };
-      await saveTenantToFirebase(defaultTenant);
-      tenantList.unshift(defaultTenant);
+    if (hasDefault) {
+      console.log("Removing 'default' tenant from Firebase...");
+      await deleteTenantFromFirebase('default');
+      tenantList = tenantList.filter(t => t.id !== 'default');
     }
     
     return tenantList;
@@ -60,15 +53,11 @@ export async function getTenantsFromFirebase(): Promise<Tenant[]> {
     console.error('Error fetching tenants from Firebase:', error);
     // Return localStorage fallback if any
     const stored = localStorage.getItem('hader_tenants');
-    if (stored) return JSON.parse(stored);
-    return [{
-      id: 'default',
-      companyName: 'checkInTime - الفرع الرئيسي',
-      adminName: 'مدير النظام الافتراضي',
-      username: 'admin',
-      password: 'admin123',
-      createdAt: '2026-07-03'
-    }];
+    if (stored) {
+      const parsed = JSON.parse(stored) as Tenant[];
+      return parsed.filter(t => t.id !== 'default');
+    }
+    return [];
   }
 }
 
@@ -308,10 +297,29 @@ export async function getRequestsFromFirebase(tenantId: string): Promise<Approva
     const requestsCol = collection(db, 'requests');
     const q = query(requestsCol, where('tenantId', '==', tenantId));
     const snapshot = await getDocs(q);
-    const requests = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
+
+    // Calculate today's date in local time (Saudi Arabia UTC+3)
+    const now = new Date();
+    const offset = 3 * 60; // UTC+3
+    const saudiDate = new Date(now.getTime() + (now.getTimezoneOffset() + offset) * 60 * 1000);
+    const todayStr = saudiDate.toISOString().split('T')[0];
+
+    const requests: ApprovalRequest[] = [];
+    
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      const reqDate = data.date || '';
+      
+      // If the request is from a previous day, delete it automatically from Firebase to save space
+      if (reqDate && reqDate < todayStr) {
+        deleteDoc(doc(db, 'requests', docSnap.id)).catch(err => {
+          console.error(`Error auto-deleting expired request ${docSnap.id}:`, err);
+        });
+        continue; // skip adding to the returned list
+      }
+
+      requests.push({
+        id: docSnap.id,
         employeeId: data.employeeId,
         employeeName: data.employeeName,
         role: data.role,
@@ -320,8 +328,9 @@ export async function getRequestsFromFirebase(tenantId: string): Promise<Approva
         type: data.type,
         status: data.status,
         notes: data.notes
-      } as ApprovalRequest;
-    });
+      } as ApprovalRequest);
+    }
+
     return requests.sort((a, b) => b.id.localeCompare(a.id));
   } catch (error) {
     console.error(`Error getting requests for tenant ${tenantId}:`, error);
@@ -347,7 +356,11 @@ export async function getOfficeSettingsFromFirebase(tenantId: string): Promise<O
     const docRef = doc(db, 'officeSettings', tenantId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data() as OfficeSettings;
+      const settings = docSnap.data() as OfficeSettings;
+      if (settings.lateGracePeriod === undefined) {
+        settings.lateGracePeriod = 10;
+      }
+      return settings;
     } else {
       await saveOfficeSettingsToFirebase(tenantId, DEFAULT_OFFICE);
       return DEFAULT_OFFICE;

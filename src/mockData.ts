@@ -8,6 +8,7 @@ export const DEFAULT_OFFICE: OfficeSettings = {
   addressName: 'مركز الملك عبد الله المالي (KAFD) - الرياض',
   workStartTime: '08:30',
   workEndTime: '16:30',
+  lateGracePeriod: 10,
 };
 
 export const INITIAL_EMPLOYEES: Employee[] = [];

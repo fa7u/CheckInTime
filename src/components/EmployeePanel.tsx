@@ -150,9 +150,12 @@ export default function EmployeePanel({
     const currentHour = now.getHours();
     const currentMin = now.getMinutes();
     
-    // Determine status (Punctual if checked in before workStartTime)
+    // Determine status (Punctual if checked in before workStartTime + lateGracePeriod)
     const [startHour, startMin] = (officeSettings.workStartTime || "08:30").split(':').map(Number);
-    const isLate = currentHour > startHour || (currentHour === startHour && currentMin > startMin);
+    const graceMinutes = typeof officeSettings.lateGracePeriod === 'number' ? officeSettings.lateGracePeriod : 10;
+    const startTimeInMinutes = startHour * 60 + startMin;
+    const checkInTimeInMinutes = currentHour * 60 + currentMin;
+    const isLate = checkInTimeInMinutes > (startTimeInMinutes + graceMinutes);
     const calculatedStatus = isLate ? 'متأخر' : 'حاضر';
 
     if (activeModel === 'on-site') {

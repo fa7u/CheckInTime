@@ -208,10 +208,14 @@ export default function SuperAdminPanel({
   };
 
   const filteredTenants = tenants.filter(t => 
-    t.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.adminName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.username.toLowerCase().includes(searchTerm.toLowerCase())
+    t.id !== 'default' && (
+      t.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.adminName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.username.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
+
+  const activeTenantsCount = tenants.filter(t => t.id !== 'default').length;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-right" dir="rtl">
@@ -261,7 +265,7 @@ export default function SuperAdminPanel({
           <div className="text-right">
             <span className="text-[10px] text-[#8E8E93] font-bold block">المؤسسات المسجلة</span>
             <span className="text-3xl font-extrabold text-white mt-1.5 block font-mono">
-              {tenants.length}
+              {activeTenantsCount}
             </span>
           </div>
           <div className="w-11 h-11 bg-emerald-950/30 border border-emerald-900/30 text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
@@ -274,7 +278,7 @@ export default function SuperAdminPanel({
           <div className="text-right">
             <span className="text-[10px] text-[#8E8E93] font-bold block">مجموع مدراء الأنظمة</span>
             <span className="text-3xl font-extrabold text-[#D4AF37] mt-1.5 block font-mono">
-              {tenants.length}
+              {activeTenantsCount}
             </span>
           </div>
           <div className="w-11 h-11 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl flex items-center justify-center shrink-0">

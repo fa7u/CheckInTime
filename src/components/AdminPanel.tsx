@@ -837,6 +837,7 @@ export default function AdminPanel({
       addressName: officeForm.addressName,
       workStartTime: officeForm.workStartTime || '08:30',
       workEndTime: officeForm.workEndTime || '16:30',
+      lateGracePeriod: officeForm.lateGracePeriod !== undefined ? Number(officeForm.lateGracePeriod) : 10,
       mapLink: locationInput,
     });
     setShowSettingsSuccess(true);
@@ -2889,10 +2890,10 @@ export default function AdminPanel({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Radius Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">قطر نطاق التحضير المسموح (بالمتر) *</label>
+                    <label className="text-xs font-bold text-[#8E8E93] block">قطر نطاق التحضير المسموح *</label>
                     <div className="relative">
                       <input
                         id="settings-radius"
@@ -2906,12 +2907,12 @@ export default function AdminPanel({
                       />
                       <span className="absolute left-3 top-3 text-xs text-[#8E8E93] font-bold">متر</span>
                     </div>
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">يجب على الموظف أن يكون ضمن هذا القطر من المقر ليتمكن من التحضير.</p>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">القطر المسموح فيه للتحضير.</p>
                   </div>
 
                   {/* Work start hour Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت بدء الدوام الرسمي للعمل *</label>
+                    <label className="text-xs font-bold text-[#8E8E93] block">وقت بدء الدوام الرسمي *</label>
                     <input
                       id="settings-work-start-time"
                       type="time"
@@ -2920,12 +2921,12 @@ export default function AdminPanel({
                       onChange={(e) => setOfficeForm({ ...officeForm, workStartTime: e.target.value })}
                       className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">سيتم تحديث وقت بدء الدوام تلقائياً وحساب تأخير الموظفين بناءً عليه.</p>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت بدء الدوام وحساب التأخير.</p>
                   </div>
 
                   {/* Work end hour Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت نهاية الدوام الرسمي للعمل *</label>
+                    <label className="text-xs font-bold text-[#8E8E93] block">وقت نهاية الدوام الرسمي *</label>
                     <input
                       id="settings-work-end-time"
                       type="time"
@@ -2934,7 +2935,26 @@ export default function AdminPanel({
                       onChange={(e) => setOfficeForm({ ...officeForm, workEndTime: e.target.value })}
                       className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">تحديث وقت انتهاء الدوام وحساب الانصراف المبكر.</p>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت انتهاء الدوام وحساب الانصراف.</p>
+                  </div>
+
+                  {/* Late Grace Period Setting */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">مهلة التأخير المسموحة *</label>
+                    <div className="relative">
+                      <input
+                        id="settings-late-grace-period"
+                        type="number"
+                        required
+                        min="0"
+                        max="180"
+                        value={officeForm.lateGracePeriod !== undefined ? officeForm.lateGracePeriod : 10}
+                        onChange={(e) => setOfficeForm({ ...officeForm, lateGracePeriod: Number(e.target.value) })}
+                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm pr-3 pl-14 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                      />
+                      <span className="absolute left-3 top-3 text-xs text-[#8E8E93] font-bold font-sans">دقيقة</span>
+                    </div>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">مهلة إضافية بعد بداية الدوام لا يُسجل فيها متأخراً.</p>
                   </div>
                 </div>
               </div>

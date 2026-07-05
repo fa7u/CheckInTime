@@ -48,6 +48,7 @@ export interface OfficeSettings {
   workStartTime?: string; // e.g. "08:30"
   workEndTime?: string; // e.g. "16:30"
   mapLink?: string; // Google maps link or coordinate string
+  lateGracePeriod?: number; // in minutes (e.g., 10)
 }
 
 export interface Tenant {
