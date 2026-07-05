@@ -111,16 +111,27 @@ export default function App() {
     const savedSuperAdminActive = localStorage.getItem(`hader_super_admin_active_${targetTenantId}`);
     const savedEmpId = localStorage.getItem(`hader_logged_in_emp_id_${targetTenantId}`);
 
-    let targetPortal = urlPortal;
-    if (!targetPortal) {
-      if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
-        targetPortal = 'superadmin';
-      } else if (savedRole === 'employee') {
-        targetPortal = 'employee';
-      } else if (savedRole === 'admin') {
-        targetPortal = 'admin';
+    let targetPortal: 'employee' | 'admin' | 'superadmin' = 'admin';
+
+    // FIRST PRIORITY: Active Logged-In Session on this device
+    if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
+      targetPortal = 'superadmin';
+    } else if (savedRole === 'employee' && savedEmpId) {
+      targetPortal = 'employee';
+    } else if (savedRole === 'admin') {
+      targetPortal = 'admin';
+    } else {
+      // SECOND PRIORITY: URL Parameter (if not logged in)
+      if (urlPortal === 'employee' || urlPortal === 'admin' || urlPortal === 'superadmin') {
+        targetPortal = urlPortal as 'employee' | 'admin' | 'superadmin';
       } else {
-        targetPortal = 'admin'; // default to admin login/panel
+        // THIRD PRIORITY: Last saved/visited portal preference for this tenant (or default to admin)
+        const lastPortal = localStorage.getItem(`hader_last_portal_preference_${targetTenantId}`);
+        if (lastPortal === 'employee' || lastPortal === 'admin' || lastPortal === 'superadmin') {
+          targetPortal = lastPortal as 'employee' | 'admin' | 'superadmin';
+        } else {
+          targetPortal = 'admin'; // fallback default
+        }
       }
     }
 
@@ -182,6 +193,9 @@ export default function App() {
       portal = 'admin';
       params.set('portal', 'admin');
     }
+    
+    // Persist last used portal preference for this tenant
+    localStorage.setItem(`hader_last_portal_preference_${activeTenantId}`, portal);
     
     const newSearch = params.toString();
     if (window.location.search !== `?${newSearch}`) {
