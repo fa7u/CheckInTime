@@ -834,13 +834,13 @@ export default function App() {
   };
 
   // 6. Update Active Tenant Admin Credentials
-  const handleUpdateAdminCredentials = (user: string, pass: string) => {
+  const handleUpdateAdminCredentials = (user: string, pass: string, companyName?: string) => {
     let tenantExists = tenants.some(t => t.id === activeTenantId);
     let updated: Tenant[];
     if (!tenantExists) {
       const newTenant: Tenant = {
         id: activeTenantId,
-        companyName: activeTenantId === 'default' ? 'checkInTime - الفرع الرئيسي' : 'مؤسسة جديدة',
+        companyName: companyName && companyName.trim() ? companyName.trim() : (activeTenantId === 'default' ? 'checkInTime - الفرع الرئيسي' : activeTenantId),
         adminName: activeTenantId === 'default' ? 'مدير النظام الافتراضي' : 'مدير جديد',
         username: user,
         password: pass,
@@ -851,7 +851,12 @@ export default function App() {
     } else {
       updated = tenants.map(t => {
         if (t.id === activeTenantId) {
-          const updatedTenant = { ...t, username: user, password: pass };
+          const updatedTenant = { 
+            ...t, 
+            username: user, 
+            password: pass,
+            companyName: companyName && companyName.trim() ? companyName.trim() : t.companyName
+          };
           saveTenantToFirebase(updatedTenant);
           return updatedTenant;
         }
@@ -1559,6 +1564,7 @@ export default function App() {
               adminPassword={currentAdminPassword}
               onUpdateAdminCredentials={handleUpdateAdminCredentials}
               activeTenantId={activeTenantId}
+              adminCompanyName={activeCompanyName}
             />
           ) : (
             (() => {

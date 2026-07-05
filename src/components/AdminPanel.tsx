@@ -38,8 +38,9 @@ interface AdminPanelProps {
   onUpdateAttendance?: (updatedRecord: AttendanceRecord) => void;
   adminUsername?: string;
   adminPassword?: string;
-  onUpdateAdminCredentials?: (user: string, pass: string) => void;
+  onUpdateAdminCredentials?: (user: string, pass: string, companyName?: string) => void;
   activeTenantId?: string;
+  adminCompanyName?: string;
 }
 
 export default function AdminPanel({
@@ -61,6 +62,7 @@ export default function AdminPanel({
   adminPassword = 'admin123',
   onUpdateAdminCredentials,
   activeTenantId = 'default',
+  adminCompanyName = '',
 }: AdminPanelProps) {
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'dashboard' | 'employees' | 'reports' | 'settings'>('dashboard');
@@ -68,6 +70,7 @@ export default function AdminPanel({
   // Credentials update states
   const [adminUser, setAdminUser] = useState(adminUsername);
   const [adminPass, setAdminPass] = useState(adminPassword);
+  const [compName, setCompName] = useState(adminCompanyName);
   const [credError, setCredError] = useState('');
   const [credSuccess, setCredSuccess] = useState('');
 
@@ -75,7 +78,8 @@ export default function AdminPanel({
   React.useEffect(() => {
     setAdminUser(adminUsername);
     setAdminPass(adminPassword);
-  }, [adminUsername, adminPassword]);
+    setCompName(adminCompanyName);
+  }, [adminUsername, adminPassword, adminCompanyName]);
 
   // Side Menu visibility state
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
@@ -2952,8 +2956,8 @@ export default function AdminPanel({
                 setCredError('');
                 setCredSuccess('');
 
-                if (!adminUser.trim() || !adminPass.trim()) {
-                  setCredError('اسم المستخدم وكلمة المرور مطلوبان.');
+                if (!adminUser.trim() || !adminPass.trim() || !compName.trim()) {
+                  setCredError('اسم المؤسسة واسم المستخدم وكلمة المرور مطلوبان.');
                   return;
                 }
 
@@ -2963,8 +2967,8 @@ export default function AdminPanel({
                 }
 
                 if (onUpdateAdminCredentials) {
-                  onUpdateAdminCredentials(adminUser.trim(), adminPass.trim());
-                  setCredSuccess('تم تحديث بيانات دخول المدير بنجاح!');
+                  onUpdateAdminCredentials(adminUser.trim(), adminPass.trim(), compName.trim());
+                  setCredSuccess('تم تحديث بيانات المؤسسة وحساب الإدارة بنجاح!');
                   setTimeout(() => setCredSuccess(''), 3000);
                 }
               }} 
@@ -2975,10 +2979,10 @@ export default function AdminPanel({
               <div>
                 <h3 className="text-lg font-bold text-[#E4E4E7] mb-1 flex items-center justify-start gap-2">
                   <Key className="w-5 h-5 text-[#D4AF37]" />
-                  <span>تعديل بيانات حساب مدير النظام</span>
+                  <span>تعديل اسم المؤسسة وبيانات حساب مدير النظام</span>
                 </h3>
                 <p className="text-xs text-[#8E8E93]">
-                  قم بتغيير اسم المستخدم وكلمة المرور الخاصة بلوحة تحكم مدير هذه المؤسسة لمنع الدخول غير المصرح به.
+                  قم بتحديث اسم المؤسسة أو المشروع، بالإضافة إلى اسم المستخدم وكلمة المرور الخاصة بلوحة تحكم الإدارة.
                 </p>
               </div>
 
@@ -2994,7 +2998,19 @@ export default function AdminPanel({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#27272A]/50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-[#27272A]/50">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#8E8E93] block">اسم المؤسسة أو المشروع *</label>
+                  <input
+                    type="text"
+                    required
+                    value={compName}
+                    onChange={(e) => setCompName(e.target.value)}
+                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                    placeholder="مثال: شركة نيوليب"
+                  />
+                </div>
+
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-[#8E8E93] block">اسم مستخدم المدير الجديد *</label>
                   <input
@@ -3025,7 +3041,7 @@ export default function AdminPanel({
                 className="w-full bg-[#1A1C1E] hover:bg-[#27272A] text-[#D4AF37] border border-[#D4AF37]/30 hover:border-[#D4AF37]/50 font-extrabold text-xs py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
               >
                 <Save className="w-4 h-4 animate-pulse" />
-                <span>حفظ بيانات دخول المدير الجديدة</span>
+                <span>حفظ بيانات دخول المدير الجديدة واسم المؤسسة</span>
               </button>
             </form>
 
