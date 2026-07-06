@@ -65,6 +65,7 @@ export default function EmployeePanel({
 
   // Out of range check confirmation state
   const [showOutOfRangeConfirm, setShowOutOfRangeConfirm] = useState(false);
+  const [showCheckOutConfirm, setShowCheckOutConfirm] = useState(false);
   const [outOfRangeDistance, setOutOfRangeDistance] = useState<number | null>(null);
   const [outOfRangeCoords, setOutOfRangeCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [outOfRangeActionType, setOutOfRangeActionType] = useState<'check-in' | 'check-out' | null>(null);
@@ -145,6 +146,17 @@ export default function EmployeePanel({
   const handleAttendanceClick = () => {
     setErrorMessage(null);
 
+    // If they are checking out, we must ask for confirmation first!
+    if (todayRecord && !todayRecord.checkOut) {
+      setShowCheckOutConfirm(true);
+      return;
+    }
+
+    // Otherwise, it's a check-in, proceed normally
+    executeAttendanceAction();
+  };
+
+  const executeAttendanceAction = () => {
     // Get current time
     const now = new Date();
     const currentHour = now.getHours();
@@ -420,6 +432,40 @@ export default function EmployeePanel({
               </span>
             </button>
           </div>
+
+          {/* Check Out Confirmation Prompt */}
+          {showCheckOutConfirm && (
+            <div className="w-full bg-[#1A1C1E] border border-rose-500/30 rounded-xl p-4 space-y-3 relative z-10 text-right animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-start gap-2.5 text-rose-400">
+                <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-xs text-white">هل أنت متأكد من تسجيل الانصراف؟</h4>
+                  <p className="text-[11px] text-[#8E8E93] mt-1 leading-relaxed">
+                    سيتم تسجيل وقت انصرافك الفعلي لليوم الآن. يرجى التأكد من إنهاء كافة مهامك قبل تأكيد الخروج.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCheckOutConfirm(false);
+                    executeAttendanceAction();
+                  }}
+                  className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2 px-3 rounded-lg transition-colors cursor-pointer"
+                >
+                  نعم، تأكيد الانصراف
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCheckOutConfirm(false)}
+                  className="flex-1 bg-[#121214] hover:bg-[#27272A] text-[#8E8E93] font-bold text-xs py-2 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                >
+                  تراجع
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Out of Range Request Confirmation Prompt */}
           {showOutOfRangeConfirm && outOfRangeDistance && (
