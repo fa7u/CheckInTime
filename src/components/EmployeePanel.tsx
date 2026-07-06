@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Clock, MapPin, CheckCircle, AlertCircle, Laptop, Landmark, 
-  History, Eye, Calendar, User, Compass, Info, ShieldCheck, XCircle
+  History, Eye, Calendar, User, Compass, Info, ShieldCheck, XCircle, Bell
 } from 'lucide-react';
 import { Employee, AttendanceRecord, OfficeSettings, ApprovalRequest, WorkModel } from '../types';
 
@@ -73,6 +73,30 @@ export default function EmployeePanel({
   // Filter logs
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
 
+  // Smart notification states
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('checkintime_notifications_enabled') === 'true';
+  });
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => {
+    return 'Notification' in window ? Notification.permission : 'default';
+  });
+  const [notificationSuccessMsg, setNotificationSuccessMsg] = useState<string | null>(null);
+
+  // Sync notification configurations automatically with the service worker
+  useEffect(() => {
+    if (notificationsEnabled && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.active?.postMessage({
+          type: 'SET_ALERTS_CONFIG',
+          employeeName: employee.name,
+          workStartTime: officeSettings.workStartTime || '08:30',
+          workEndTime: officeSettings.workEndTime || '16:30',
+          companyName: 'checkInTime'
+        });
+      }).catch(err => console.error('Failed to sync sw configuration:', err));
+    }
+  }, [notificationsEnabled, employee.name, officeSettings.workStartTime, officeSettings.workEndTime]);
+
   // Trigger real location search when component mounts or employee/settings changes
   useEffect(() => {
     setErrorMessage(null);
@@ -141,6 +165,78 @@ export default function EmployeePanel({
 
   const currentDistance = realDistance;
   const isWithinRadius = currentDistance !== null && currentDistance <= officeSettings.radius;
+
+  // Toggle notifications opt-in/opt-out
+  const handleToggleNotifications = async () => {
+    setNotificationSuccessMsg(null);
+    setErrorMessage(null);
+
+    if (!('Notification' in window)) {
+      setErrorMessage('متصفحك الحالي لا يدعم ميزة الإشعارات.');
+      return;
+    }
+
+    if (notificationsEnabled) {
+      // Opt out
+      setNotificationsEnabled(false);
+      localStorage.setItem('checkintime_notifications_enabled', 'false');
+      setNotificationSuccessMsg('تم إلغاء تفعيل إشعارات التذكير بنجاح.');
+      return;
+    }
+
+    // Request permissions
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+
+      if (permission === 'granted') {
+        setNotificationsEnabled(true);
+        localStorage.setItem('checkintime_notifications_enabled', 'true');
+        
+        // Push setup to Service Worker immediately
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          reg.active?.postMessage({
+            type: 'SET_ALERTS_CONFIG',
+            employeeName: employee.name,
+            workStartTime: officeSettings.workStartTime || '08:30',
+            workEndTime: officeSettings.workEndTime || '16:30',
+            companyName: 'checkInTime'
+          });
+        }
+        
+        setNotificationSuccessMsg('🎉 تم تفعيل الإشعارات الذكية بنجاح! ستتلقى تنبيهات مرتبة بانتظام قبل الدوام والانصراف بـ 5 دقائق.');
+      } else if (permission === 'denied') {
+        setErrorMessage('تم حجب الإشعارات من قبل المتصفح. يرجى تفعيل الإشعارات من إعدادات المتصفح/الهاتف للاستفادة من الخدمة.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('حدث خطأ أثناء محاولة تفعيل الإشعارات.');
+    }
+  };
+
+  // Test Notification Trigger
+  const handleSendTestNotification = async () => {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      setErrorMessage('يرجى تفعيل الإشعارات أولاً لتتمكن من تجربة الإرسال.');
+      return;
+    }
+
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        reg.active?.postMessage({
+          type: 'TEST_NOTIFICATION',
+          employeeName: employee.name,
+          workStartTime: officeSettings.workStartTime || '08:30',
+          workEndTime: officeSettings.workEndTime || '16:30'
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('فشلت محاولة إرسال إشعار تجريبي.');
+    }
+  };
 
   // Handle Action button
   const handleAttendanceClick = () => {
@@ -653,6 +749,68 @@ export default function EmployeePanel({
                   <p className="text-sm font-bold text-[#E4E4E7] font-serif">تتطلب موافقة المدير</p>
                   <p className="text-[11px] text-[#8E8E93] mt-0.5">التحضير عن بعد يحتاج موافقة فورية من الإدارة لتأكيده</p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card: Smart Notification Reminders */}
+          <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute -top-10 -left-10 w-24 h-24 bg-[#D4AF37] opacity-5 blur-[50px] pointer-events-none"></div>
+            
+            <h3 className="text-base font-bold text-[#E4E4E7] mb-3 flex items-center gap-2 justify-start font-sans">
+              <Bell className="w-5 h-5 text-[#D4AF37]" />
+              <span>نظام التنبيهات الذكي للتحضير والانصراف</span>
+            </h3>
+
+            <p className="text-xs text-[#8E8E93] leading-relaxed mb-4 text-right">
+              حتى لا تنسى تسجيل حضورك أو انصرافك اليومي، يقوم النظام بإرسال إشعارات وتنبيهات مباشرة لهاتفك أو متصفحك قبل موعد بداية الدوام بـ 5 دقائق، وقبل نهاية الدوام بـ 5 دقائق.
+            </p>
+
+            <div className="space-y-3">
+              {/* Status Indicator */}
+              <div className="flex items-center justify-between bg-[#0A0A0B]/60 p-3 rounded-xl border border-[#27272A] text-right">
+                <span className="text-xs text-[#8E8E93] font-medium">حالة التنبيهات على هذا الجهاز:</span>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${
+                  notificationsEnabled 
+                    ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/40' 
+                    : 'bg-rose-950/40 text-rose-400 border border-rose-900/40'
+                }`}>
+                  {notificationsEnabled ? 'مفعّلة ونشطة ✓' : 'غير نشطة ✗'}
+                </span>
+              </div>
+
+              {/* Success / Info Alerts */}
+              {notificationSuccessMsg && (
+                <div className="bg-emerald-950/30 border border-emerald-900/40 text-emerald-400 text-xs p-3 rounded-lg text-right leading-relaxed animate-in fade-in duration-200">
+                  {notificationSuccessMsg}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleToggleNotifications}
+                  className={`flex-1 font-bold text-xs py-2.5 px-3 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                    notificationsEnabled 
+                      ? 'bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20' 
+                      : 'bg-[#D4AF37] hover:bg-[#B3922E] text-[#0A0A0B]'
+                  }`}
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  <span>{notificationsEnabled ? 'إيقاف التنبيهات' : 'تفعيل التنبيهات الذكية الآن'}</span>
+                </button>
+
+                {notificationsEnabled && (
+                  <button
+                    type="button"
+                    onClick={handleSendTestNotification}
+                    className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer flex items-center justify-center gap-1"
+                    title="اختبر وصول التنبيه بهاتفك"
+                  >
+                    <span>تجربة الإرسال 🧪</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
