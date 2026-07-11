@@ -1,3 +1,38 @@
+// Import Firebase scripts for FCM compatibility in Service Worker
+try {
+  importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+  importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+  // Initialize Firebase App in Service Worker
+  firebase.initializeApp({
+    apiKey: "AIzaSyA5rOQQ4-SzzHFggZzoBRwXR8gW8_Dwz10",
+    authDomain: "noted-yarrow-0x6pd.firebaseapp.com",
+    projectId: "noted-yarrow-0x6pd",
+    storageBucket: "noted-yarrow-0x6pd.firebasestorage.app",
+    messagingSenderId: "920988104854",
+    appId: "1:920988104854:web:c02b29069fe20821042ab7"
+  });
+
+  const messaging = firebase.messaging();
+
+  // Listen for background push notifications
+  messaging.onBackgroundMessage((payload) => {
+    console.log('[sw.js] Received background push message:', payload);
+    const notificationTitle = payload.notification?.title || payload.data?.title || 'تنبيه من checkInTime ⏰';
+    const notificationOptions = {
+      body: payload.notification?.body || payload.data?.body || 'تذكير جديد بخصوص نظام التحضير الذكي للحضور والانصراف.',
+      icon: '/icon.png',
+      badge: '/icon.png',
+      vibrate: [200, 100, 200],
+      data: { url: self.location.origin }
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
+} catch (err) {
+  console.error('Failed to initialize Firebase Messaging in Service Worker:', err);
+}
+
 const CACHE_NAME = 'checkintime-v1';
 const ASSETS = [
   '/',

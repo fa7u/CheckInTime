@@ -11,6 +11,7 @@ export interface Employee {
   status: 'active' | 'inactive';
   username?: string;
   password?: string;
+  fcmToken?: string;
 }
 
 export interface AttendanceRecord {

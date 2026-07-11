@@ -15,7 +15,7 @@ import { DEFAULT_OFFICE } from './mockData';
 
 import firebaseConfig from '../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 // Use custom firestoreDatabaseId if provided, else default
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || "ai-studio-099ab2a7-7e36-45c1-9989-fbb077471437");
