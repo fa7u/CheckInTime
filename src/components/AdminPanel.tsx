@@ -204,6 +204,46 @@ export default function AdminPanel({
   const [filterEmployeeId, setFilterEmployeeId] = useState('all');
   const [filterWorkModel, setFilterWorkModel] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [reportViewMode, setReportViewMode] = useState<'pivot' | 'list'>('pivot');
+
+  // Helper to determine if a date is Friday or Saturday (Arabic weekend)
+  const isWeekend = (dateStr: string): boolean => {
+    try {
+      const d = new Date(dateStr);
+      const day = d.getDay(); // 0 is Sunday, 5 is Friday, 6 is Saturday
+      return day === 5 || day === 6;
+    } catch {
+      return false;
+    }
+  };
+
+  // Helper to generate all dates between filterStartDate and filterEndDate
+  const getDatesInRange = (startStr: string, endStr: string): string[] => {
+    const dates: string[] = [];
+    try {
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return [];
+      }
+      // Safety limit to avoid performance issue on infinite loops or massive selections
+      const limitDate = new Date(start);
+      limitDate.setDate(limitDate.getDate() + 90);
+      const finalEnd = end > limitDate ? limitDate : end;
+
+      let current = new Date(start);
+      while (current <= finalEnd) {
+        const y = current.getFullYear();
+        const m = (current.getMonth() + 1).toString().padStart(2, '0');
+        const d = current.getDate().toString().padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
+        current.setDate(current.getDate() + 1);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return dates;
+  };
 
   // Editing attendance record modal state
   const [editingRecord, setEditingRecord] = useState<AttendanceRecord | null>(null);
@@ -706,6 +746,374 @@ export default function AdminPanel({
               window.print();
             }, 500);
           }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
+  const exportPivotToExcel = (dates: string[], title: string) => {
+    const targetEmployees = employees.filter(emp => {
+      if (filterEmployeeId !== 'all' && emp.id !== filterEmployeeId) return false;
+      return true;
+    });
+
+    const headers = [
+      'الموظف',
+      'الدور الوظيفي',
+      'البريد الإلكتروني / الحساب',
+      ...dates,
+      'إجمالي الأيام المنجزة',
+      'أيام الحضور (مكتب)',
+      'أيام الحضور (عن بعد)',
+      'أيام التأخير',
+      'أيام الغياب',
+      'إجمالي الساعات المنجزة'
+    ];
+
+    const rows = targetEmployees.map(emp => {
+      const empRecords = attendanceRecords.filter(r => r.employeeId === emp.id);
+      
+      let countOnSite = 0;
+      let countRemote = 0;
+      let countLate = 0;
+      let countAbsent = 0;
+      let totalHours = 0;
+
+      const dateStatuses = dates.map(dt => {
+        const rec = empRecords.find(r => r.date === dt);
+        if (!rec) {
+          return 'غير مسجل';
+        }
+        
+        if (rec.status === 'حاضر') {
+          if (rec.workModel === 'on-site') {
+            countOnSite++;
+            totalHours += rec.totalHours || 0;
+            return 'حاضر (مكتب)';
+          } else {
+            countRemote++;
+            totalHours += rec.totalHours || 0;
+            return 'حاضر (عن بعد)';
+          }
+        } else if (rec.status === 'متأخر') {
+          countLate++;
+          totalHours += rec.totalHours || 0;
+          return `متأخر (${rec.checkIn || ''})`;
+        } else if (rec.status === 'غياب') {
+          countAbsent++;
+          return 'غياب كلي';
+        }
+        return 'غير مسجل';
+      });
+
+      const totalActiveDays = countOnSite + countRemote + countLate;
+
+      return [
+        emp.name,
+        emp.role,
+        emp.username || '-',
+        ...dateStatuses,
+        `${totalActiveDays} يوم`,
+        `${countOnSite} يوم`,
+        `${countRemote} يوم`,
+        `${countLate} يوم`,
+        `${countAbsent} يوم`,
+        `${totalHours.toFixed(1)} ساعة`
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${title}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportPivotToPDF = (dates: string[], title: string, subtitle: string) => {
+    const targetEmployees = employees.filter(emp => {
+      if (filterEmployeeId !== 'all' && emp.id !== filterEmployeeId) return false;
+      return true;
+    });
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('الرجاء السماح بالنوافذ المنبثقة لتصدير التقرير بنجاح.');
+      return;
+    }
+
+    const datesHeadersHtml = dates.map(dt => {
+      const dayNum = dt.split('-')[2];
+      const isWk = isWeekend(dt);
+      return `<th style="text-align: center; font-size: 8px; padding: 4px; border: 1px solid #e5e7eb; min-width: 18px; ${isWk ? 'background-color: #f3f4f6;' : ''}">${dayNum}</th>`;
+    }).join('');
+
+    const rowsHtml = targetEmployees.map((emp, idx) => {
+      const empRecords = attendanceRecords.filter(r => r.employeeId === emp.id);
+      
+      let countOnSite = 0;
+      let countRemote = 0;
+      let countLate = 0;
+      let countAbsent = 0;
+      let totalHours = 0;
+
+      const cellsHtml = dates.map(dt => {
+        const rec = empRecords.find(r => r.date === dt);
+        const isWk = isWeekend(dt);
+        
+        let cellText = '-';
+        let cellStyle = 'color: #9ca3af;';
+        
+        if (rec) {
+          if (rec.status === 'حاضر') {
+            if (rec.workModel === 'on-site') {
+              countOnSite++;
+              totalHours += rec.totalHours || 0;
+              cellText = 'ح';
+              cellStyle = 'background-color: #d1fae5; color: #065f46; font-weight: bold;';
+            } else {
+              countRemote++;
+              totalHours += rec.totalHours || 0;
+              cellText = 'ع';
+              cellStyle = 'background-color: #ede9fe; color: #5b21b6; font-weight: bold;';
+            }
+          } else if (rec.status === 'متأخر') {
+            countLate++;
+            totalHours += rec.totalHours || 0;
+            cellText = 'ت';
+            cellStyle = 'background-color: #fef3c7; color: #92400e; font-weight: bold;';
+          } else if (rec.status === 'غياب') {
+            countAbsent++;
+            cellText = 'غ';
+            cellStyle = 'background-color: #fee2e2; color: #991b1b; font-weight: bold;';
+          }
+        } else if (isWk) {
+          cellText = 'عطلة';
+          cellStyle = 'background-color: #f3f4f6; color: #9ca3af; font-size: 7px;';
+        }
+
+        return `<td style="text-align: center; padding: 4px; font-size: 9px; border: 1px solid #e5e7eb; ${cellStyle}">${cellText}</td>`;
+      }).join('');
+
+      const totalActiveDays = countOnSite + countRemote + countLate;
+
+      return `
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 4px; font-weight: bold; text-align: center; border: 1px solid #e5e7eb; font-size: 9px;">${idx + 1}</td>
+          <td style="padding: 4px; text-align: right; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; white-space: nowrap;">${emp.name}</td>
+          <td style="padding: 4px; text-align: right; color: #4b5563; border: 1px solid #e5e7eb; font-size: 8px; white-space: nowrap;">${emp.role}</td>
+          ${cellsHtml}
+          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; background-color: #f9fafb;">${totalActiveDays}</td>
+          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #059669; background-color: #f9fafb;">${countOnSite}</td>
+          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #7c3aed; background-color: #f9fafb;">${countRemote}</td>
+          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #d97706; background-color: #f9fafb;">${countLate}</td>
+          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #dc2626; background-color: #f9fafb;">${countAbsent}</td>
+          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; background-color: #f9fafb;">${totalHours.toFixed(1)} س</td>
+        </tr>
+      `;
+    }).join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <title>${title}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+          @page {
+            size: A4 landscape;
+            margin: 8mm;
+          }
+          body {
+            font-family: 'Cairo', sans-serif;
+            color: #1f2937;
+            margin: 0;
+            padding: 5px;
+            background-color: #ffffff;
+            direction: rtl;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #D4AF37;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+          }
+          .logo-area {
+            text-align: right;
+          }
+          .company-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0;
+          }
+          .company-sub {
+            font-size: 9px;
+            color: #6b7280;
+            margin: 2px 0 0 0;
+          }
+          .report-meta {
+            text-align: left;
+          }
+          .report-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0;
+          }
+          .report-subtitle {
+            font-size: 10px;
+            color: #D4AF37;
+            font-weight: 600;
+            margin: 2px 0 0 0;
+          }
+          .meta-info {
+            font-size: 8px;
+            color: #4b5563;
+            margin-top: 4px;
+          }
+          .legend {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 8px;
+            font-weight: bold;
+            background-color: #f9fafb;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+          }
+          .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+          }
+          .legend-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            display: inline-block;
+            border: 1px solid rgba(0,0,0,0.1);
+          }
+          .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 9px;
+          }
+          .records-table th {
+            background-color: #111827;
+            color: #ffffff;
+            padding: 4px;
+            font-weight: bold;
+            text-align: right;
+            border: 1px solid #e5e7eb;
+            font-size: 9px;
+          }
+          .records-table th.center {
+            text-align: center;
+          }
+          .signatures-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            page-break-inside: avoid;
+          }
+          .signature-box {
+            width: 180px;
+            text-align: center;
+            border-top: 1px solid #d1d5db;
+            padding-top: 4px;
+            font-size: 9px;
+            color: #374151;
+          }
+          .signature-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo-area">
+            <h1 class="company-name">نظام checkInTime لضبط الحضور والانصراف</h1>
+            <p class="company-sub">جدول مصفوفة الحضور والانصراف الشهرية المجمعة</p>
+          </div>
+          <div class="report-meta">
+            <h2 class="report-title">${title}</h2>
+            <p class="report-subtitle">${subtitle}</p>
+            <div class="meta-info">
+              تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span>دليل الرموز:</span>
+          <div class="legend-item"><span class="legend-box" style="background-color: #d1fae5;"></span> <span>ح: حضور مكتب</span></div>
+          <div class="legend-item"><span class="legend-box" style="background-color: #ede9fe;"></span> <span>ع: حضور عن بعد</span></div>
+          <div class="legend-item"><span class="legend-box" style="background-color: #fef3c7;"></span> <span>ت: تأخير</span></div>
+          <div class="legend-item"><span class="legend-box" style="background-color: #fee2e2;"></span> <span>غ: غياب كلي</span></div>
+          <div class="legend-item"><span class="legend-box" style="background-color: #f3f4f6;"></span> <span>عطلة: نهاية الأسبوع</span></div>
+        </div>
+
+        <table class="records-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width: 25px; text-align: center; border: 1px solid #e5e7eb;">م</th>
+              <th rowspan="2" style="width: 100px; text-align: right; border: 1px solid #e5e7eb;">الموظف</th>
+              <th rowspan="2" style="width: 80px; text-align: right; border: 1px solid #e5e7eb;">الوظيفة</th>
+              <th colspan="${dates.length}" class="center" style="border: 1px solid #e5e7eb;">أيام الشهر</th>
+              <th colspan="6" class="center" style="border: 1px solid #e5e7eb; background-color: #1f2937;">ملخص الأداء بالفترة</th>
+            </tr>
+            <tr>
+              ${datesHeadersHtml}
+              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">التحضير</th>
+              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">مكتبي</th>
+              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">عن بعد</th>
+              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">تأخير</th>
+              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">غياب</th>
+              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 40px;">الساعات</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div class="signatures-section">
+          <div class="signature-box">
+            <div class="signature-title">مسؤول الموارد البشرية</div>
+            <div>التوقيع: ...................................</div>
+          </div>
+          <div class="signature-box">
+            <div class="signature-title">المدير العام للمنشأة</div>
+            <div>التوقيع: ...................................</div>
+          </div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
         </script>
       </body>
       </html>
@@ -2531,143 +2939,394 @@ export default function AdminPanel({
                 </div>
               </div>
 
-              {/* Download Buttons Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0F0F11]/40 border border-[#27272A]/40 p-3 rounded-xl text-right">
-                <span className="text-xs font-bold text-white">
-                  تم العثور على <span className="text-[#D4AF37] font-mono">{filteredRecords.length}</span> سجلاً للخيارات المحددة.
-                </span>
-
-                <div className="flex gap-2">
+              {/* Report View Toggle Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#161618] border border-[#27272A]/80 p-3 rounded-xl">
+                <div className="text-right space-y-0.5">
+                  <p className="text-xs font-extrabold text-[#D4AF37]">طريقة عرض التقرير النشطة</p>
+                  <p className="text-[10px] text-[#8E8E93]">اختر طريقة العرض الأنسب لمراجعة بيانات المنشأة وتصديرها</p>
+                </div>
+                
+                <div className="flex bg-[#0A0A0B] p-1 rounded-lg border border-[#27272A] self-start sm:self-center">
                   <button
                     type="button"
-                    onClick={() => {
-                      if (filteredRecords.length === 0) {
-                        alert('لا توجد سجلات لتصديرها للفترة المحددة.');
-                        return;
-                      }
-                      const title = `تقرير الحضور والانصراف المخصص للفترة من ${filterStartDate} إلى ${filterEndDate}`;
-                      exportToExcel(filteredRecords, title);
-                    }}
-                    className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2 px-3.5 rounded-lg border border-[#27272A] flex items-center gap-1.5 transition-all cursor-pointer"
+                    onClick={() => setReportViewMode('pivot')}
+                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      reportViewMode === 'pivot'
+                        ? 'bg-[#D4AF37] text-black font-extrabold shadow'
+                        : 'text-[#8E8E93] hover:text-white'
+                    }`}
                   >
-                    <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>تحميل كملف Excel مخصص</span>
+                    مصفوفة التحضير الذكية 📊 (موصى به)
                   </button>
-
                   <button
                     type="button"
-                    onClick={() => {
-                      if (filteredRecords.length === 0) {
-                        alert('لا توجد سجلات لتصديرها للفترة المحددة.');
-                        return;
-                      }
-                      const title = `تقرير الحضور والانصراف المخصص (لوحة التحكم الإدارية)`;
-                      const subtitle = `فلترة مخصصة للفترة من ${filterStartDate} إلى ${filterEndDate}`;
-                      exportToPDF(filteredRecords, title, subtitle);
-                    }}
-                    className="bg-rose-950/30 hover:bg-rose-950/50 text-rose-300 font-bold text-xs py-2 px-3.5 rounded-lg border border-rose-900/40 flex items-center gap-1.5 transition-all cursor-pointer"
+                    onClick={() => setReportViewMode('list')}
+                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      reportViewMode === 'list'
+                        ? 'bg-[#D4AF37] text-black font-extrabold shadow'
+                        : 'text-[#8E8E93] hover:text-white'
+                    }`}
                   >
-                    <FileText className="w-3.5 h-3.5 text-rose-400" />
-                    <span>تحميل تقرير PDF مخصص ملوّن</span>
+                    سجل السجلات التفصيلي (تعديل/حذف)
                   </button>
                 </div>
               </div>
 
-              {/* Records List Table with inline CRUD actions */}
-              <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#0F0F11]">
-                {filteredRecords.length === 0 ? (
-                  <div className="text-center py-12 text-[#8E8E93] text-sm">
-                    لا توجد سجلات حضور وانصراف مرصودة تطابق الفلاتر المحددة لهذه الفترة.
-                  </div>
-                ) : (
-                  <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
-                    <thead>
-                      <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
-                        <th className="px-4 py-3 text-right">الموظف</th>
-                        <th className="px-4 py-3 text-center">التاريخ</th>
-                        <th className="px-4 py-3 text-center">نموذج العمل</th>
-                        <th className="px-4 py-3 text-center">وقت الحضور</th>
-                        <th className="px-4 py-3 text-center">وقت الانصراف</th>
-                        <th className="px-4 py-3 text-center">ساعات العمل</th>
-                        <th className="px-4 py-3 text-center">الحالة</th>
-                        <th className="px-4 py-3 text-center">الإجراءات</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
-                      {filteredRecords.map((rec) => {
-                        const emp = employees.find(e => e.id === rec.employeeId);
-                        return (
-                          <tr key={rec.id} className="hover:bg-[#121214]/40 transition-colors">
-                            <td className="px-4 py-3 font-bold text-right">
-                              <div>
-                                <p>{rec.employeeName}</p>
-                                <p className="text-[10px] text-[#8E8E93] font-normal">{emp?.role || 'موظف'}</p>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-center font-mono text-[#E4E4E7]">{rec.date}</td>
-                            <td className="px-4 py-3 text-center">
-                              {rec.workModel === 'on-site' ? (
-                                <span className="bg-blue-950/20 text-blue-400 border border-blue-900/30 px-2 py-0.5 rounded-full text-[10px] font-bold">حضوري</span>
-                              ) : (
-                                <span className="bg-violet-950/20 text-violet-400 border border-violet-900/30 px-2 py-0.5 rounded-full text-[10px] font-bold">عن بعد</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-center font-mono text-emerald-400 font-semibold">{rec.checkIn || '-'}</td>
-                            <td className="px-4 py-3 text-center font-mono text-rose-400 font-semibold">{rec.checkOut || '-'}</td>
-                            <td className="px-4 py-3 text-center font-mono font-bold text-white">
-                              {rec.checkOut ? `${rec.totalHours} س` : 'قيد العمل...'}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {rec.status === 'حاضر' ? (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-900/30 font-bold">حاضر</span>
-                              ) : rec.status === 'متأخر' ? (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/30 font-bold">متأخر</span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/40 text-rose-400 border border-rose-900/30 font-bold">غياب</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex justify-center items-center gap-1.5">
-                                {/* Edit Button */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setEditingRecord(rec);
-                                    setEditRecDate(rec.date);
-                                    setEditRecCheckIn(rec.checkIn || '');
-                                    setEditRecCheckOut(rec.checkOut || '');
-                                    setEditRecStatus(rec.status);
-                                    setEditRecWorkModel(rec.workModel || 'on-site');
-                                    setEditRecError('');
-                                  }}
-                                  className="p-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
-                                  title="تعديل هذا السجل"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
+              {/* Dynamic Download Buttons Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0F0F11]/40 border border-[#27272A]/40 p-3 rounded-xl text-right">
+                <div className="space-y-0.5 text-right">
+                  <span className="text-xs font-bold text-white block">
+                    {reportViewMode === 'pivot' 
+                      ? `يعرض مصفوفة الحضور المحورية لـ ${employees.length} موظفاً عبر الأيام المحددة`
+                      : `تم العثور على ${filteredRecords.length} سجلاً حضور وانصراف تفصيلي`
+                    }
+                  </span>
+                  {reportViewMode === 'pivot' && (
+                    <span className="text-[10px] text-[#8E8E93] block">
+                      * اضغط أو حرك مؤشر الماوس على خلايا المصفوفة لعرض التفاصيل الزمنية الدقيقة لكل تحضير. يتم تظليل عطلات نهاية الأسبوع بالرمادي.
+                    </span>
+                  )}
+                </div>
 
-                                {/* Delete Button */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (confirm(`هل أنت متأكد من رغبتك في حذف سجل حضور الموظف "${rec.employeeName}" بتاريخ ${rec.date} بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.`)) {
-                                      onDeleteAttendance?.(rec.id);
-                                    }
-                                  }}
-                                  className="p-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:border-rose-400 transition-colors cursor-pointer"
-                                  title="حذف هذا السجل نهائياً"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (reportViewMode === 'pivot') {
+                        const dates = getDatesInRange(filterStartDate, filterEndDate);
+                        if (dates.length === 0) {
+                          alert('لا توجد تواريخ محددة للتصدير.');
+                          return;
+                        }
+                        const title = `مصفوفة الحضور المحورية للفترة من ${filterStartDate} إلى ${filterEndDate}`;
+                        exportPivotToExcel(dates, title);
+                      } else {
+                        if (filteredRecords.length === 0) {
+                          alert('لا توجد سجلات لتصديرها للفترة المحددة.');
+                          return;
+                        }
+                        const title = `سجل الحضور والانصراف التفصيلي من ${filterStartDate} إلى ${filterEndDate}`;
+                        exportToExcel(filteredRecords, title);
+                      }
+                    }}
+                    className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2 px-3.5 rounded-lg border border-[#27272A] flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>
+                      {reportViewMode === 'pivot'
+                        ? 'تصدير مصفوفة الحضور (Excel) 📊'
+                        : 'تصدير السجلات التفصيلية (Excel)'
+                      }
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (reportViewMode === 'pivot') {
+                        const dates = getDatesInRange(filterStartDate, filterEndDate);
+                        if (dates.length === 0) {
+                          alert('لا توجد تواريخ محددة للتصدير.');
+                          return;
+                        }
+                        const title = `مصفوفة الحضور المحورية المعتمدة`;
+                        const subtitle = `فلترة مخصصة للفترة من ${filterStartDate} إلى ${filterEndDate}`;
+                        exportPivotToPDF(dates, title, subtitle);
+                      } else {
+                        if (filteredRecords.length === 0) {
+                          alert('لا توجد سجلات لتصديرها للفترة المحددة.');
+                          return;
+                        }
+                        const title = `تقرير الحضور والانصراف التفصيلي الملون`;
+                        const subtitle = `فلترة مخصصة للفترة من ${filterStartDate} إلى ${filterEndDate}`;
+                        exportToPDF(filteredRecords, title, subtitle);
+                      }
+                    }}
+                    className="bg-rose-950/30 hover:bg-rose-950/50 text-rose-300 font-bold text-xs py-2 px-3.5 rounded-lg border border-rose-900/40 flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-rose-400" />
+                    <span>
+                      {reportViewMode === 'pivot'
+                        ? 'تحميل المصفوفة طباعة (PDF) 📄'
+                        : 'تحميل كشف التفاصيل طباعة (PDF)'
+                      }
+                    </span>
+                  </button>
+                </div>
               </div>
+
+              {/* Grid or List Render */}
+              {reportViewMode === 'pivot' ? (
+                <div className="space-y-4">
+                  {/* Legend guide */}
+                  <div className="flex flex-wrap items-center gap-3.5 bg-[#0F0F11]/60 border border-[#27272A]/50 p-3 rounded-xl text-right">
+                    <span className="text-[10px] font-bold text-[#8E8E93] ml-2">دليل رموز المصفوفة:</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
+                      <span className="w-4 h-4 rounded bg-emerald-950/50 border border-emerald-900 text-emerald-400 flex items-center justify-center text-[8px] font-bold">🏠</span>
+                      <span>مكتبي</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
+                      <span className="w-4 h-4 rounded bg-violet-950/50 border border-violet-900 text-violet-400 flex items-center justify-center text-[8px] font-bold">🌐</span>
+                      <span>عن بعد</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
+                      <span className="w-4 h-4 rounded bg-amber-950/50 border border-amber-900 text-amber-400 flex items-center justify-center text-[8px] font-bold">⏳</span>
+                      <span>تأخير</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
+                      <span className="w-4 h-4 rounded bg-rose-950/50 border border-rose-900 text-rose-400 flex items-center justify-center text-[8px] font-bold">❌</span>
+                      <span>غياب كلي</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#8E8E93]">
+                      <span className="w-4 h-4 rounded bg-[#161618] border border-[#27272A] flex items-center justify-center text-[8px] font-bold text-[#8E8E93]">-</span>
+                      <span>عطلة / لا سجل</span>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#0F0F11] scrollbar-thin scrollbar-thumb-zinc-800">
+                    {(() => {
+                      const pivotDates = getDatesInRange(filterStartDate, filterEndDate);
+                      const targetEmployees = employees.filter(emp => {
+                        if (filterEmployeeId !== 'all' && emp.id !== filterEmployeeId) return false;
+                        return true;
+                      });
+
+                      if (pivotDates.length === 0) {
+                        return (
+                          <div className="text-center py-12 text-[#8E8E93] text-sm">
+                            الرجاء اختيار تواريخ صحيحة لعرض مصفوفة الحضور.
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <table className="w-full text-right border-collapse text-xs whitespace-nowrap">
+                          <thead>
+                            <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
+                              <th className="px-3 py-2.5 text-right sticky right-0 bg-[#161618] z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.5)]">الموظف</th>
+                              <th className="px-3 py-2.5 text-right">الوظيفة</th>
+                              {pivotDates.map(dt => {
+                                const dayNum = dt.split('-')[2];
+                                const isWk = isWeekend(dt);
+                                // Get name of day in Arabic
+                                const dName = new Date(dt).toLocaleDateString('ar-EG', { weekday: 'narrow' });
+                                return (
+                                  <th key={dt} className={`px-2 py-2 text-center border-r border-[#27272A] min-w-[36px] ${isWk ? 'bg-zinc-900/40 text-[#8E8E93]' : ''}`}>
+                                    <div className="text-[9px] font-normal text-[#8E8E93]">{dName}</div>
+                                    <div className="text-[10px] font-bold text-white">{dayNum}</div>
+                                  </th>
+                                );
+                              })}
+                              {/* Summary columns */}
+                              <th className="px-3 py-2.5 text-center bg-zinc-900 border-r border-[#27272A] text-[#D4AF37]">التحضير</th>
+                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-emerald-400">مكتبي</th>
+                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-violet-400">عن بعد</th>
+                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-amber-400">تأخير</th>
+                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-rose-400">غياب</th>
+                              <th className="px-3 py-2.5 text-center bg-zinc-900 border-l border-[#27272A] text-white">الساعات</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                            {targetEmployees.map((emp) => {
+                              const empRecords = attendanceRecords.filter(r => r.employeeId === emp.id);
+                              
+                              let countOnSite = 0;
+                              let countRemote = 0;
+                              let countLate = 0;
+                              let countAbsent = 0;
+                              let totalHours = 0;
+
+                              return (
+                                <tr key={emp.id} className="hover:bg-[#121214]/40 transition-colors">
+                                  {/* Employee name sticky */}
+                                  <td className="px-3 py-2 font-bold sticky right-0 bg-[#0F0F11] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.5)] border-l border-[#27272A]/55">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`w-6 h-6 rounded-full ${emp.avatarColor || 'bg-slate-700'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
+                                        {emp.name.split(' ').map(n => n[0]).join('')}
+                                      </span>
+                                      <span className="text-white text-xs">{emp.name}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-3 py-2 text-[#8E8E93] text-[10px] font-medium border-l border-[#27272A]/55">{emp.role}</td>
+                                  
+                                  {pivotDates.map(dt => {
+                                    const rec = empRecords.find(r => r.date === dt);
+                                    const isWk = isWeekend(dt);
+                                    
+                                    if (rec) {
+                                      let bgClass = '';
+                                      let symbol = '';
+                                      let tooltip = '';
+
+                                      if (rec.status === 'حاضر') {
+                                        if (rec.workModel === 'on-site') {
+                                          countOnSite++;
+                                          totalHours += rec.totalHours || 0;
+                                          bgClass = 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/40';
+                                          symbol = '🏠';
+                                          tooltip = `مكتبي\nالحضور: ${rec.checkIn || '-'}\nالانصراف: ${rec.checkOut || '-'}\nالساعات: ${rec.checkOut ? rec.totalHours + ' س' : 'مفتوح'}`;
+                                        } else {
+                                          countRemote++;
+                                          totalHours += rec.totalHours || 0;
+                                          bgClass = 'bg-violet-950/30 text-violet-400 border border-violet-900/40';
+                                          symbol = '🌐';
+                                          tooltip = `عن بعد\nالحضور: ${rec.checkIn || '-'}\nالانصراف: ${rec.checkOut || '-'}\nالساعات: ${rec.checkOut ? rec.totalHours + ' س' : 'مفتوح'}`;
+                                        }
+                                      } else if (rec.status === 'متأخر') {
+                                        countLate++;
+                                        totalHours += rec.totalHours || 0;
+                                        bgClass = 'bg-amber-950/30 text-amber-400 border border-amber-900/40';
+                                        symbol = '⏳';
+                                        tooltip = `متأخر\nالحضور: ${rec.checkIn || '-'}\nالانصراف: ${rec.checkOut || '-'}\nالساعات: ${rec.checkOut ? rec.totalHours + ' س' : 'مفتوح'}`;
+                                      } else if (rec.status === 'غياب') {
+                                        countAbsent++;
+                                        bgClass = 'bg-rose-950/30 text-rose-400 border border-rose-900/40';
+                                        symbol = '❌';
+                                        tooltip = 'غياب كلي عن العمل';
+                                      }
+
+                                      return (
+                                        <td key={dt} className="p-1 border-r border-[#27272A]/50 text-center">
+                                          <div 
+                                            title={tooltip}
+                                            className={`inline-flex items-center justify-center w-6 h-6 rounded text-[9px] font-bold cursor-help transition-all hover:scale-115 ${bgClass}`}
+                                          >
+                                            {symbol}
+                                          </div>
+                                        </td>
+                                      );
+                                    }
+
+                                    // No record
+                                    return (
+                                      <td key={dt} className={`p-1 border-r border-[#27272A]/50 text-center ${isWk ? 'bg-zinc-950/50' : ''}`}>
+                                        <span 
+                                          title={isWk ? 'نهاية عطلة الأسبوع (الجمعة / السبت)' : 'لا يوجد سجل تحضير مرصود'}
+                                          className={`text-[10px] ${isWk ? 'text-zinc-600 font-bold' : 'text-zinc-700'}`}
+                                        >
+                                          {isWk ? 'ع' : '-'}
+                                        </span>
+                                      </td>
+                                    );
+                                  })}
+
+                                  {/* Summaries */}
+                                  <td className="px-3 py-2 text-center border-r border-[#27272A] font-extrabold text-[#D4AF37] bg-zinc-900/20 font-mono text-[11px]">
+                                    {countOnSite + countRemote + countLate} ي
+                                  </td>
+                                  <td className="px-2 py-2 text-center text-emerald-400 font-bold bg-emerald-950/10 font-mono text-[11px]">{countOnSite}</td>
+                                  <td className="px-2 py-2 text-center text-violet-400 font-bold bg-violet-950/10 font-mono text-[11px]">{countRemote}</td>
+                                  <td className="px-2 py-2 text-center text-amber-400 font-bold bg-amber-950/10 font-mono text-[11px]">{countLate}</td>
+                                  <td className="px-2 py-2 text-center text-rose-400 font-bold bg-rose-950/10 font-mono text-[11px]">{countAbsent}</td>
+                                  <td className="px-3 py-2 text-center font-bold border-l border-[#27272A] bg-zinc-900/20 text-white font-mono text-[11px]">
+                                    {totalHours.toFixed(1)} س
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      );
+                    })()}
+                  </div>
+                </div>
+              ) : (
+                /* List View Mode with Edit/Delete Actions */
+                <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#0F0F11]">
+                  {filteredRecords.length === 0 ? (
+                    <div className="text-center py-12 text-[#8E8E93] text-sm">
+                      لا توجد سجلات حضور وانصراف مرصودة تطابق الفلاتر المحددة لهذه الفترة.
+                    </div>
+                  ) : (
+                    <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
+                      <thead>
+                        <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
+                          <th className="px-4 py-3 text-right">الموظف</th>
+                          <th className="px-4 py-3 text-center">التاريخ</th>
+                          <th className="px-4 py-3 text-center">نموذج العمل</th>
+                          <th className="px-4 py-3 text-center">وقت الحضور</th>
+                          <th className="px-4 py-3 text-center">وقت الانصراف</th>
+                          <th className="px-4 py-3 text-center">ساعات العمل</th>
+                          <th className="px-4 py-3 text-center">الحالة</th>
+                          <th className="px-4 py-3 text-center">الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                        {filteredRecords.map((rec) => {
+                          const emp = employees.find(e => e.id === rec.employeeId);
+                          return (
+                            <tr key={rec.id} className="hover:bg-[#121214]/40 transition-colors">
+                              <td className="px-4 py-3 font-bold text-right">
+                                <div>
+                                  <p>{rec.employeeName}</p>
+                                  <p className="text-[10px] text-[#8E8E93] font-normal">{emp?.role || 'موظف'}</p>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-center font-mono text-[#E4E4E7]">{rec.date}</td>
+                              <td className="px-4 py-3 text-center">
+                                {rec.workModel === 'on-site' ? (
+                                  <span className="bg-blue-950/20 text-blue-400 border border-blue-900/30 px-2 py-0.5 rounded-full text-[10px] font-bold">حضوري</span>
+                                ) : (
+                                  <span className="bg-violet-950/20 text-violet-400 border border-violet-900/30 px-2 py-0.5 rounded-full text-[10px] font-bold">عن بعد</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-center font-mono text-emerald-400 font-semibold">{rec.checkIn || '-'}</td>
+                              <td className="px-4 py-3 text-center font-mono text-rose-400 font-semibold">{rec.checkOut || '-'}</td>
+                              <td className="px-4 py-3 text-center font-mono font-bold text-white">
+                                {rec.checkOut ? `${rec.totalHours} س` : 'قيد العمل...'}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                {rec.status === 'حاضر' ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-900/30 font-bold">حاضر</span>
+                                ) : rec.status === 'متأخر' ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/30 font-bold">متأخر</span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/40 text-rose-400 border border-rose-900/30 font-bold">غياب</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <div className="flex justify-center items-center gap-1.5">
+                                  {/* Edit Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingRecord(rec);
+                                      setEditRecDate(rec.date);
+                                      setEditRecCheckIn(rec.checkIn || '');
+                                      setEditRecCheckOut(rec.checkOut || '');
+                                      setEditRecStatus(rec.status);
+                                      setEditRecWorkModel(rec.workModel || 'on-site');
+                                      setEditRecError('');
+                                    }}
+                                    className="p-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
+                                    title="تعديل هذا السجل"
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  {/* Delete Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (confirm(`هل أنت متأكد من رغبتك في حذف سجل حضور الموظف "${rec.employeeName}" بتاريخ ${rec.date} بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+                                        onDeleteAttendance?.(rec.id);
+                                      }
+                                    }}
+                                    className="p-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:border-rose-400 transition-colors cursor-pointer"
+                                    title="حذف هذا السجل نهائياً"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* ========================================== */}
