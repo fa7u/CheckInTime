@@ -564,15 +564,48 @@ export default function App() {
   // 2c. Archive Today's Records
   const handleArchiveTodayRecords = () => {
     const todayStr = new Date().toISOString().split('T')[0];
+    
+    // Find employees who do not have any attendance record for today (neither active nor archived)
+    const todayRecords = attendanceRecords.filter(r => r.date === todayStr);
+    const absentRecordsToCreate: AttendanceRecord[] = [];
+    
+    employees.forEach(emp => {
+      const hasRecord = todayRecords.some(r => r.employeeId === emp.id);
+      if (!hasRecord) {
+        const newAbsentRecord: AttendanceRecord = {
+          id: `att-${Date.now()}-${emp.id}`,
+          employeeId: emp.id,
+          employeeName: emp.name,
+          date: todayStr,
+          status: 'غياب',
+          checkIn: '',
+          checkOut: '',
+          totalHours: 0,
+          workModel: emp.workModel || 'on-site',
+          isApproved: true,
+          archived: true
+        };
+        absentRecordsToCreate.push(newAbsentRecord);
+      }
+    });
+
+    // Archive all existing unarchived records for today
     const updated = attendanceRecords.map(r => {
-      if (r.date === todayStr) {
+      if (r.date === todayStr && !r.archived) {
         const archivedRec = { ...r, archived: true };
         saveAttendanceToFirebase(activeTenantId, archivedRec);
         return archivedRec;
       }
       return r;
     });
-    saveState(undefined, updated);
+
+    // Save the new automated absent records to Firebase
+    absentRecordsToCreate.forEach(rec => {
+      saveAttendanceToFirebase(activeTenantId, rec);
+    });
+
+    const finalRecords = [...updated, ...absentRecordsToCreate];
+    saveState(undefined, finalRecords);
   };
 
   // 3. Remote Check In Request
