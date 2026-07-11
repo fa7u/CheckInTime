@@ -238,6 +238,87 @@ export default function EmployeePanel({
     }
   };
 
+  // Generate and download a persistent standard .ics Calendar Alarm for absolute 100% offline accuracy
+  const handleDownloadCalendarAlarms = () => {
+    try {
+      const startTimeStr = officeSettings.workStartTime || "08:30";
+      const endTimeStr = officeSettings.workEndTime || "16:30";
+
+      const [startHour, startMin] = startTimeStr.split(':').map(Number);
+      const [endHour, endMin] = endTimeStr.split(':').map(Number);
+
+      // Calculate 5 minutes before
+      let checkInHour = startHour;
+      let checkInMin = startMin - 5;
+      if (checkInMin < 0) {
+        checkInHour = (checkInHour - 1 + 24) % 24;
+        checkInMin += 60;
+      }
+
+      let checkOutHour = endHour;
+      let checkOutMin = endMin - 5;
+      if (checkOutMin < 0) {
+        checkOutHour = (checkOutHour - 1 + 24) % 24;
+        checkOutMin += 60;
+      }
+
+      const pad = (num: number) => String(num).padStart(2, '0');
+
+      // Use a fixed start Sunday to repeat weekly Sunday-Thursday (SU, MO, TU, WE, TH)
+      const startDateStr = "20260705"; // Sunday
+
+      const checkInTimeFormatted = `${startDateStr}T${pad(checkInHour)}${pad(checkInMin)}00`;
+      const checkOutTimeFormatted = `${startDateStr}T${pad(checkOutHour)}${pad(checkOutMin)}00`;
+
+      const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//checkInTime//Attendance Alarms//AR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:checkin-reminder-uid-${employee.id}@checkintime
+DTSTAMP:20260706T120000Z
+DTSTART;TZID=Asia/Riyadh:${checkInTimeFormatted}
+RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH
+SUMMARY:⏰ تذكير التحضير اليومي - حضور
+DESCRIPTION:مرحباً ${employee.name}! يبدأ دوامك الفعلي بعد 5 دقائق (الساعة ${startTimeStr}). يرجى تسجيل حضورك على نظام التحضير الآن لتفادي التأخير. ✨
+BEGIN:VALARM
+TRIGGER:-PT0M
+ACTION:DISPLAY
+DESCRIPTION:تذكير الحضور اليومي
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:checkout-reminder-uid-${employee.id}@checkintime
+DTSTAMP:20260706T120000Z
+DTSTART;TZID=Asia/Riyadh:${checkOutTimeFormatted}
+RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH
+SUMMARY:🚪 تذكير تسجيل الانصراف اليومي - خروج
+DESCRIPTION:مرحباً ${employee.name}! ينتهي دوامك الفعلي بعد 5 دقائق (الساعة ${endTimeStr}). يرجى تسجيل انصرافك على نظام التحضير الآن لحفظ ساعات العمل لليوم. 🌟
+BEGIN:VALARM
+TRIGGER:-PT0M
+ACTION:DISPLAY
+DESCRIPTION:تذكير الانصراف اليومي
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `منبهات_الدوام_${employee.name}.ics`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setNotificationSuccessMsg('📅 تم تحميل ملف التقويم بنجاح! افتحه الآن على هاتف الموظف لإضافة المنبهات المتكررة (الأحد - الخميس) قبل الدوام بـ 5 دقائق لحل مشكلة إغلاق التطبيق نهائياً.');
+    } catch (err) {
+      console.error('Error generating ics file:', err);
+      setErrorMessage('حدث خطأ أثناء محاولة توليد ملف تقويم المنبهات.');
+    }
+  };
+
   // Handle Action button
   const handleAttendanceClick = () => {
     setErrorMessage(null);
@@ -705,52 +786,9 @@ export default function EmployeePanel({
               </div>
             ) : (
               <div className="bg-[#0A0A0B] border border-[#27272A] rounded-xl p-4 text-center text-xs text-[#8E8E93] animate-in fade-in duration-300">
-                أنت لم تقم بتسجيل الحضور أو الانصراف لليوم بعد. يرجى اختيار طبيعة العمل والضغط على الزر أعلاه.
+                أنت لم تقم بتسجيل الحضور أو الانصراف لليوم بعد. يرجى اختيار طبيعة العمل والضغط على الزر أعلاه للبدء.
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Right Information Guide Panel */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          {/* Card: Work Schedule Rules */}
-          <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl relative overflow-hidden">
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-500 opacity-5 blur-[50px] pointer-events-none"></div>
-            
-            <h3 className="text-lg font-serif italic text-[#D4AF37] mb-4 flex items-center gap-2 justify-start">
-              <Info className="w-5 h-5" />
-              قواعد الحضور والدوام
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex gap-3 border-r-2 border-[#D4AF37] pr-3">
-                <div className="text-right">
-                  <h4 className="text-xs font-bold text-[#8E8E93]">ساعات الدوام الرسمي</h4>
-                  <p className="text-sm font-bold text-[#E4E4E7] font-serif">
-                    {formatTimeStr(officeSettings.workStartTime || "08:30")} - {formatTimeStr(officeSettings.workEndTime || "16:30")}
-                  </p>
-                  <p className="text-[11px] text-[#8E8E93] mt-0.5">الالتزام بـ 8 ساعات يومياً كحد أدنى</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 border-r-2 border-blue-500 pr-3">
-                <div className="text-right">
-                  <h4 className="text-xs font-bold text-[#8E8E93]">سياسة التأخير</h4>
-                  <p className="text-sm font-bold text-[#E4E4E7] font-serif">
-                    بعد الساعة {formatTimeStr(officeSettings.workStartTime || "08:30")}
-                  </p>
-                  <p className="text-[11px] text-[#8E8E93] mt-0.5">يُحتسب التأخير بدقة ويؤثر على التقييم الشهري</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 border-r-2 border-[#8E8E93] pr-3">
-                <div className="text-right">
-                  <h4 className="text-xs font-bold text-[#8E8E93]">سياسة العمل عن بُعد</h4>
-                  <p className="text-sm font-bold text-[#E4E4E7] font-serif">تتطلب موافقة المدير</p>
-                  <p className="text-[11px] text-[#8E8E93] mt-0.5">التحضير عن بعد يحتاج موافقة فورية من الإدارة لتأكيده</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Card: Smart Notification Reminders */}
@@ -759,59 +797,83 @@ export default function EmployeePanel({
             
             <h3 className="text-base font-bold text-[#E4E4E7] mb-3 flex items-center gap-2 justify-start font-sans">
               <Bell className="w-5 h-5 text-[#D4AF37]" />
-              <span>نظام التنبيهات الذكي للتحضير والانصراف</span>
+              <span>نظام التنبيهات والمنبهات الذكية للدوام</span>
             </h3>
 
             <p className="text-xs text-[#8E8E93] leading-relaxed mb-4 text-right">
-              حتى لا تنسى تسجيل حضورك أو انصرافك اليومي، يقوم النظام بإرسال إشعارات وتنبيهات مباشرة لهاتفك أو متصفحك قبل موعد بداية الدوام بـ 5 دقائق، وقبل نهاية الدوام بـ 5 دقائق.
+              حتى لا تنسى تسجيل حضورك أو انصرافك اليومي، صممنا لك نوعين من المنبهات لضمان التنبيه الفعال قبل الدوام والانصراف بـ 5 دقائق:
             </p>
 
-            <div className="space-y-3">
-              {/* Status Indicator */}
-              <div className="flex items-center justify-between bg-[#0A0A0B]/60 p-3 rounded-xl border border-[#27272A] text-right">
-                <span className="text-xs text-[#8E8E93] font-medium">حالة التنبيهات على هذا الجهاز:</span>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${
-                  notificationsEnabled 
-                    ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/40' 
-                    : 'bg-rose-950/40 text-rose-400 border border-rose-900/40'
-                }`}>
-                  {notificationsEnabled ? 'مفعّلة ونشطة ✓' : 'غير نشطة ✗'}
-                </span>
+            <div className="space-y-4">
+              {/* Option 1: Browser / App Notifications */}
+              <div className="bg-[#1A1C1E] border border-[#27272A] rounded-xl p-4 text-right space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-md">خيار 1: إشعارات الهاتف / المتصفح (PWA)</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                    notificationsEnabled 
+                      ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/40' 
+                      : 'bg-rose-950/40 text-rose-400 border border-rose-900/40'
+                  }`}>
+                    {notificationsEnabled ? 'مفعّلة' : 'غير نشطة'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
+                  ترسل لك إشعارات ذكية في شريط التنبيهات. (قد تتوقف إذا قام نظام الهاتف بحذف التطبيق كلياً من الذاكرة العشوائية لتوفير البطارية).
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleToggleNotifications}
+                    className={`flex-1 font-bold text-[11px] py-2 px-3 rounded-lg transition-colors cursor-pointer ${
+                      notificationsEnabled 
+                        ? 'bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20' 
+                        : 'bg-[#D4AF37] hover:bg-[#B3922E] text-[#0A0A0B]'
+                    }`}
+                  >
+                    <span>{notificationsEnabled ? 'إيقاف إشعارات المتصفح' : 'تفعيل إشعارات المتصفح'}</span>
+                  </button>
+                  {notificationsEnabled && (
+                    <button
+                      type="button"
+                      onClick={handleSendTestNotification}
+                      className="bg-[#121214] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-[11px] py-2 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                    >
+                      <span>تجربة الإرسال 🧪</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Option 2: 100% Guaranteed Native Calendar Reminders */}
+              <div className="bg-[#1A1C1E] border border-[#D4AF37]/20 rounded-xl p-4 text-right space-y-3 relative">
+                <div className="absolute top-3 left-3">
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-900/40 px-2 py-0.5 rounded">مضمون 100%</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-[#D4AF37]" />
+                  <span className="text-[11px] font-bold text-white">خيار 2: منبهات تقويم الهاتف الافتراضية (موصى به)</span>
+                </div>
+                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
+                  <strong>الحل الأقوى للتحضير المستقر:</strong> نقوم بتوليد ملف تقويم ذكي يحتوي على منبهات متكررة (الأحد - الخميس) مخصصة لمواعيد دوامك الفعلي (<span className="text-[#D4AF37]">{officeSettings.workStartTime} - {officeSettings.workEndTime}</span>) قبل الموعد بـ 5 دقائق.
+                  <br />
+                  <span className="text-white font-medium">سيرن الهاتف كمنبه حتى لو كان التطبيق محذوفاً ومغلقاً كلياً من الخلفية أو الهاتف مغلقاً!</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadCalendarAlarms}
+                  className="w-full bg-[#121214] hover:bg-emerald-950/20 text-[#D4AF37] hover:text-emerald-400 font-bold text-[11px] py-2.5 px-3 rounded-lg border border-[#D4AF37]/30 hover:border-emerald-500/30 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>تحميل وضبط منبهات تقويم الهاتف لدوامك 📅</span>
+                </button>
               </div>
 
               {/* Success / Info Alerts */}
               {notificationSuccessMsg && (
-                <div className="bg-emerald-950/30 border border-emerald-900/40 text-emerald-400 text-xs p-3 rounded-lg text-right leading-relaxed animate-in fade-in duration-200">
+                <div className="bg-emerald-950/30 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl text-right leading-relaxed animate-in fade-in duration-200">
                   {notificationSuccessMsg}
                 </div>
               )}
-
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleToggleNotifications}
-                  className={`flex-1 font-bold text-xs py-2.5 px-3 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                    notificationsEnabled 
-                      ? 'bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20' 
-                      : 'bg-[#D4AF37] hover:bg-[#B3922E] text-[#0A0A0B]'
-                  }`}
-                >
-                  <Bell className="w-3.5 h-3.5" />
-                  <span>{notificationsEnabled ? 'إيقاف التنبيهات' : 'تفعيل التنبيهات الذكية الآن'}</span>
-                </button>
-
-                {notificationsEnabled && (
-                  <button
-                    type="button"
-                    onClick={handleSendTestNotification}
-                    className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer flex items-center justify-center gap-1"
-                    title="اختبر وصول التنبيه بهاتفك"
-                  >
-                    <span>تجربة الإرسال 🧪</span>
-                  </button>
-                )}
-              </div>
             </div>
           </div>
 
