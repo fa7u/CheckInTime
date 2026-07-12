@@ -967,6 +967,77 @@ END:VCALENDAR`;
                 </button>
               </div>
 
+              {/* Option 3: FCM Cloud Push Notifications */}
+              <div className="bg-[#1A1C1E] border border-blue-900/30 rounded-xl p-4 text-right space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded-md">خيار 3: دفع الإشعارات السحابي (FCM)</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                    fcmToken 
+                      ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/40' 
+                      : 'bg-amber-950/40 text-amber-400 border border-amber-900/40'
+                  }`}>
+                    {fcmToken ? 'نشط ومتصل ✓' : 'غير متصل ✗'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
+                  <strong>إشعارات دفع سحابية (FCM) فورية:</strong> نستخدم تقنيات الـ Push Notifications السحابية من Google لتوصيل تنبيهات الدوام الحقيقية وموافقة طلبات الإدارة مباشرة لجهازك، لتصلك حتى عندما يكون التطبيق مغلقاً تماماً أو غير نشط في الخلفية.
+                </p>
+                
+                {fcmToken && (
+                  <div className="bg-[#0A0A0B] p-2.5 rounded-lg border border-[#27272A] space-y-1 text-right">
+                    <div className="flex items-center justify-between text-[10px] mb-1">
+                      <span className="text-emerald-400 font-bold">رمز جهازك السحابي (FCM Token):</span>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(fcmToken);
+                          alert('تم نسخ الرمز السحابي بنجاح!');
+                        }}
+                        className="text-[#D4AF37] hover:underline cursor-pointer"
+                      >
+                        نسخ الرمز 📋
+                      </button>
+                    </div>
+                    <p className="font-mono text-[9px] text-[#8E8E93] break-all select-all text-left max-h-12 overflow-y-auto bg-[#121214] p-1.5 rounded border border-[#27272A]">
+                      {fcmToken}
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-[#8E8E93] block mb-1">مفتاح VAPID العام (Web Push Key) - اختياري للتخصيص:</label>
+                    <input
+                      type="text"
+                      value={vapidKeyInput}
+                      onChange={(e) => setVapidKeyInput(e.target.value)}
+                      placeholder="أدخل مفتاح VAPID من كونسول Firebase..."
+                      className="w-full bg-[#0A0A0B] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white font-mono placeholder-[#52525B] focus:outline-none focus:border-blue-500 text-left"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSubscribeFCM}
+                      disabled={isFCMSubscribing}
+                      className="flex-1 font-bold text-[11px] py-2 px-3 rounded-lg transition-colors cursor-pointer bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 disabled:opacity-50"
+                    >
+                      <span>{isFCMSubscribing ? 'جاري الاتصال بالسحابة...' : fcmToken ? 'تحديث الاتصال السحابي 🔄' : 'تفعيل استقبال الإشعارات السحابية ⚡'}</span>
+                    </button>
+                    {fcmToken && (
+                      <button
+                        type="button"
+                        onClick={handleDeleteFCMToken}
+                        className="bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20 font-bold text-[11px] py-2 px-3 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <span>إلغاء ✗</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Success / Info Alerts */}
               {notificationSuccessMsg && (
                 <div className="bg-emerald-950/30 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl text-right leading-relaxed animate-in fade-in duration-200">
