@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Shield, Laptop, Landmark, ClipboardList, 
   MapPin, Clock, LogOut, CheckCircle, HelpCircle,
@@ -90,6 +90,9 @@ export default function App() {
   // Admin Side Drawer Menu visibility
   const [isAdminDrawerOpen, setIsAdminDrawerOpen] = useState(false);
   const [isAdminPasswordVisible, setIsAdminPasswordVisible] = useState(false);
+
+  // Background Auto-Archiving tracking ref to avoid race conditions
+  const autoArchivingInProgressRef = useRef(false);
 
   // Load Tenants & Active Tenant configuration on mount
   useEffect(() => {
@@ -364,6 +367,7 @@ export default function App() {
           totalHours: data.totalHours,
           isApproved: data.isApproved,
           approvedAt: data.approvedAt,
+          archived: data.archived,
         } as AttendanceRecord;
       });
       // Sort descending by date / time safely
@@ -441,6 +445,74 @@ export default function App() {
       unsubscribeOff();
     };
   }, [activeTenantId, isLoaded]);
+
+  // Hook for Automatically Archiving Past Unarchived Days & Registering Absences
+  useEffect(() => {
+    if (!isInitialDataLoaded || employees.length === 0 || attendanceRecords.length === 0) return;
+    if (autoArchivingInProgressRef.current) return;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Find any unarchived records belonging to dates strictly before today
+    const unarchivedPastRecords = attendanceRecords.filter(r => r.date < todayStr && !r.archived);
+    if (unarchivedPastRecords.length === 0) return;
+
+    // To prevent infinite execution or simultaneous writes conflicts:
+    autoArchivingInProgressRef.current = true;
+
+    // Identify unique past dates that have unarchived records
+    const uniquePastDates = Array.from(new Set(unarchivedPastRecords.map(r => r.date))) as string[];
+
+    let updatedRecords = [...attendanceRecords];
+    const absentRecordsToCreate: AttendanceRecord[] = [];
+
+    uniquePastDates.forEach(pastDate => {
+      // Find all records (archived or unarchived) already present for this specific past date
+      const pastRecords = updatedRecords.filter(r => r.date === pastDate);
+
+      // Create automated "غياب" records for employees who missed recording attendance on that day
+      employees.forEach(emp => {
+        const hasRecord = pastRecords.some(r => r.employeeId === emp.id);
+        if (!hasRecord) {
+          const newAbsentRecord: AttendanceRecord = {
+            id: `att-autoabs-${Date.now()}-${pastDate}-${emp.id}`,
+            employeeId: emp.id,
+            employeeName: emp.name,
+            date: pastDate,
+            status: 'غياب',
+            checkIn: '',
+            checkOut: '',
+            totalHours: 0,
+            workModel: emp.workModel || 'on-site',
+            isApproved: true,
+            archived: true
+          };
+          absentRecordsToCreate.push(newAbsentRecord);
+          saveAttendanceToFirebase(activeTenantId, newAbsentRecord);
+        }
+      });
+
+      // Archive any unarchived records for this past date
+      updatedRecords = updatedRecords.map(r => {
+        if (r.date === pastDate && !r.archived) {
+          const archivedRec = { ...r, archived: true };
+          saveAttendanceToFirebase(activeTenantId, archivedRec);
+          return archivedRec;
+        }
+        return r;
+      });
+    });
+
+    const finalRecords = [...updatedRecords, ...absentRecordsToCreate];
+    saveState(undefined, finalRecords);
+
+    // Reset lock after a brief delay so subsequent onSnapshot updates can be parsed if needed
+    setTimeout(() => {
+      autoArchivingInProgressRef.current = false;
+    }, 2000);
+
+    console.log(`[Auto-Archive] Archived previous unarchived days and created absent records for: ${uniquePastDates.join(', ')}`);
+  }, [isInitialDataLoaded, employees, attendanceRecords, activeTenantId]);
 
   // Sync state helper to write to localStorage for the active tenant
   const saveState = (
