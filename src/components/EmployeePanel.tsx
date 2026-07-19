@@ -82,6 +82,20 @@ export default function EmployeePanel({
   });
   const [notificationSuccessMsg, setNotificationSuccessMsg] = useState<string | null>(null);
 
+  // Customizable Calendar/Alarms settings
+  const [customStartTime, setCustomStartTime] = useState<string>(officeSettings.workStartTime || "08:30");
+  const [customEndTime, setCustomEndTime] = useState<string>(officeSettings.workEndTime || "16:30");
+  const [alarmOffsetMinutes, setAlarmOffsetMinutes] = useState<number>(5);
+
+  useEffect(() => {
+    if (officeSettings.workStartTime) {
+      setCustomStartTime(officeSettings.workStartTime);
+    }
+    if (officeSettings.workEndTime) {
+      setCustomEndTime(officeSettings.workEndTime);
+    }
+  }, [officeSettings.workStartTime, officeSettings.workEndTime]);
+
   // Sync notification configurations automatically with the service worker
   useEffect(() => {
     if (notificationsEnabled && 'serviceWorker' in navigator) {
@@ -241,23 +255,23 @@ export default function EmployeePanel({
   // Generate and download a persistent standard .ics Calendar Alarm for absolute 100% offline accuracy
   const handleDownloadCalendarAlarms = () => {
     try {
-      const startTimeStr = officeSettings.workStartTime || "08:30";
-      const endTimeStr = officeSettings.workEndTime || "16:30";
+      const startTimeStr = customStartTime;
+      const endTimeStr = customEndTime;
 
       const [startHour, startMin] = startTimeStr.split(':').map(Number);
       const [endHour, endMin] = endTimeStr.split(':').map(Number);
 
-      // Calculate 5 minutes before
+      // Calculate minutes before based on selected offset
       let checkInHour = startHour;
-      let checkInMin = startMin - 5;
-      if (checkInMin < 0) {
+      let checkInMin = startMin - alarmOffsetMinutes;
+      while (checkInMin < 0) {
         checkInHour = (checkInHour - 1 + 24) % 24;
         checkInMin += 60;
       }
 
       let checkOutHour = endHour;
-      let checkOutMin = endMin - 5;
-      if (checkOutMin < 0) {
+      let checkOutMin = endMin - alarmOffsetMinutes;
+      while (checkOutMin < 0) {
         checkOutHour = (checkOutHour - 1 + 24) % 24;
         checkOutMin += 60;
       }
@@ -281,7 +295,7 @@ DTSTAMP:20260706T120000Z
 DTSTART;TZID=Asia/Riyadh:${checkInTimeFormatted}
 RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH
 SUMMARY:⏰ تذكير التحضير اليومي - حضور
-DESCRIPTION:مرحباً ${employee.name}! يبدأ دوامك الفعلي بعد 5 دقائق (الساعة ${startTimeStr}). يرجى تسجيل حضورك على نظام التحضير الآن لتفادي التأخير. ✨
+DESCRIPTION:مرحباً ${employee.name}! يبدأ دوامك بعد ${alarmOffsetMinutes} دقائق (الساعة ${startTimeStr}). يرجى تسجيل حضورك على نظام التحضير الآن لتفادي التأخير. ✨
 BEGIN:VALARM
 TRIGGER:-PT0M
 ACTION:DISPLAY
@@ -294,7 +308,7 @@ DTSTAMP:20260706T120000Z
 DTSTART;TZID=Asia/Riyadh:${checkOutTimeFormatted}
 RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH
 SUMMARY:🚪 تذكير تسجيل الانصراف اليومي - خروج
-DESCRIPTION:مرحباً ${employee.name}! ينتهي دوامك الفعلي بعد 5 دقائق (الساعة ${endTimeStr}). يرجى تسجيل انصرافك على نظام التحضير الآن لحفظ ساعات العمل لليوم. 🌟
+DESCRIPTION:مرحباً ${employee.name}! ينتهي دوامك بعد ${alarmOffsetMinutes} دقائق (الساعة ${endTimeStr}). يرجى تسجيل انصرافك على نظام التحضير الآن لحفظ ساعات العمل لليوم. 🌟
 BEGIN:VALARM
 TRIGGER:-PT0M
 ACTION:DISPLAY
@@ -312,7 +326,7 @@ END:VCALENDAR`;
       link.click();
       document.body.removeChild(link);
       
-      setNotificationSuccessMsg('📅 تم تحميل ملف التقويم بنجاح! افتحه الآن على هاتف الموظف لإضافة المنبهات المتكررة (الأحد - الخميس) قبل الدوام بـ 5 دقائق لحل مشكلة إغلاق التطبيق نهائياً.');
+      setNotificationSuccessMsg(`📅 تم تحميل ملف التقويم بنجاح! تم ضبط المنبهات لتوقيت الدوام المخصص الجديد (${startTimeStr} - ${endTimeStr}) مع التنبيه قبلها بـ ${alarmOffsetMinutes} دقائق. افتح الملف الآن على جهاز الموظف لتطبيقها.`);
     } catch (err) {
       console.error('Error generating ics file:', err);
       setErrorMessage('حدث خطأ أثناء محاولة توليد ملف تقويم المنبهات.');
@@ -845,7 +859,7 @@ END:VCALENDAR`;
               </div>
 
               {/* Option 2: 100% Guaranteed Native Calendar Reminders */}
-              <div className="bg-[#1A1C1E] border border-[#D4AF37]/20 rounded-xl p-4 text-right space-y-3 relative">
+              <div className="bg-[#1A1C1E] border border-[#D4AF37]/20 rounded-xl p-4 text-right space-y-3 relative animate-in fade-in duration-200">
                 <div className="absolute top-3 left-3">
                   <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-900/40 px-2 py-0.5 rounded">مضمون 100%</span>
                 </div>
@@ -853,18 +867,64 @@ END:VCALENDAR`;
                   <Calendar className="w-4 h-4 text-[#D4AF37]" />
                   <span className="text-[11px] font-bold text-white">خيار 2: منبهات تقويم الهاتف الافتراضية (موصى به)</span>
                 </div>
+                
                 <p className="text-[11px] text-[#8E8E93] leading-relaxed">
-                  <strong>الحل الأقوى للتحضير المستقر:</strong> نقوم بتوليد ملف تقويم ذكي يحتوي على منبهات متكررة (الأحد - الخميس) مخصصة لمواعيد دوامك الفعلي (<span className="text-[#D4AF37]">{officeSettings.workStartTime} - {officeSettings.workEndTime}</span>) قبل الموعد بـ 5 دقائق.
-                  <br />
+                  <strong>تخصيص مواقيت التقويم والمنبهات:</strong> إذا اختلف وقت دوامك الفعلي، يمكنك تعديله بالأسفل فوراً وتحديد وقت رنين المنبه المناسب لك قبل تحميل ملف التقويم الجديد.
+                </p>
+
+                {/* Customizable inputs */}
+                <div className="bg-[#0A0A0B] p-3 rounded-lg border border-[#27272A]/80 space-y-3 text-right">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] text-[#8E8E93] block mb-1">⏰ بداية الدوام:</label>
+                      <input
+                        type="time"
+                        value={customStartTime}
+                        onChange={(e) => setCustomStartTime(e.target.value)}
+                        className="w-full bg-[#121214] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white font-mono focus:outline-none focus:border-[#D4AF37] text-center"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-[#8E8E93] block mb-1">🚪 نهاية الدوام:</label>
+                      <input
+                        type="time"
+                        value={customEndTime}
+                        onChange={(e) => setCustomEndTime(e.target.value)}
+                        className="w-full bg-[#121214] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white font-mono focus:outline-none focus:border-[#D4AF37] text-center"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-[#8E8E93] block mb-1">🔔 تنبيه رنين المنبه قبل الدوام بـ:</label>
+                    <select
+                      value={alarmOffsetMinutes}
+                      onChange={(e) => setAlarmOffsetMinutes(Number(e.target.value))}
+                      className="w-full bg-[#121214] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white focus:outline-none focus:border-[#D4AF37] text-right"
+                    >
+                      <option value="0">في نفس موعد الدوام تماماً (0 دقيقة)</option>
+                      <option value="5">قبل الموعد بـ 5 دقائق</option>
+                      <option value="10">قبل الموعد بـ 10 دقائق</option>
+                      <option value="15">قبل الموعد بـ 15 دقيقة</option>
+                      <option value="20">قبل الموعد بـ 20 دقيقة</option>
+                      <option value="30">قبل الموعد بـ 30 دقيقة</option>
+                      <option value="45">قبل الموعد بـ 45 دقيقة</option>
+                      <option value="60">قبل الموعد بساعة كاملة (60 دقيقة)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
                   <span className="text-white font-medium">سيرن الهاتف كمنبه حتى لو كان التطبيق محذوفاً ومغلقاً كلياً من الخلفية أو الهاتف مغلقاً!</span>
                 </p>
+
                 <button
                   type="button"
                   onClick={handleDownloadCalendarAlarms}
                   className="w-full bg-[#121214] hover:bg-emerald-950/20 text-[#D4AF37] hover:text-emerald-400 font-bold text-[11px] py-2.5 px-3 rounded-lg border border-[#D4AF37]/30 hover:border-emerald-500/30 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>تحميل وضبط منبهات تقويم الهاتف لدوامك 📅</span>
+                  <span>تحميل ملف تقويم المنبهات المخصصة 📅</span>
                 </button>
               </div>
 
