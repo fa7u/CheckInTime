@@ -3596,7 +3596,7 @@ export default function AdminPanel({
                       onChange={(e) => setOfficeForm({ ...officeForm, workEndTime: e.target.value })}
                       className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت انتهاء الدوام وحساب الانصراف.</p>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت انتهاء الدوام الرسمي. الموظفون الذين يسجلون انصرافهم مبكراً يثبت توقيتهم الفعلي، بينما يتم تسجيل انصراف الموظفين المتبقين على رأس العمل تلقائياً على هذا الوقت فور انتهائه.</p>
                   </div>
 
                   {/* Late Grace Period Setting */}

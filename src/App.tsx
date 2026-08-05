@@ -493,9 +493,17 @@ export default function App() {
       });
 
       // Archive any unarchived records for this past date
+      const workEndTime = officeSettings.workEndTime || '16:30';
       updatedRecords = updatedRecords.map(r => {
         if (r.date === pastDate && !r.archived) {
-          const archivedRec = { ...r, archived: true };
+          const checkOutTime = r.checkOut || (r.checkIn && r.status !== 'غياب' ? workEndTime : null);
+          const totalHours = r.checkOut ? r.totalHours : (r.checkIn && r.status !== 'غياب' ? calculateHoursDiff(r.checkIn, workEndTime) : 0);
+          const archivedRec = {
+            ...r,
+            checkOut: checkOutTime,
+            totalHours: totalHours,
+            archived: true
+          };
           saveAttendanceToFirebase(activeTenantId, archivedRec);
           return archivedRec;
         }
@@ -512,7 +520,60 @@ export default function App() {
     }, 2000);
 
     console.log(`[Auto-Archive] Archived previous unarchived days and created absent records for: ${uniquePastDates.join(', ')}`);
-  }, [isInitialDataLoaded, employees, attendanceRecords, activeTenantId]);
+  }, [isInitialDataLoaded, employees, attendanceRecords, activeTenantId, officeSettings.workEndTime]);
+
+  // Hook for Automatically Checking Out Employees still on duty at Work End Time (وقت الانصراف الموحد)
+  useEffect(() => {
+    if (!isInitialDataLoaded || attendanceRecords.length === 0) return;
+
+    const workEndTime = officeSettings.workEndTime || '16:30';
+    const checkAndAutoCheckout = () => {
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const currentHours = now.getHours().toString().padStart(2, '0');
+      const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+      const currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+      // Perform auto-checkout if current time has reached or passed workEndTime
+      if (currentTimeStr >= workEndTime) {
+        // Find records for today where employee is checked in but has not checked out yet
+        const activeTodayRecords = attendanceRecords.filter(
+          r => r.date === todayStr && r.checkIn && (!r.checkOut || r.checkOut === '') && r.status !== 'غياب'
+        );
+
+        if (activeTodayRecords.length > 0) {
+          let hasChanges = false;
+          const updatedRecords = attendanceRecords.map(r => {
+            if (r.date === todayStr && r.checkIn && (!r.checkOut || r.checkOut === '') && r.status !== 'غياب') {
+              hasChanges = true;
+              const checkOutTime = workEndTime;
+              const calculatedHours = calculateHoursDiff(r.checkIn, checkOutTime);
+              const updatedRec: AttendanceRecord = {
+                ...r,
+                checkOut: checkOutTime,
+                totalHours: calculatedHours,
+              };
+              saveAttendanceToFirebase(activeTenantId, updatedRec);
+              return updatedRec;
+            }
+            return r;
+          });
+
+          if (hasChanges) {
+            saveState(undefined, updatedRecords);
+            console.log(`[Auto Checkout] Automatically checked out ${activeTodayRecords.length} employees on duty at work end time (${workEndTime}).`);
+          }
+        }
+      }
+    };
+
+    // Run immediately
+    checkAndAutoCheckout();
+
+    // Check periodically every 15 seconds
+    const intervalId = setInterval(checkAndAutoCheckout, 15000);
+    return () => clearInterval(intervalId);
+  }, [isInitialDataLoaded, attendanceRecords, officeSettings.workEndTime, activeTenantId]);
 
   // Sync state helper to write to localStorage for the active tenant
   const saveState = (
@@ -661,10 +722,18 @@ export default function App() {
       }
     });
 
-    // Archive all existing unarchived records for today
+    // Archive all existing unarchived records for today, ensuring any active employees get checked out at workEndTime
+    const workEndTime = officeSettings.workEndTime || '16:30';
     const updated = attendanceRecords.map(r => {
       if (r.date === todayStr && !r.archived) {
-        const archivedRec = { ...r, archived: true };
+        const checkOutTime = r.checkOut || (r.checkIn && r.status !== 'غياب' ? workEndTime : null);
+        const totalHours = r.checkOut ? r.totalHours : (r.checkIn && r.status !== 'غياب' ? calculateHoursDiff(r.checkIn, workEndTime) : 0);
+        const archivedRec = {
+          ...r,
+          checkOut: checkOutTime,
+          totalHours: totalHours,
+          archived: true
+        };
         saveAttendanceToFirebase(activeTenantId, archivedRec);
         return archivedRec;
       }
