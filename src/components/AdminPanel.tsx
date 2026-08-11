@@ -1959,15 +1959,6 @@ export default function AdminPanel({
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         type="button"
-                        onClick={openGeneralAdminAttModal}
-                        className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#D4AF37]/10"
-                      >
-                        <UserCheck className="w-4 h-4" />
-                        <span>تسجيل حضور / انصراف إداري</span>
-                      </button>
-
-                      <button
-                        type="button"
                         onClick={() => {
                           if (confirm('هل أنت متأكد من رغبتك في أرشفة وترحيل جميع سجلات اليوم وتصفير اللوحة؟ (سيقوم النظام تلقائياً برصد الموظفين المتغيبين الذين لم يسجلوا دخولهم وتسجيلهم بحالة "غياب" وإضافتهم في كشف التقارير)')) {
                             onArchiveTodayRecords?.();
@@ -2104,16 +2095,16 @@ export default function AdminPanel({
                                     <button
                                       type="button"
                                       onClick={() => openAdminAttModalForCheckOut(emp, todayRecord)}
-                                      className="bg-rose-950/40 hover:bg-rose-900/50 text-rose-400 border border-rose-900/40 text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer inline-flex items-center gap-1 shadow-sm"
+                                      className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
                                     >
-                                      <UserX className="w-3.5 h-3.5" />
-                                      <span>انصراف إداري</span>
+                                      <UserX className="w-3.5 h-3.5 text-rose-400" />
+                                      <span>تسجيل انصراف</span>
                                     </button>
                                   )}
                                 </div>
                               ) : todayRecord && todayRecord.checkOut ? (
                                 <div className="flex items-center justify-center gap-2">
-                                  <span className="text-emerald-400 font-bold text-[11px]">مكتمل ✓</span>
+                                  <span className="text-emerald-400 font-bold text-[11px] bg-emerald-950/30 border border-emerald-900/30 px-2 py-0.5 rounded-lg">مكتمل ✓</span>
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -2136,10 +2127,10 @@ export default function AdminPanel({
                                 <button
                                   type="button"
                                   onClick={() => openAdminAttModalForCheckIn(emp)}
-                                  className="bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-400 border border-emerald-900/40 text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer inline-flex items-center gap-1 shadow-sm"
+                                  className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-200 border border-emerald-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
                                 >
-                                  <UserCheck className="w-3.5 h-3.5" />
-                                  <span>حضور إداري</span>
+                                  <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>تسجيل حضور</span>
                                 </button>
                               )}
                             </td>
