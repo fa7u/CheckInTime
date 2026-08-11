@@ -3,7 +3,8 @@ import {
   Users, UserPlus, CheckCircle, XCircle, Clock, MapPin, 
   Settings, Award, AlertTriangle, FileText, Search, Plus, 
   Trash2, Edit, Save, Check, X, Shield, Download, RefreshCw,
-  LayoutDashboard, Key, Eye, EyeOff, Menu, Link2, Copy, Archive
+  LayoutDashboard, Key, Eye, EyeOff, Menu, Link2, Copy, Archive,
+  UserCheck, UserX, LogIn, LogOut, Pencil
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -253,6 +254,151 @@ export default function AdminPanel({
   const [editRecStatus, setEditRecStatus] = useState<'حاضر' | 'متأخر' | 'غياب'>('حاضر');
   const [editRecWorkModel, setEditRecWorkModel] = useState<'on-site' | 'remote'>('on-site');
   const [editRecError, setEditRecError] = useState('');
+
+  // Admin Manual Attendance Modal State
+  const [isAdminAttModalOpen, setIsAdminAttModalOpen] = useState(false);
+  const [adminAttEmployeeId, setAdminAttEmployeeId] = useState<string>('');
+  const [adminAttDate, setAdminAttDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [adminAttMode, setAdminAttMode] = useState<'check-in' | 'check-out' | 'both'>('check-in');
+  const [adminAttCheckIn, setAdminAttCheckIn] = useState<string>('08:30');
+  const [adminAttCheckOut, setAdminAttCheckOut] = useState<string>('16:30');
+  const [adminAttStatus, setAdminAttStatus] = useState<'حاضر' | 'متأخر' | 'غياب'>('حاضر');
+  const [adminAttWorkModel, setAdminAttWorkModel] = useState<'on-site' | 'remote'>('on-site');
+  const [adminAttNotes, setAdminAttNotes] = useState<string>('');
+  const [adminAttError, setAdminAttError] = useState('');
+  const [adminAttSuccessMsg, setAdminAttSuccessMsg] = useState<string | null>(null);
+
+  const getFormattedCurrentTime = () => {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const openAdminAttModalForCheckIn = (emp: Employee) => {
+    setAdminAttEmployeeId(emp.id);
+    setAdminAttDate(new Date().toISOString().split('T')[0]);
+    setAdminAttMode('check-in');
+    setAdminAttCheckIn(getFormattedCurrentTime());
+    setAdminAttCheckOut(officeSettings.workEndTime || '16:30');
+    setAdminAttStatus('حاضر');
+    setAdminAttWorkModel(emp.workModel || 'on-site');
+    setAdminAttNotes('');
+    setAdminAttError('');
+    setAdminAttSuccessMsg(null);
+    setIsAdminAttModalOpen(true);
+  };
+
+  const openAdminAttModalForCheckOut = (emp: Employee, record?: AttendanceRecord) => {
+    setAdminAttEmployeeId(emp.id);
+    setAdminAttDate(record?.date || new Date().toISOString().split('T')[0]);
+    setAdminAttMode('check-out');
+    setAdminAttCheckIn(record?.checkIn || officeSettings.workStartTime || '08:30');
+    setAdminAttCheckOut(getFormattedCurrentTime());
+    setAdminAttStatus(record?.status || 'حاضر');
+    setAdminAttWorkModel(record?.workModel || emp.workModel || 'on-site');
+    setAdminAttNotes('');
+    setAdminAttError('');
+    setAdminAttSuccessMsg(null);
+    setIsAdminAttModalOpen(true);
+  };
+
+  const openGeneralAdminAttModal = () => {
+    setAdminAttEmployeeId(employees[0]?.id || '');
+    setAdminAttDate(new Date().toISOString().split('T')[0]);
+    setAdminAttMode('check-in');
+    setAdminAttCheckIn(getFormattedCurrentTime());
+    setAdminAttCheckOut(officeSettings.workEndTime || '16:30');
+    setAdminAttStatus('حاضر');
+    setAdminAttWorkModel('on-site');
+    setAdminAttNotes('');
+    setAdminAttError('');
+    setAdminAttSuccessMsg(null);
+    setIsAdminAttModalOpen(true);
+  };
+
+  const handleSaveAdminAttendance = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminAttError('');
+    setAdminAttSuccessMsg(null);
+
+    if (!adminAttEmployeeId) {
+      setAdminAttError('يرجى اختيار الموظف أولاً.');
+      return;
+    }
+    if (!adminAttDate) {
+      setAdminAttError('يرجى تحديد التاريخ.');
+      return;
+    }
+
+    const emp = employees.find(e => e.id === adminAttEmployeeId);
+    if (!emp) {
+      setAdminAttError('الموظف غير موجود.');
+      return;
+    }
+
+    let finalCheckIn: string | null = adminAttCheckIn;
+    let finalCheckOut: string | null = adminAttCheckOut;
+    let totalHrs = 0;
+
+    if (adminAttMode === 'check-in') {
+      if (!adminAttCheckIn) {
+        setAdminAttError('يرجى تحديد وقت الحضور.');
+        return;
+      }
+      finalCheckOut = null;
+    } else if (adminAttMode === 'check-out') {
+      if (!adminAttCheckOut) {
+        setAdminAttError('يرجى تحديد وقت الانصراف.');
+        return;
+      }
+      if (adminAttCheckIn && adminAttCheckOut) {
+        const [h1, m1] = adminAttCheckIn.split(':').map(Number);
+        const [h2, m2] = adminAttCheckOut.split(':').map(Number);
+        const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
+        if (diffMin < 0) {
+          setAdminAttError('وقت الانصراف لا يمكن أن يكون قبل وقت الحضور.');
+          return;
+        }
+        totalHrs = parseFloat(Math.max(0, diffMin / 60).toFixed(2));
+      }
+    } else if (adminAttMode === 'both') {
+      if (!adminAttCheckIn || !adminAttCheckOut) {
+        setAdminAttError('يرجى تحديد وقت الحضور وانصراف الموظف.');
+        return;
+      }
+      const [h1, m1] = adminAttCheckIn.split(':').map(Number);
+      const [h2, m2] = adminAttCheckOut.split(':').map(Number);
+      const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
+      if (diffMin < 0) {
+        setAdminAttError('وقت الانصراف لا يمكن أن يكون قبل وقت الحضور.');
+        return;
+      }
+      totalHrs = parseFloat(Math.max(0, diffMin / 60).toFixed(2));
+    }
+
+    const existingRec = attendanceRecords.find(r => r.employeeId === emp.id && r.date === adminAttDate && !r.archived);
+
+    const recordToSave: AttendanceRecord = {
+      id: existingRec ? existingRec.id : `att-admin-${Date.now()}-${emp.id}`,
+      employeeId: emp.id,
+      employeeName: emp.name,
+      date: adminAttDate,
+      checkIn: adminAttStatus === 'غياب' ? null : finalCheckIn,
+      checkOut: adminAttStatus === 'غياب' ? null : finalCheckOut,
+      status: adminAttStatus,
+      workModel: adminAttWorkModel,
+      totalHours: adminAttStatus === 'غياب' ? 0 : totalHrs,
+      isApproved: true,
+      archived: false,
+    };
+
+    onUpdateAttendance?.(recordToSave);
+    setAdminAttSuccessMsg(`تم تنفيذ تسجيل ${adminAttMode === 'check-in' ? 'حضور' : adminAttMode === 'check-out' ? 'انصراف' : 'حضور وانصراف'} الموظف (${emp.name}) إدارياً بنجاح ⚡`);
+
+    setTimeout(() => {
+      setIsAdminAttModalOpen(false);
+      setAdminAttSuccessMsg(null);
+    }, 1200);
+  };
 
   // Sync officeForm when officeSettings prop updates
   React.useEffect(() => {
@@ -1810,22 +1956,33 @@ export default function AdminPanel({
                         * تنبيه ذكي: عند الترحيل والتصفير الآن، سيقوم النظام تلقائياً برصد جميع الموظفين الذين لم يسجلوا حضورهم اليوم وتسجيلهم بحالة "غياب كلي" وإدراجهم في التقارير لضمان دقة كشف الحضور والانصراف.
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (confirm('هل أنت متأكد من رغبتك في أرشفة وترحيل جميع سجلات اليوم وتصفير اللوحة؟ (سيقوم النظام تلقائياً برصد الموظفين المتغيبين الذين لم يسجلوا دخولهم وتسجيلهم بحالة "غياب" وإضافتهم في كشف التقارير)')) {
-                          onArchiveTodayRecords?.();
-                        }
-                      }}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
-                        isEveryoneCheckedOut 
-                          ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10' 
-                          : 'bg-[#27272A] hover:bg-[#323235] text-[#E4E4E7] border border-[#3A3A3D]'
-                      }`}
-                    >
-                      <Archive className="w-3.5 h-3.5" />
-                      <span>ترحيل السجلات وتصفير القائمة</span>
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={openGeneralAdminAttModal}
+                        className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#D4AF37]/10"
+                      >
+                        <UserCheck className="w-4 h-4" />
+                        <span>تسجيل حضور / انصراف إداري</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm('هل أنت متأكد من رغبتك في أرشفة وترحيل جميع سجلات اليوم وتصفير اللوحة؟ (سيقوم النظام تلقائياً برصد الموظفين المتغيبين الذين لم يسجلوا دخولهم وتسجيلهم بحالة "غياب" وإضافتهم في كشف التقارير)')) {
+                            onArchiveTodayRecords?.();
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                          isEveryoneCheckedOut 
+                            ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10' 
+                            : 'bg-[#27272A] hover:bg-[#323235] text-[#E4E4E7] border border-[#3A3A3D]'
+                        }`}
+                      >
+                        <Archive className="w-3.5 h-3.5" />
+                        <span>ترحيل السجلات وتصفير القائمة</span>
+                      </button>
+                    </div>
                   </div>
                 );
               })()}
@@ -1919,42 +2076,71 @@ export default function AdminPanel({
                             </td>
                             <td className="px-4 py-3 text-center">
                               {todayRecord && !todayRecord.checkOut ? (
-                                forceCheckOutConfirmId === emp.id ? (
-                                  <div className="flex items-center gap-1 bg-rose-950/20 border border-rose-900/30 p-1 rounded-lg">
-                                    <span className="text-[9px] text-rose-300 font-bold">متأكد؟</span>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  {forceCheckOutConfirmId === emp.id ? (
+                                    <div className="flex items-center gap-1 bg-rose-950/20 border border-rose-900/30 p-1 rounded-lg">
+                                      <span className="text-[9px] text-rose-300 font-bold">متأكد؟</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          onForceCheckOut?.(emp.id);
+                                          setForceCheckOutConfirmId(null);
+                                        }}
+                                        className="text-emerald-400 hover:text-emerald-300 p-0.5 bg-emerald-950/40 rounded transition-colors cursor-pointer"
+                                        title="نعم"
+                                      >
+                                        <Check className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setForceCheckOutConfirmId(null)}
+                                        className="text-rose-400 hover:text-rose-300 p-0.5 bg-rose-900/10 rounded transition-colors cursor-pointer"
+                                        title="إلغاء"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <button
                                       type="button"
-                                      onClick={() => {
-                                        onForceCheckOut?.(emp.id);
-                                        setForceCheckOutConfirmId(null);
-                                      }}
-                                      className="text-emerald-400 hover:text-emerald-300 p-0.5 bg-emerald-950/40 rounded transition-colors cursor-pointer"
-                                      title="نعم"
+                                      onClick={() => openAdminAttModalForCheckOut(emp, todayRecord)}
+                                      className="bg-rose-950/40 hover:bg-rose-900/50 text-rose-400 border border-rose-900/40 text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer inline-flex items-center gap-1 shadow-sm"
                                     >
-                                      <Check className="w-3 h-3" />
+                                      <UserX className="w-3.5 h-3.5" />
+                                      <span>انصراف إداري</span>
                                     </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setForceCheckOutConfirmId(null)}
-                                      className="text-rose-400 hover:text-rose-300 p-0.5 bg-rose-900/10 rounded transition-colors cursor-pointer"
-                                      title="إلغاء"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ) : (
+                                  )}
+                                </div>
+                              ) : todayRecord && todayRecord.checkOut ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <span className="text-emerald-400 font-bold text-[11px]">مكتمل ✓</span>
                                   <button
                                     type="button"
-                                    onClick={() => setForceCheckOutConfirmId(emp.id)}
-                                    className="bg-rose-950/40 hover:bg-rose-900/40 text-rose-400 border border-rose-900/30 text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer"
+                                    onClick={() => {
+                                      setEditingRecord(todayRecord);
+                                      setEditRecDate(todayRecord.date);
+                                      setEditRecCheckIn(todayRecord.checkIn || '');
+                                      setEditRecCheckOut(todayRecord.checkOut || '');
+                                      setEditRecStatus(todayRecord.status);
+                                      setEditRecWorkModel(todayRecord.workModel || 'on-site');
+                                      setEditRecError('');
+                                    }}
+                                    className="bg-[#1F1F23] hover:bg-[#27272A] text-zinc-300 border border-[#27272A] text-[10px] px-2 py-0.5 rounded-md font-semibold transition-all cursor-pointer inline-flex items-center gap-1"
+                                    title="تعديل السجل الإداري"
                                   >
-                                    تسجيل انصراف
+                                    <Pencil className="w-3 h-3 text-[#D4AF37]" />
+                                    <span>تعديل</span>
                                   </button>
-                                )
-                              ) : todayRecord && todayRecord.checkOut ? (
-                                <span className="text-emerald-400 font-bold">تم الانصراف بنجاح ✓</span>
+                                </div>
                               ) : (
-                                <span className="text-zinc-600">غير متاح حالياً</span>
+                                <button
+                                  type="button"
+                                  onClick={() => openAdminAttModalForCheckIn(emp)}
+                                  className="bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-400 border border-emerald-900/40 text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer inline-flex items-center gap-1 shadow-sm"
+                                >
+                                  <UserCheck className="w-3.5 h-3.5" />
+                                  <span>حضور إداري</span>
+                                </button>
                               )}
                             </td>
                           </tr>
@@ -3456,6 +3642,228 @@ export default function AdminPanel({
                         className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
                       >
                         إلغاء الأمر
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Professional Admin Check-In / Check-Out Modal */}
+            {isAdminAttModalOpen && (
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-lg p-6 relative shadow-2xl text-right overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setIsAdminAttModalOpen(false)}
+                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-extrabold text-[#E4E4E7]">
+                        صلاحية التحضير والإنصراف الإداري
+                      </h4>
+                      <p className="text-xs text-[#8E8E93]">
+                        تسجيل حضور أو انصراف إداري للموظفين بصورة مباشرة واحترافية
+                      </p>
+                    </div>
+                  </div>
+
+                  {adminAttSuccessMsg && (
+                    <div className="bg-emerald-950/40 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{adminAttSuccessMsg}</span>
+                    </div>
+                  )}
+
+                  {adminAttError && (
+                    <div className="bg-rose-950/40 border border-rose-900/40 text-rose-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                      <span>{adminAttError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSaveAdminAttendance} className="space-y-4 text-right">
+                    {/* Employee & Date */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#8E8E93] block">اختيار الموظف:</label>
+                        <select
+                          value={adminAttEmployeeId}
+                          onChange={(e) => {
+                            setAdminAttEmployeeId(e.target.value);
+                            const selected = employees.find(emp => emp.id === e.target.value);
+                            if (selected) {
+                              setAdminAttWorkModel(selected.workModel || 'on-site');
+                            }
+                          }}
+                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                        >
+                          {employees.map(emp => (
+                            <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
+                        <input
+                          type="date"
+                          required
+                          value={adminAttDate}
+                          onChange={(e) => setAdminAttDate(e.target.value)}
+                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Action Mode Toggle */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-[#8E8E93] block">نوع الإجراء الإداري:</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setAdminAttMode('check-in')}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            adminAttMode === 'check-in'
+                              ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400 shadow-sm'
+                              : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                          }`}
+                        >
+                          <LogIn className="w-3.5 h-3.5" />
+                          <span>حضور فقط</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setAdminAttMode('check-out')}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            adminAttMode === 'check-out'
+                              ? 'bg-rose-950/50 border-rose-500 text-rose-400 shadow-sm'
+                              : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                          }`}
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>انصراف فقط</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setAdminAttMode('both')}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            adminAttMode === 'both'
+                              ? 'bg-amber-950/50 border-amber-500 text-amber-400 shadow-sm'
+                              : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                          }`}
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                          <span>حضور وانصراف</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Time Inputs */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {(adminAttMode === 'check-in' || adminAttMode === 'both') && (
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-emerald-400 block">وقت الحضور:</label>
+                          <input
+                            type="time"
+                            required
+                            value={adminAttCheckIn}
+                            onChange={(e) => setAdminAttCheckIn(e.target.value)}
+                            className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+                      )}
+
+                      {(adminAttMode === 'check-out' || adminAttMode === 'both') && (
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-rose-400 block">وقت الانصراف:</label>
+                          <input
+                            type="time"
+                            required
+                            value={adminAttCheckOut}
+                            onChange={(e) => setAdminAttCheckOut(e.target.value)}
+                            className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-rose-500"
+                          />
+                        </div>
+                      )}
+
+                      {adminAttMode === 'check-out' && (
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-zinc-400 block">وقت الحضور المسجل:</label>
+                          <input
+                            type="time"
+                            value={adminAttCheckIn}
+                            onChange={(e) => setAdminAttCheckIn(e.target.value)}
+                            className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-zinc-300 font-mono focus:outline-none focus:border-[#D4AF37]"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Status & Work Model */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#8E8E93] block">حالة التحضير:</label>
+                        <select
+                          value={adminAttStatus}
+                          onChange={(e) => setAdminAttStatus(e.target.value as any)}
+                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                        >
+                          <option value="حاضر">حاضر (في الوقت)</option>
+                          <option value="متأخر">متأخر</option>
+                          <option value="غياب">غياب كلي</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#8E8E93] block">نموذج العمل:</label>
+                        <select
+                          value={adminAttWorkModel}
+                          onChange={(e) => setAdminAttWorkModel(e.target.value as any)}
+                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                        >
+                          <option value="on-site">حضوري (ميداني/مكتبي)</option>
+                          <option value="remote">عن بعد</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Admin Notes */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-[#8E8E93] block">ملاحظات الإدارة (اختياري):</label>
+                      <input
+                        type="text"
+                        value={adminAttNotes}
+                        onChange={(e) => setAdminAttNotes(e.target.value)}
+                        placeholder="مثال: تسجيل دخول بطلب مباشر من الموظف / تعديل تقني"
+                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] placeholder-[#52525B] focus:outline-none focus:border-[#D4AF37]"
+                      />
+                    </div>
+
+                    {/* Submit Actions */}
+                    <div className="flex gap-2 pt-3 border-t border-[#27272A]">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#D4AF37]/10 flex items-center justify-center gap-1.5"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        <span>تأكيد وتسجيل الإجراء الإداري</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsAdminAttModalOpen(false)}
+                        className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
+                      >
+                        إلغاء
                       </button>
                     </div>
                   </form>

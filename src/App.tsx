@@ -936,9 +936,12 @@ export default function App() {
     deleteAttendanceFromFirebase(recordId);
   };
 
-  // 4b. Update Attendance Record
+  // 4b. Update or Add Attendance Record
   const handleUpdateAttendanceRecord = (updatedRecord: AttendanceRecord) => {
-    const updated = attendanceRecords.map(r => r.id === updatedRecord.id ? updatedRecord : r);
+    const exists = attendanceRecords.some(r => r.id === updatedRecord.id);
+    const updated = exists
+      ? attendanceRecords.map(r => r.id === updatedRecord.id ? updatedRecord : r)
+      : [updatedRecord, ...attendanceRecords];
     saveState(undefined, updated);
     saveAttendanceToFirebase(activeTenantId, updatedRecord);
   };
