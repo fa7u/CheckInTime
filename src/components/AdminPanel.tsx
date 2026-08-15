@@ -21,6 +21,7 @@ import {
   Area
 } from 'recharts';
 import { Employee, AttendanceRecord, OfficeSettings, ApprovalRequest, WorkModel } from '../types';
+import { getScheduleForDate, calculateAttendanceStatus } from '../utils/scheduleHelper';
 
 interface AdminPanelProps {
   employees: Employee[];
@@ -207,11 +208,14 @@ export default function AdminPanel({
   const [filterStatus, setFilterStatus] = useState('all');
   const [reportViewMode, setReportViewMode] = useState<'pivot' | 'list'>('pivot');
 
-  // Helper to determine if a date is Friday or Saturday (Arabic weekend)
+  // Helper to determine if a date is weekend (Friday always, Saturday unless custom schedule is enabled)
   const isWeekend = (dateStr: string): boolean => {
     try {
       const d = new Date(dateStr);
       const day = d.getDay(); // 0 is Sunday, 5 is Friday, 6 is Saturday
+      if (officeSettings?.enableSaturdayCustomSchedule) {
+        return day === 5; // Friday is the only weekend day
+      }
       return day === 5 || day === 6;
     } catch {
       return false;
@@ -273,12 +277,103 @@ export default function AdminPanel({
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   };
 
+  // Quick Action Confirmation state for Check-In & Check-Out
+  const [confirmAttAction, setConfirmAttAction] = useState<{
+    type: 'check-in' | 'check-out';
+    empId: string;
+    empName: string;
+    record?: AttendanceRecord;
+  } | null>(null);
+
+  const [globalSuccessBanner, setGlobalSuccessBanner] = useState<string | null>(null);
+
+  const requestAdminCheckInConfirmation = (emp: Employee) => {
+    setConfirmAttAction({
+      type: 'check-in',
+      empId: emp.id,
+      empName: emp.name,
+    });
+  };
+
+  const requestAdminCheckOutConfirmation = (emp: Employee, record?: AttendanceRecord) => {
+    setConfirmAttAction({
+      type: 'check-out',
+      empId: emp.id,
+      empName: emp.name,
+      record: record,
+    });
+  };
+
+  const executeConfirmedAdminAttendance = () => {
+    if (!confirmAttAction) return;
+
+    const { type, empId, empName, record } = confirmAttAction;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const currentTime = getFormattedCurrentTime();
+
+    if (type === 'check-in') {
+      const emp = employees.find(e => e.id === empId);
+      const status: 'حاضر' | 'متأخر' = calculateAttendanceStatus(currentTime, todayStr, officeSettings);
+
+      const existingRec = attendanceRecords.find(r => r.employeeId === empId && r.date === todayStr && !r.archived);
+
+      const newRecord: AttendanceRecord = {
+        id: existingRec ? existingRec.id : `att-admin-${Date.now()}-${empId}`,
+        employeeId: empId,
+        employeeName: empName,
+        date: todayStr,
+        checkIn: currentTime,
+        checkOut: null,
+        status: status,
+        workModel: emp?.workModel || 'on-site',
+        totalHours: 0,
+        isApproved: true,
+        archived: false,
+      };
+
+      onUpdateAttendance?.(newRecord);
+      setGlobalSuccessBanner(`تم تسجيل حضور الموظف (${empName}) بنجاح الساعة (${currentTime}) ✓`);
+    } else if (type === 'check-out') {
+      const checkInTime = record?.checkIn || officeSettings?.workStartTime || '08:30';
+      let totalHrs = 0;
+      if (checkInTime && currentTime) {
+        const [h1, m1] = checkInTime.split(':').map(Number);
+        const [h2, m2] = currentTime.split(':').map(Number);
+        const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
+        totalHrs = parseFloat(Math.max(0, diffMin / 60).toFixed(2));
+      }
+
+      const existingRec = record || attendanceRecords.find(r => r.employeeId === empId && r.date === todayStr && !r.archived);
+
+      if (existingRec) {
+        const updatedRecord: AttendanceRecord = {
+          ...existingRec,
+          checkOut: currentTime,
+          totalHours: totalHrs,
+        };
+        onUpdateAttendance?.(updatedRecord);
+      } else {
+        onForceCheckOut?.(empId);
+      }
+
+      setGlobalSuccessBanner(`تم تسجيل انصراف الموظف (${empName}) بنجاح الساعة (${currentTime}) [إجمالي ساعات العمل: ${totalHrs} ساعة] ✓`);
+    }
+
+    setConfirmAttAction(null);
+
+    setTimeout(() => {
+      setGlobalSuccessBanner(null);
+    }, 6000);
+  };
+
   const openAdminAttModalForCheckIn = (emp: Employee) => {
+    const today = new Date().toISOString().split('T')[0];
+    const schedule = getScheduleForDate(today, officeSettings);
     setAdminAttEmployeeId(emp.id);
-    setAdminAttDate(new Date().toISOString().split('T')[0]);
+    setAdminAttDate(today);
     setAdminAttMode('check-in');
     setAdminAttCheckIn(getFormattedCurrentTime());
-    setAdminAttCheckOut(officeSettings.workEndTime || '16:30');
+    setAdminAttCheckOut(schedule.endTime);
     setAdminAttStatus('حاضر');
     setAdminAttWorkModel(emp.workModel || 'on-site');
     setAdminAttNotes('');
@@ -288,10 +383,12 @@ export default function AdminPanel({
   };
 
   const openAdminAttModalForCheckOut = (emp: Employee, record?: AttendanceRecord) => {
+    const recDate = record?.date || new Date().toISOString().split('T')[0];
+    const schedule = getScheduleForDate(recDate, officeSettings);
     setAdminAttEmployeeId(emp.id);
-    setAdminAttDate(record?.date || new Date().toISOString().split('T')[0]);
+    setAdminAttDate(recDate);
     setAdminAttMode('check-out');
-    setAdminAttCheckIn(record?.checkIn || officeSettings.workStartTime || '08:30');
+    setAdminAttCheckIn(record?.checkIn || schedule.startTime);
     setAdminAttCheckOut(getFormattedCurrentTime());
     setAdminAttStatus(record?.status || 'حاضر');
     setAdminAttWorkModel(record?.workModel || emp.workModel || 'on-site');
@@ -302,11 +399,13 @@ export default function AdminPanel({
   };
 
   const openGeneralAdminAttModal = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const schedule = getScheduleForDate(today, officeSettings);
     setAdminAttEmployeeId(employees[0]?.id || '');
-    setAdminAttDate(new Date().toISOString().split('T')[0]);
+    setAdminAttDate(today);
     setAdminAttMode('check-in');
     setAdminAttCheckIn(getFormattedCurrentTime());
-    setAdminAttCheckOut(officeSettings.workEndTime || '16:30');
+    setAdminAttCheckOut(schedule.endTime);
     setAdminAttStatus('حاضر');
     setAdminAttWorkModel('on-site');
     setAdminAttNotes('');
@@ -1392,6 +1491,10 @@ export default function AdminPanel({
       workStartTime: officeForm.workStartTime || '08:30',
       workEndTime: officeForm.workEndTime || '16:30',
       lateGracePeriod: officeForm.lateGracePeriod !== undefined ? Number(officeForm.lateGracePeriod) : 10,
+      enableSaturdayCustomSchedule: Boolean(officeForm.enableSaturdayCustomSchedule),
+      saturdayStartTime: officeForm.saturdayStartTime || '09:00',
+      saturdayEndTime: officeForm.saturdayEndTime || '14:00',
+      saturdayGracePeriod: officeForm.saturdayGracePeriod !== undefined ? Number(officeForm.saturdayGracePeriod) : 15,
       mapLink: locationInput,
     });
     setShowSettingsSuccess(true);
@@ -1923,6 +2026,52 @@ export default function AdminPanel({
                 </div>
               </div>
 
+              {/* Global Success Notification Banner for Admin CheckIn/CheckOut */}
+              {globalSuccessBanner && (
+                <div className="mb-4 bg-emerald-950/60 border border-emerald-500/50 text-emerald-200 px-4 py-3 rounded-xl text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-950/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                      <CheckCircle className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-extrabold text-emerald-300">{globalSuccessBanner}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setGlobalSuccessBanner(null)}
+                    className="text-emerald-400 hover:text-emerald-100 p-1 rounded-lg transition-colors cursor-pointer hover:bg-emerald-900/40"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Saturday Custom Schedule Banner if today is Saturday & custom schedule is active */}
+              {(() => {
+                const isSaturday = new Date().getDay() === 6;
+                if (!isSaturday || !officeSettings?.enableSaturdayCustomSchedule) return null;
+                const satSchedule = getScheduleForDate(new Date(), officeSettings);
+                return (
+                  <div className="mb-4 bg-gradient-to-r from-amber-950/40 via-amber-900/20 to-amber-950/40 border border-[#D4AF37]/50 text-amber-200 px-4 py-3 rounded-xl text-xs flex items-center justify-between shadow-lg shadow-amber-950/20 animate-in fade-in duration-200">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0 font-extrabold text-xs">
+                        السبت
+                      </div>
+                      <div>
+                        <div className="font-extrabold text-amber-300 text-sm flex items-center gap-2">
+                          <span>جدول دوام السبت المخصص مفعّل اليوم</span>
+                        </div>
+                        <p className="text-xs text-amber-200/90 mt-0.5">
+                          ساعات العمل المعتمدة اليوم: من <span className="font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{satSchedule.startTime}</span> إلى <span className="font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{satSchedule.endTime}</span> | مهلة السماح: <span className="font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{satSchedule.gracePeriod} دقيقة</span>
+                        </p>
+                      </div>
+                    </div>
+                    <span className="hidden sm:inline-block text-[11px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 px-2.5 py-1 rounded-lg shrink-0">
+                      استثناء نشط
+                    </span>
+                  </div>
+                );
+              })()}
+
               {/* Archive Today's Records Banner */}
               {(() => {
                 const todayUnarchivedRecords = attendanceRecords.filter(r => r.date === todayStr && !r.archived);
@@ -2094,7 +2243,7 @@ export default function AdminPanel({
                                   ) : (
                                     <button
                                       type="button"
-                                      onClick={() => openAdminAttModalForCheckOut(emp, todayRecord)}
+                                      onClick={() => requestAdminCheckOutConfirmation(emp, todayRecord)}
                                       className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
                                     >
                                       <UserX className="w-3.5 h-3.5 text-rose-400" />
@@ -2126,7 +2275,7 @@ export default function AdminPanel({
                               ) : (
                                 <button
                                   type="button"
-                                  onClick={() => openAdminAttModalForCheckIn(emp)}
+                                  onClick={() => requestAdminCheckInConfirmation(emp)}
                                   className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-200 border border-emerald-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
                                 >
                                   <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -3862,6 +4011,78 @@ export default function AdminPanel({
               </div>
             )}
 
+            {/* Confirmation Modal for Admin Attendance Action */}
+            {confirmAttAction && (
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-md p-6 relative shadow-2xl text-right">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmAttAction(null)}
+                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                      confirmAttAction.type === 'check-in' 
+                        ? 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-400' 
+                        : 'bg-rose-950/80 border border-rose-500/40 text-rose-400'
+                    }`}>
+                      {confirmAttAction.type === 'check-in' ? <UserCheck className="w-6 h-6" /> : <UserX className="w-6 h-6" />}
+                    </div>
+                    <div>
+                      <h4 className="text-base font-extrabold text-[#E4E4E7]">
+                        {confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل حضور إداري' : 'تأكيد تسجيل انصراف إداري'}
+                      </h4>
+                      <p className="text-xs text-[#8E8E93]">
+                        يرجى التأكيد لتسجيل الإجراء مباشرة لليوم
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#0F0F11] border border-[#27272A] rounded-xl p-4 mb-5 space-y-2.5 text-xs">
+                    <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
+                      <span className="text-[#8E8E93]">اسم الموظف:</span>
+                      <span className="font-bold text-[#E4E4E7] text-sm">{confirmAttAction.empName}</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
+                      <span className="text-[#8E8E93]">الوقت الحالي:</span>
+                      <span className="font-mono font-bold text-[#D4AF37] text-sm">{getFormattedCurrentTime()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#8E8E93]">نوع الإجراء:</span>
+                      <span className={`font-extrabold ${confirmAttAction.type === 'check-in' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {confirmAttAction.type === 'check-in' ? 'تسجيل دخول (حضور)' : 'تسجيل خروج (انصراف)'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5">
+                    <button
+                      type="button"
+                      onClick={executeConfirmedAdminAttendance}
+                      className={`flex-1 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center gap-1.5 ${
+                        confirmAttAction.type === 'check-in'
+                          ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
+                          : 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20'
+                      }`}
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>{confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل الحضور' : 'تأكيد تسجيل الانصراف'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmAttAction(null)}
+                      className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
@@ -3972,21 +4193,21 @@ export default function AdminPanel({
 
                   {/* Work start hour Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت بدء الدوام الرسمي *</label>
+                    <label className="text-xs font-bold text-[#8E8E93] block">وقت بدء الدوام الافتراضي (أحد - خميس) *</label>
                     <input
-                      id="settings-work-start-time"
+                        id="settings-work-start-time"
                       type="time"
                       required
                       value={officeForm.workStartTime || '08:30'}
                       onChange={(e) => setOfficeForm({ ...officeForm, workStartTime: e.target.value })}
                       className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت بدء الدوام وحساب التأخير.</p>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت بدء الدوام وحساب التأخير لبقية أيام الأسبوع.</p>
                   </div>
 
                   {/* Work end hour Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت نهاية الدوام الرسمي *</label>
+                    <label className="text-xs font-bold text-[#8E8E93] block">وقت نهاية الدوام الافتراضي *</label>
                     <input
                       id="settings-work-end-time"
                       type="time"
@@ -3995,7 +4216,7 @@ export default function AdminPanel({
                       onChange={(e) => setOfficeForm({ ...officeForm, workEndTime: e.target.value })}
                       className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت انتهاء الدوام الرسمي. الموظفون الذين يسجلون انصرافهم مبكراً يثبت توقيتهم الفعلي، بينما يتم تسجيل انصراف الموظفين المتبقين على رأس العمل تلقائياً على هذا الوقت فور انتهائه.</p>
+                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت انتهاء الدوام والانصراف التلقائي للأيام العادية.</p>
                   </div>
 
                   {/* Late Grace Period Setting */}
@@ -4016,6 +4237,95 @@ export default function AdminPanel({
                     </div>
                     <p className="text-[10px] text-[#8E8E93] mt-0.5">مهلة إضافية بعد بداية الدوام لا يُسجل فيها متأخراً.</p>
                   </div>
+                </div>
+
+                {/* SATURDAY CUSTOM SCHEDULE EXCEPTION */}
+                <div className="mt-4 pt-4 border-t border-[#27272A]/80 bg-[#161619]/60 rounded-xl p-4 border border-[#27272A]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#27272A]/60">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] shrink-0">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-[#E4E4E7] flex items-center gap-2">
+                          <span>استثناء دوام يوم السبت (أوقات مخصصة)</span>
+                          {officeForm.enableSaturdayCustomSchedule && (
+                            <span className="bg-amber-500/20 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              مفعّل
+                            </span>
+                          )}
+                        </h4>
+                        <p className="text-[11px] text-[#8E8E93]">
+                          تخصيص ساعات عمل وفترة سماح خاصة بيوم السبت تختلف عن باقي أيام الأسبوع
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(officeForm.enableSaturdayCustomSchedule)}
+                        onChange={(e) => setOfficeForm({ ...officeForm, enableSaturdayCustomSchedule: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[#27272A] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"></div>
+                      <span className="mr-2 text-xs font-bold text-[#E4E4E7]">
+                        {officeForm.enableSaturdayCustomSchedule ? 'مفعل' : 'معطل'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {officeForm.enableSaturdayCustomSchedule ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-amber-200/90 block">وقت بدء دوام السبت *</label>
+                        <input
+                          id="settings-sat-start-time"
+                          type="time"
+                          required={officeForm.enableSaturdayCustomSchedule}
+                          value={officeForm.saturdayStartTime || '09:00'}
+                          onChange={(e) => setOfficeForm({ ...officeForm, saturdayStartTime: e.target.value })}
+                          className="w-full bg-[#0F0F11] border border-amber-500/30 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-amber-100 text-left font-mono"
+                        />
+                        <p className="text-[9px] text-[#8E8E93]">بداية الحساب ليوم السبت فقط.</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-amber-200/90 block">وقت نهاية دوام السبت *</label>
+                        <input
+                          id="settings-sat-end-time"
+                          type="time"
+                          required={officeForm.enableSaturdayCustomSchedule}
+                          value={officeForm.saturdayEndTime || '14:00'}
+                          onChange={(e) => setOfficeForm({ ...officeForm, saturdayEndTime: e.target.value })}
+                          className="w-full bg-[#0F0F11] border border-amber-500/30 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-amber-100 text-left font-mono"
+                        />
+                        <p className="text-[9px] text-[#8E8E93]">الانصراف التلقائي ليوم السبت.</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-amber-200/90 block">مهلة التأخير ليوم السبت *</label>
+                        <div className="relative">
+                          <input
+                            id="settings-sat-grace-period"
+                            type="number"
+                            required={officeForm.enableSaturdayCustomSchedule}
+                            min="0"
+                            max="180"
+                            value={officeForm.saturdayGracePeriod !== undefined ? officeForm.saturdayGracePeriod : 15}
+                            onChange={(e) => setOfficeForm({ ...officeForm, saturdayGracePeriod: Number(e.target.value) })}
+                            className="w-full bg-[#0F0F11] border border-amber-500/30 rounded-lg text-sm pr-3 pl-14 py-2 focus:outline-none focus:border-[#D4AF37] text-amber-100 font-mono"
+                          />
+                          <span className="absolute left-3 top-2.5 text-[11px] text-[#8E8E93] font-bold">دقيقة</span>
+                        </div>
+                        <p className="text-[9px] text-[#8E8E93]">سماح التأخير المخصص للسبت.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-[#8E8E93] pt-2 italic">
+                      عند التعطيل، يُعامل يوم السبت كعطلة نهاية أسبوع أو يتبع ساعات الدوام الافتراضية المحددة أعلاه.
+                    </p>
+                  )}
                 </div>
               </div>
 

@@ -4,6 +4,7 @@ import {
   History, Eye, Calendar, User, Compass, Info, ShieldCheck, XCircle, Bell
 } from 'lucide-react';
 import { Employee, AttendanceRecord, OfficeSettings, ApprovalRequest, WorkModel } from '../types';
+import { getScheduleForDate, calculateAttendanceStatus } from '../utils/scheduleHelper';
 
 interface EmployeePanelProps {
   employee: Employee;
@@ -82,34 +83,35 @@ export default function EmployeePanel({
   });
   const [notificationSuccessMsg, setNotificationSuccessMsg] = useState<string | null>(null);
 
+  // Dynamic schedule for today
+  const todaySchedule = getScheduleForDate(new Date(), officeSettings);
+
   // Customizable Calendar/Alarms settings
-  const [customStartTime, setCustomStartTime] = useState<string>(officeSettings.workStartTime || "08:30");
-  const [customEndTime, setCustomEndTime] = useState<string>(officeSettings.workEndTime || "16:30");
+  const [customStartTime, setCustomStartTime] = useState<string>(todaySchedule.startTime);
+  const [customEndTime, setCustomEndTime] = useState<string>(todaySchedule.endTime);
   const [alarmOffsetMinutes, setAlarmOffsetMinutes] = useState<number>(5);
 
   useEffect(() => {
-    if (officeSettings.workStartTime) {
-      setCustomStartTime(officeSettings.workStartTime);
-    }
-    if (officeSettings.workEndTime) {
-      setCustomEndTime(officeSettings.workEndTime);
-    }
-  }, [officeSettings.workStartTime, officeSettings.workEndTime]);
+    const schedule = getScheduleForDate(new Date(), officeSettings);
+    setCustomStartTime(schedule.startTime);
+    setCustomEndTime(schedule.endTime);
+  }, [officeSettings]);
 
   // Sync notification configurations automatically with the service worker
   useEffect(() => {
     if (notificationsEnabled && 'serviceWorker' in navigator) {
+      const schedule = getScheduleForDate(new Date(), officeSettings);
       navigator.serviceWorker.ready.then((reg) => {
         reg.active?.postMessage({
           type: 'SET_ALERTS_CONFIG',
           employeeName: employee.name,
-          workStartTime: officeSettings.workStartTime || '08:30',
-          workEndTime: officeSettings.workEndTime || '16:30',
+          workStartTime: schedule.startTime,
+          workEndTime: schedule.endTime,
           companyName: 'checkInTime'
         });
       }).catch(err => console.error('Failed to sync sw configuration:', err));
     }
-  }, [notificationsEnabled, employee.name, officeSettings.workStartTime, officeSettings.workEndTime]);
+  }, [notificationsEnabled, employee.name, officeSettings]);
 
   // Trigger real location search when component mounts or employee/settings changes
   useEffect(() => {
@@ -284,6 +286,60 @@ export default function EmployeePanel({
       const checkInTimeFormatted = `${startDateStr}T${pad(checkInHour)}${pad(checkInMin)}00`;
       const checkOutTimeFormatted = `${startDateStr}T${pad(checkOutHour)}${pad(checkOutMin)}00`;
 
+      let satEvents = '';
+      if (officeSettings.enableSaturdayCustomSchedule) {
+        const satStartStr = officeSettings.saturdayStartTime || '09:00';
+        const satEndStr = officeSettings.saturdayEndTime || '14:00';
+        const [satStartH, satStartM] = satStartStr.split(':').map(Number);
+        const [satEndH, satEndM] = satEndStr.split(':').map(Number);
+
+        let satInH = satStartH;
+        let satInM = satStartM - alarmOffsetMinutes;
+        while (satInM < 0) {
+          satInH = (satInH - 1 + 24) % 24;
+          satInM += 60;
+        }
+
+        let satOutH = satEndH;
+        let satOutM = satEndM - alarmOffsetMinutes;
+        while (satOutM < 0) {
+          satOutH = (satOutH - 1 + 24) % 24;
+          satOutM += 60;
+        }
+
+        const satDateStr = "20260711"; // Saturday
+        const satInFormatted = `${satDateStr}T${pad(satInH)}${pad(satInM)}00`;
+        const satOutFormatted = `${satDateStr}T${pad(satOutH)}${pad(satOutM)}00`;
+
+        satEvents = `
+BEGIN:VEVENT
+UID:saturday-checkin-reminder-${employee.id}@checkintime
+DTSTAMP:20260706T120000Z
+DTSTART;TZID=Asia/Riyadh:${satInFormatted}
+RRULE:FREQ=WEEKLY;BYDAY=SA
+SUMMARY:⏰ تذكير تحضير السبت (دوام مخصص)
+DESCRIPTION:مرحباً ${employee.name}! يبدأ دوام السبت بعد ${alarmOffsetMinutes} دقائق (الساعة ${satStartStr}). يرجى تسجيل حضورك على نظام التحضير الآن لتفادي التأخير.
+BEGIN:VALARM
+TRIGGER:-PT0M
+ACTION:DISPLAY
+DESCRIPTION:تذكير حضور السبت
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:saturday-checkout-reminder-${employee.id}@checkintime
+DTSTAMP:20260706T120000Z
+DTSTART;TZID=Asia/Riyadh:${satOutFormatted}
+RRULE:FREQ=WEEKLY;BYDAY=SA
+SUMMARY:🚪 تذكير انصراف السبت (دوام مخصص)
+DESCRIPTION:مرحباً ${employee.name}! ينتهي دوام السبت بعد ${alarmOffsetMinutes} دقائق (الساعة ${satEndStr}). يرجى تسجيل انصرافك على نظام التحضير الآن لحفظ ساعات العمل.
+BEGIN:VALARM
+TRIGGER:-PT0M
+ACTION:DISPLAY
+DESCRIPTION:تذكير انصراف السبت
+END:VALARM
+END:VEVENT`;
+      }
+
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//checkInTime//Attendance Alarms//AR
@@ -314,7 +370,7 @@ TRIGGER:-PT0M
 ACTION:DISPLAY
 DESCRIPTION:تذكير الانصراف اليومي
 END:VALARM
-END:VEVENT
+END:VEVENT${satEvents}
 END:VCALENDAR`;
 
       const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
@@ -352,14 +408,11 @@ END:VCALENDAR`;
     const now = new Date();
     const currentHour = now.getHours();
     const currentMin = now.getMinutes();
+    const currentTimeStr = `${currentHour.toString().padStart(2, '0')}:${currentMin.toString().padStart(2, '0')}`;
+    const todayDateStr = now.toISOString().split('T')[0];
     
-    // Determine status (Punctual if checked in before workStartTime + lateGracePeriod)
-    const [startHour, startMin] = (officeSettings.workStartTime || "08:30").split(':').map(Number);
-    const graceMinutes = typeof officeSettings.lateGracePeriod === 'number' ? officeSettings.lateGracePeriod : 10;
-    const startTimeInMinutes = startHour * 60 + startMin;
-    const checkInTimeInMinutes = currentHour * 60 + currentMin;
-    const isLate = checkInTimeInMinutes > (startTimeInMinutes + graceMinutes);
-    const calculatedStatus = isLate ? 'متأخر' : 'حاضر';
+    // Determine status (Punctual vs Late based on dynamic schedule)
+    const calculatedStatus = calculateAttendanceStatus(currentTimeStr, todayDateStr, officeSettings);
 
     if (activeModel === 'on-site') {
       setIsLocating(true);
@@ -503,7 +556,7 @@ END:VCALENDAR`;
             <h3 className="text-lg font-serif italic text-[#D4AF37] text-right mb-4">بوابة تسجيل الدخول اليومي</h3>
             
             {/* Work Model Mode (Assigned by Admin) */}
-            <div className="bg-[#0A0A0B]/60 p-3.5 rounded-xl mb-4 border border-[#27272A] flex items-center justify-between text-right">
+            <div className="bg-[#0A0A0B]/60 p-3.5 rounded-xl mb-3 border border-[#27272A] flex items-center justify-between text-right">
               <span className="text-xs text-[#8E8E93] font-bold">طبيعة نظام العمل المعتمد لك:</span>
               {activeModel === 'on-site' ? (
                 <span className="inline-flex items-center gap-1.5 text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-3.5 py-1.5 rounded-lg font-bold text-xs">
@@ -516,6 +569,32 @@ END:VCALENDAR`;
                   <span>عن بُعد (خارج المكتب)</span>
                 </span>
               )}
+            </div>
+
+            {/* Today Schedule Details Bar */}
+            <div className={`p-3.5 rounded-xl mb-4 border text-right flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+              todaySchedule.isCustomSaturday 
+                ? 'bg-amber-950/30 border-[#D4AF37]/40 text-amber-200' 
+                : 'bg-[#0A0A0B]/60 border-[#27272A] text-[#8E8E93]'
+            }`}>
+              <div className="flex items-center gap-2">
+                <Clock className={`w-4 h-4 shrink-0 ${todaySchedule.isCustomSaturday ? 'text-[#D4AF37]' : 'text-[#8E8E93]'}`} />
+                <span className="text-xs font-bold text-[#E4E4E7]">
+                  {todaySchedule.isCustomSaturday ? 'دوام السبت الاستثنائي اليوم:' : 'ساعات العمل الرسمية لليوم:'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-mono text-[#E4E4E7]">
+                <span className="bg-[#121214] px-2 py-0.5 rounded border border-[#27272A] text-emerald-400 font-bold">
+                  {formatTimeStr(todaySchedule.startTime)}
+                </span>
+                <span className="text-[#8E8E93]">-</span>
+                <span className="bg-[#121214] px-2 py-0.5 rounded border border-[#27272A] text-rose-400 font-bold">
+                  {formatTimeStr(todaySchedule.endTime)}
+                </span>
+                <span className="text-[10px] text-[#8E8E93] font-sans mr-1">
+                  (سماح {todaySchedule.gracePeriod} د)
+                </span>
+              </div>
             </div>
           </div>
 

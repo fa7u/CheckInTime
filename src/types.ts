@@ -50,6 +50,11 @@ export interface OfficeSettings {
   workEndTime?: string; // e.g. "16:30"
   mapLink?: string; // Google maps link or coordinate string
   lateGracePeriod?: number; // in minutes (e.g., 10)
+  // Saturday Custom Schedule Settings
+  enableSaturdayCustomSchedule?: boolean;
+  saturdayStartTime?: string; // e.g. "09:00"
+  saturdayEndTime?: string; // e.g. "14:00"
+  saturdayGracePeriod?: number; // in minutes (e.g., 15)
 }
 
 export interface Tenant {

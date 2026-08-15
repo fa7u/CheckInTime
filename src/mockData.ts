@@ -9,6 +9,10 @@ export const DEFAULT_OFFICE: OfficeSettings = {
   workStartTime: '08:30',
   workEndTime: '16:30',
   lateGracePeriod: 10,
+  enableSaturdayCustomSchedule: false,
+  saturdayStartTime: '09:00',
+  saturdayEndTime: '14:00',
+  saturdayGracePeriod: 15,
 };
 
 export const INITIAL_EMPLOYEES: Employee[] = [];

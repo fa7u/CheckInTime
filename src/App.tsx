@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Employee, AttendanceRecord, ApprovalRequest, OfficeSettings, WorkModel, Tenant } from './types';
 import { INITIAL_EMPLOYEES, INITIAL_APPROVAL_REQUESTS, DEFAULT_OFFICE, generateMockHistory } from './mockData';
+import { getScheduleForDate, calculateAttendanceStatus } from './utils/scheduleHelper';
 import EmployeePanel from './components/EmployeePanel';
 import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
@@ -493,7 +494,8 @@ export default function App() {
       });
 
       // Archive any unarchived records for this past date
-      const workEndTime = officeSettings.workEndTime || '16:30';
+      const pastSchedule = getScheduleForDate(pastDate, officeSettings);
+      const workEndTime = pastSchedule.endTime;
       updatedRecords = updatedRecords.map(r => {
         if (r.date === pastDate && !r.archived) {
           const checkOutTime = r.checkOut || (r.checkIn && r.status !== 'غياب' ? workEndTime : null);
@@ -520,16 +522,17 @@ export default function App() {
     }, 2000);
 
     console.log(`[Auto-Archive] Archived previous unarchived days and created absent records for: ${uniquePastDates.join(', ')}`);
-  }, [isInitialDataLoaded, employees, attendanceRecords, activeTenantId, officeSettings.workEndTime]);
+  }, [isInitialDataLoaded, employees, attendanceRecords, activeTenantId, officeSettings]);
 
   // Hook for Automatically Checking Out Employees still on duty at Work End Time (وقت الانصراف الموحد)
   useEffect(() => {
     if (!isInitialDataLoaded || attendanceRecords.length === 0) return;
 
-    const workEndTime = officeSettings.workEndTime || '16:30';
     const checkAndAutoCheckout = () => {
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
+      const todaySchedule = getScheduleForDate(todayStr, officeSettings);
+      const workEndTime = todaySchedule.endTime;
       const currentHours = now.getHours().toString().padStart(2, '0');
       const currentMinutes = now.getMinutes().toString().padStart(2, '0');
       const currentTimeStr = `${currentHours}:${currentMinutes}`;
@@ -573,7 +576,7 @@ export default function App() {
     // Check periodically every 15 seconds
     const intervalId = setInterval(checkAndAutoCheckout, 15000);
     return () => clearInterval(intervalId);
-  }, [isInitialDataLoaded, attendanceRecords, officeSettings.workEndTime, activeTenantId]);
+  }, [isInitialDataLoaded, attendanceRecords, officeSettings, activeTenantId]);
 
   // Sync state helper to write to localStorage for the active tenant
   const saveState = (
@@ -723,7 +726,8 @@ export default function App() {
     });
 
     // Archive all existing unarchived records for today, ensuring any active employees get checked out at workEndTime
-    const workEndTime = officeSettings.workEndTime || '16:30';
+    const todaySchedule = getScheduleForDate(todayStr, officeSettings);
+    const workEndTime = todaySchedule.endTime;
     const updated = attendanceRecords.map(r => {
       if (r.date === todayStr && !r.archived) {
         const checkOutTime = r.checkOut || (r.checkIn && r.status !== 'غياب' ? workEndTime : null);
@@ -826,15 +830,7 @@ export default function App() {
     const requestTime = request.time || getFormattedTime();
 
     if (request.type === 'check-in') {
-      // Work hour policy: Starts dynamically based on officeSettings.workStartTime + lateGracePeriod
-      const [hour, min] = requestTime.split(':').map(Number);
-      const [startHour, startMin] = (officeSettings.workStartTime || "08:30").split(':').map(Number);
-      const graceMinutes = typeof officeSettings.lateGracePeriod === 'number' ? officeSettings.lateGracePeriod : 10;
-      const startTimeInMinutes = startHour * 60 + startMin;
-      const checkInTimeInMinutes = hour * 60 + min;
-      const isLate = isNaN(hour) || isNaN(min) ? false : (checkInTimeInMinutes > (startTimeInMinutes + graceMinutes));
-      const attendanceStatus = isLate ? 'متأخر' : 'حاضر';
-
+      const attendanceStatus = calculateAttendanceStatus(requestTime, request.date, officeSettings);
       const isOutOfRangeOnSite = request.notes?.includes('خارج النطاق');
 
       const newRecord: AttendanceRecord = {
