@@ -4,7 +4,7 @@ import {
   Settings, Award, AlertTriangle, FileText, Search, Plus, 
   Trash2, Edit, Save, Check, X, Shield, Download, RefreshCw,
   LayoutDashboard, Key, Eye, EyeOff, Menu, Link2, Copy, Archive,
-  UserCheck, UserX, LogIn, LogOut, Pencil
+  UserCheck, UserX, LogIn, LogOut, Pencil, ShieldCheck
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -353,7 +353,21 @@ export default function AdminPanel({
         };
         onUpdateAttendance?.(updatedRecord);
       } else {
-        onForceCheckOut?.(empId);
+        const emp = employees.find(e => e.id === empId);
+        const newRecord: AttendanceRecord = {
+          id: `att-admin-${Date.now()}-${empId}`,
+          employeeId: empId,
+          employeeName: empName,
+          date: todayStr,
+          checkIn: checkInTime,
+          checkOut: currentTime,
+          status: 'حاضر',
+          workModel: emp?.workModel || 'on-site',
+          totalHours: totalHrs,
+          isApproved: true,
+          archived: false,
+        };
+        onUpdateAttendance?.(newRecord);
       }
 
       setGlobalSuccessBanner(`تم تسجيل انصراف الموظف (${empName}) بنجاح الساعة (${currentTime}) [إجمالي ساعات العمل: ${totalHrs} ساعة] ✓`);
@@ -2021,8 +2035,19 @@ export default function AdminPanel({
                   </h3>
                   <p className="text-xs text-[#8E8E93] mt-0.5">متابعة فورية ومباشرة لحالة حضور وانصراف الموظفين خلال ساعات العمل الحالية</p>
                 </div>
-                <div className="text-xs text-[#8E8E93] font-mono bg-[#0F0F11] border border-[#27272A] px-3 py-1.5 rounded-xl self-start sm:self-auto">
-                  {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={openGeneralAdminAttModal}
+                    className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl transition-all shadow-md shadow-[#D4AF37]/15 flex items-center gap-1.5 cursor-pointer hover:scale-[1.02]"
+                    title="تسجيل حضور أو انصراف لأي موظف مع إمكانية تحديد التوقيت بدقة"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>تسجيل تحضير إداري يدوي</span>
+                  </button>
+                  <div className="text-xs text-[#8E8E93] font-mono bg-[#0F0F11] border border-[#27272A] px-3 py-1.5 rounded-xl self-start sm:self-auto">
+                    {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </div>
                 </div>
               </div>
 
@@ -2241,14 +2266,25 @@ export default function AdminPanel({
                                       </button>
                                     </div>
                                   ) : (
-                                    <button
-                                      type="button"
-                                      onClick={() => requestAdminCheckOutConfirmation(emp, todayRecord)}
-                                      className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
-                                    >
-                                      <UserX className="w-3.5 h-3.5 text-rose-400" />
-                                      <span>تسجيل انصراف</span>
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => requestAdminCheckOutConfirmation(emp, todayRecord)}
+                                        className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
+                                        title="تسجيل انصراف فوري بالوقت الحالي"
+                                      >
+                                        <UserX className="w-3.5 h-3.5 text-rose-400" />
+                                        <span>تسجيل انصراف</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => openAdminAttModalForCheckOut(emp, todayRecord)}
+                                        className="p-1.5 bg-[#1F1F23] hover:bg-[#27272A] text-zinc-300 hover:text-white border border-[#27272A] rounded-xl transition-all cursor-pointer"
+                                        title="تحديد وقت الانصراف بدقة يدوياً"
+                                      >
+                                        <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                      </button>
+                                    </div>
                                   )}
                                 </div>
                               ) : todayRecord && todayRecord.checkOut ? (
@@ -2273,14 +2309,25 @@ export default function AdminPanel({
                                   </button>
                                 </div>
                               ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => requestAdminCheckInConfirmation(emp)}
-                                  className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-200 border border-emerald-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
-                                >
-                                  <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                                  <span>تسجيل حضور</span>
-                                </button>
+                                <div className="flex items-center justify-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => requestAdminCheckInConfirmation(emp)}
+                                    className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-200 border border-emerald-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
+                                    title="تسجيل حضور فوري بالوقت الحالي"
+                                  >
+                                    <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                                    <span>تسجيل حضور</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openAdminAttModalForCheckIn(emp)}
+                                    className="p-1.5 bg-[#1F1F23] hover:bg-[#27272A] text-zinc-300 hover:text-white border border-[#27272A] rounded-xl transition-all cursor-pointer"
+                                    title="تحديد وقت الحضور بدقة يدوياً"
+                                  >
+                                    <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                  </button>
+                                </div>
                               )}
                             </td>
                           </tr>
@@ -3655,434 +3702,6 @@ export default function AdminPanel({
               )}
             </div>
 
-            {/* ========================================== */}
-            {/* NEW MODAL: EDIT ATTENDANCE RECORD (ADMIN ONLY) */}
-            {/* ========================================== */}
-            {editingRecord && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
-                <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 w-full max-w-lg shadow-2xl relative text-right">
-                  <button 
-                    type="button"
-                    onClick={() => setEditingRecord(null)}
-                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-
-                  <h4 className="text-base font-extrabold text-[#D4AF37] mb-2 flex items-center gap-2">
-                    <Edit className="w-5 h-5 text-[#D4AF37]" />
-                    <span>تعديل سجل حضور الموظف</span>
-                  </h4>
-                  <p className="text-xs text-[#8E8E93] mb-4">
-                    أنت تقوم الآن بتعديل سجل حضور الموظف <span className="text-white font-bold">{editingRecord.employeeName}</span>. سيقوم النظام بإعادة حساب ساعات العمل المنجزة تلقائياً بناءً على الوقت المدخل.
-                  </p>
-
-                  <form onSubmit={handleSaveEditRecord} className="space-y-4">
-                    {editRecError && (
-                      <div className="bg-rose-950/30 border border-rose-900/40 text-rose-400 text-xs p-3 rounded-lg font-bold">
-                        {editRecError}
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Date */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
-                        <input
-                          type="date"
-                          required
-                          value={editRecDate}
-                          onChange={(e) => setEditRecDate(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
-                        />
-                      </div>
-
-                      {/* Work Model */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">طبيعة العمل:</label>
-                        <select
-                          value={editRecWorkModel}
-                          onChange={(e) => setEditRecWorkModel(e.target.value as 'on-site' | 'remote')}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
-                        >
-                          <option value="on-site">حضوري</option>
-                          <option value="remote">عن بعد</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Check In */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">وقت الحضور (التحضير):</label>
-                        <input
-                          type="time"
-                          value={editRecCheckIn}
-                          onChange={(e) => setEditRecCheckIn(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] font-mono"
-                        />
-                      </div>
-
-                      {/* Check Out */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">وقت الانصراف:</label>
-                        <input
-                          type="time"
-                          value={editRecCheckOut}
-                          onChange={(e) => setEditRecCheckOut(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Status selection */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">حالة الحضور الإجمالية:</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(['حاضر', 'متأخر', 'غياب'] as const).map((status) => (
-                          <button
-                            key={status}
-                            type="button"
-                            onClick={() => {
-                              setEditRecStatus(status);
-                              if (status === 'غياب') {
-                                setEditRecCheckIn('');
-                                setEditRecCheckOut('');
-                              } else if (!editRecCheckIn) {
-                                setEditRecCheckIn('08:00');
-                              }
-                            }}
-                            className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                              editRecStatus === status
-                                ? status === 'حاضر'
-                                  ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400'
-                                  : status === 'متأخر'
-                                  ? 'bg-amber-950/30 border-amber-500 text-amber-400'
-                                  : 'bg-rose-950/30 border-rose-500 text-rose-400'
-                                : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
-                            }`}
-                          >
-                            {status}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Modal Buttons */}
-                    <div className="flex gap-2 pt-3 border-t border-[#27272A]">
-                      <button
-                        type="submit"
-                        className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
-                      >
-                        حفظ سجل التحضير
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditingRecord(null)}
-                        className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
-                      >
-                        إلغاء الأمر
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* Professional Admin Check-In / Check-Out Modal */}
-            {isAdminAttModalOpen && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-                <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-lg p-6 relative shadow-2xl text-right overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setIsAdminAttModalOpen(false)}
-                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
-                      <Shield className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-base font-extrabold text-[#E4E4E7]">
-                        صلاحية التحضير والإنصراف الإداري
-                      </h4>
-                      <p className="text-xs text-[#8E8E93]">
-                        تسجيل حضور أو انصراف إداري للموظفين بصورة مباشرة واحترافية
-                      </p>
-                    </div>
-                  </div>
-
-                  {adminAttSuccessMsg && (
-                    <div className="bg-emerald-950/40 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>{adminAttSuccessMsg}</span>
-                    </div>
-                  )}
-
-                  {adminAttError && (
-                    <div className="bg-rose-950/40 border border-rose-900/40 text-rose-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                      <span>{adminAttError}</span>
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSaveAdminAttendance} className="space-y-4 text-right">
-                    {/* Employee & Date */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">اختيار الموظف:</label>
-                        <select
-                          value={adminAttEmployeeId}
-                          onChange={(e) => {
-                            setAdminAttEmployeeId(e.target.value);
-                            const selected = employees.find(emp => emp.id === e.target.value);
-                            if (selected) {
-                              setAdminAttWorkModel(selected.workModel || 'on-site');
-                            }
-                          }}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
-                        >
-                          {employees.map(emp => (
-                            <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
-                        <input
-                          type="date"
-                          required
-                          value={adminAttDate}
-                          onChange={(e) => setAdminAttDate(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Action Mode Toggle */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">نوع الإجراء الإداري:</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setAdminAttMode('check-in')}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                            adminAttMode === 'check-in'
-                              ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400 shadow-sm'
-                              : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
-                          }`}
-                        >
-                          <LogIn className="w-3.5 h-3.5" />
-                          <span>حضور فقط</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setAdminAttMode('check-out')}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                            adminAttMode === 'check-out'
-                              ? 'bg-rose-950/50 border-rose-500 text-rose-400 shadow-sm'
-                              : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
-                          }`}
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          <span>انصراف فقط</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setAdminAttMode('both')}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                            adminAttMode === 'both'
-                              ? 'bg-amber-950/50 border-amber-500 text-amber-400 shadow-sm'
-                              : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
-                          }`}
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                          <span>حضور وانصراف</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Time Inputs */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {(adminAttMode === 'check-in' || adminAttMode === 'both') && (
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-emerald-400 block">وقت الحضور:</label>
-                          <input
-                            type="time"
-                            required
-                            value={adminAttCheckIn}
-                            onChange={(e) => setAdminAttCheckIn(e.target.value)}
-                            className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-emerald-500"
-                          />
-                        </div>
-                      )}
-
-                      {(adminAttMode === 'check-out' || adminAttMode === 'both') && (
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-rose-400 block">وقت الانصراف:</label>
-                          <input
-                            type="time"
-                            required
-                            value={adminAttCheckOut}
-                            onChange={(e) => setAdminAttCheckOut(e.target.value)}
-                            className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-rose-500"
-                          />
-                        </div>
-                      )}
-
-                      {adminAttMode === 'check-out' && (
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-400 block">وقت الحضور المسجل:</label>
-                          <input
-                            type="time"
-                            value={adminAttCheckIn}
-                            onChange={(e) => setAdminAttCheckIn(e.target.value)}
-                            className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-zinc-300 font-mono focus:outline-none focus:border-[#D4AF37]"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Status & Work Model */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">حالة التحضير:</label>
-                        <select
-                          value={adminAttStatus}
-                          onChange={(e) => setAdminAttStatus(e.target.value as any)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
-                        >
-                          <option value="حاضر">حاضر (في الوقت)</option>
-                          <option value="متأخر">متأخر</option>
-                          <option value="غياب">غياب كلي</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#8E8E93] block">نموذج العمل:</label>
-                        <select
-                          value={adminAttWorkModel}
-                          onChange={(e) => setAdminAttWorkModel(e.target.value as any)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
-                        >
-                          <option value="on-site">حضوري (ميداني/مكتبي)</option>
-                          <option value="remote">عن بعد</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Admin Notes */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">ملاحظات الإدارة (اختياري):</label>
-                      <input
-                        type="text"
-                        value={adminAttNotes}
-                        onChange={(e) => setAdminAttNotes(e.target.value)}
-                        placeholder="مثال: تسجيل دخول بطلب مباشر من الموظف / تعديل تقني"
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] placeholder-[#52525B] focus:outline-none focus:border-[#D4AF37]"
-                      />
-                    </div>
-
-                    {/* Submit Actions */}
-                    <div className="flex gap-2 pt-3 border-t border-[#27272A]">
-                      <button
-                        type="submit"
-                        className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#D4AF37]/10 flex items-center justify-center gap-1.5"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        <span>تأكيد وتسجيل الإجراء الإداري</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsAdminAttModalOpen(false)}
-                        className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
-                      >
-                        إلغاء
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* Confirmation Modal for Admin Attendance Action */}
-            {confirmAttAction && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-                <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-md p-6 relative shadow-2xl text-right">
-                  <button
-                    type="button"
-                    onClick={() => setConfirmAttAction(null)}
-                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                      confirmAttAction.type === 'check-in' 
-                        ? 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-400' 
-                        : 'bg-rose-950/80 border border-rose-500/40 text-rose-400'
-                    }`}>
-                      {confirmAttAction.type === 'check-in' ? <UserCheck className="w-6 h-6" /> : <UserX className="w-6 h-6" />}
-                    </div>
-                    <div>
-                      <h4 className="text-base font-extrabold text-[#E4E4E7]">
-                        {confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل حضور إداري' : 'تأكيد تسجيل انصراف إداري'}
-                      </h4>
-                      <p className="text-xs text-[#8E8E93]">
-                        يرجى التأكيد لتسجيل الإجراء مباشرة لليوم
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#0F0F11] border border-[#27272A] rounded-xl p-4 mb-5 space-y-2.5 text-xs">
-                    <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
-                      <span className="text-[#8E8E93]">اسم الموظف:</span>
-                      <span className="font-bold text-[#E4E4E7] text-sm">{confirmAttAction.empName}</span>
-                    </div>
-                    <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
-                      <span className="text-[#8E8E93]">الوقت الحالي:</span>
-                      <span className="font-mono font-bold text-[#D4AF37] text-sm">{getFormattedCurrentTime()}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[#8E8E93]">نوع الإجراء:</span>
-                      <span className={`font-extrabold ${confirmAttAction.type === 'check-in' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {confirmAttAction.type === 'check-in' ? 'تسجيل دخول (حضور)' : 'تسجيل خروج (انصراف)'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2.5">
-                    <button
-                      type="button"
-                      onClick={executeConfirmedAdminAttendance}
-                      className={`flex-1 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center gap-1.5 ${
-                        confirmAttAction.type === 'check-in'
-                          ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
-                          : 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20'
-                      }`}
-                    >
-                      <Check className="w-4 h-4" />
-                      <span>{confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل الحضور' : 'تأكيد تسجيل الانصراف'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmAttAction(null)}
-                      className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
-                    >
-                      إلغاء
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
           </div>
         )}
 
@@ -4435,6 +4054,438 @@ export default function AdminPanel({
               </button>
             </form>
 
+          </div>
+        )}
+
+        {/* ========================================== */}
+        {/* GLOBAL MODAL 1: EDIT ATTENDANCE RECORD (ADMIN ONLY) */}
+        {/* ========================================== */}
+        {editingRecord && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
+            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 w-full max-w-lg shadow-2xl relative text-right">
+              <button 
+                type="button"
+                onClick={() => setEditingRecord(null)}
+                className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h4 className="text-base font-extrabold text-[#D4AF37] mb-2 flex items-center gap-2">
+                <Edit className="w-5 h-5 text-[#D4AF37]" />
+                <span>تعديل سجل حضور الموظف</span>
+              </h4>
+              <p className="text-xs text-[#8E8E93] mb-4">
+                أنت تقوم الآن بتعديل سجل حضور الموظف <span className="text-white font-bold">{editingRecord.employeeName}</span>. سيقوم النظام بإعادة حساب ساعات العمل المنجزة تلقائياً بناءً على الوقت المدخل.
+              </p>
+
+              <form onSubmit={handleSaveEditRecord} className="space-y-4">
+                {editRecError && (
+                  <div className="bg-rose-950/30 border border-rose-900/40 text-rose-400 text-xs p-3 rounded-lg font-bold">
+                    {editRecError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Date */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
+                    <input
+                      type="date"
+                      required
+                      value={editRecDate}
+                      onChange={(e) => setEditRecDate(e.target.value)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+
+                  {/* Work Model */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">طبيعة العمل:</label>
+                    <select
+                      value={editRecWorkModel}
+                      onChange={(e) => setEditRecWorkModel(e.target.value as 'on-site' | 'remote')}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    >
+                      <option value="on-site">حضوري</option>
+                      <option value="remote">عن بعد</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Check In */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">وقت الحضور (التحضير):</label>
+                    <input
+                      type="time"
+                      value={editRecCheckIn}
+                      onChange={(e) => setEditRecCheckIn(e.target.value)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] font-mono"
+                    />
+                  </div>
+
+                  {/* Check Out */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">وقت الانصراف:</label>
+                    <input
+                      type="time"
+                      value={editRecCheckOut}
+                      onChange={(e) => setEditRecCheckOut(e.target.value)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Status selection */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#8E8E93] block">حالة الحضور الإجمالية:</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['حاضر', 'متأخر', 'غياب'] as const).map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => {
+                          setEditRecStatus(status);
+                          if (status === 'غياب') {
+                            setEditRecCheckIn('');
+                            setEditRecCheckOut('');
+                          } else if (!editRecCheckIn) {
+                            setEditRecCheckIn('08:00');
+                          }
+                        }}
+                        className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                          editRecStatus === status
+                            ? status === 'حاضر'
+                              ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400'
+                              : status === 'متأخر'
+                              ? 'bg-amber-950/30 border-amber-500 text-amber-400'
+                              : 'bg-rose-950/30 border-rose-500 text-rose-400'
+                            : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Modal Buttons */}
+                <div className="flex gap-2 pt-3 border-t border-[#27272A]">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    حفظ سجل التحضير
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingRecord(null)}
+                    className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                  >
+                    إلغاء الأمر
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================== */}
+        {/* GLOBAL MODAL 2: PROFESSIONAL ADMIN ATTENDANCE MODAL */}
+        {/* ========================================== */}
+        {isAdminAttModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-lg p-6 relative shadow-2xl text-right overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setIsAdminAttModalOpen(false)}
+                className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-base font-extrabold text-[#E4E4E7]">
+                    صلاحية التحضير والإنصراف الإداري
+                  </h4>
+                  <p className="text-xs text-[#8E8E93]">
+                    تسجيل حضور أو انصراف إداري للموظفين بصورة مباشرة واحترافية
+                  </p>
+                </div>
+              </div>
+
+              {adminAttSuccessMsg && (
+                <div className="bg-emerald-950/40 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{adminAttSuccessMsg}</span>
+                </div>
+              )}
+
+              {adminAttError && (
+                <div className="bg-rose-950/40 border border-rose-900/40 text-rose-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>{adminAttError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveAdminAttendance} className="space-y-4 text-right">
+                {/* Employee & Date */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">اختيار الموظف:</label>
+                    <select
+                      value={adminAttEmployeeId}
+                      onChange={(e) => {
+                        setAdminAttEmployeeId(e.target.value);
+                        const selected = employees.find(emp => emp.id === e.target.value);
+                        if (selected) {
+                          setAdminAttWorkModel(selected.workModel || 'on-site');
+                        }
+                      }}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    >
+                      {employees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
+                    <input
+                      type="date"
+                      required
+                      value={adminAttDate}
+                      onChange={(e) => setAdminAttDate(e.target.value)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Mode Toggle */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#8E8E93] block">نوع الإجراء الإداري:</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAdminAttMode('check-in')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        adminAttMode === 'check-in'
+                          ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400 shadow-sm'
+                          : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                      }`}
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      <span>حضور فقط</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setAdminAttMode('check-out')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        adminAttMode === 'check-out'
+                          ? 'bg-rose-950/50 border-rose-500 text-rose-400 shadow-sm'
+                          : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                      }`}
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>انصراف فقط</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setAdminAttMode('both')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        adminAttMode === 'both'
+                          ? 'bg-amber-950/50 border-amber-500 text-amber-400 shadow-sm'
+                          : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                      }`}
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>حضور وانصراف</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Time Inputs */}
+                <div className="grid grid-cols-2 gap-3">
+                  {(adminAttMode === 'check-in' || adminAttMode === 'both') && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-emerald-400 block">وقت الحضور:</label>
+                      <input
+                        type="time"
+                        required
+                        value={adminAttCheckIn}
+                        onChange={(e) => setAdminAttCheckIn(e.target.value)}
+                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                  )}
+
+                  {(adminAttMode === 'check-out' || adminAttMode === 'both') && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-rose-400 block">وقت الانصراف:</label>
+                      <input
+                        type="time"
+                        required
+                        value={adminAttCheckOut}
+                        onChange={(e) => setAdminAttCheckOut(e.target.value)}
+                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-rose-500"
+                      />
+                    </div>
+                  )}
+
+                  {adminAttMode === 'check-out' && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-zinc-400 block">وقت الحضور المسجل:</label>
+                      <input
+                        type="time"
+                        value={adminAttCheckIn}
+                        onChange={(e) => setAdminAttCheckIn(e.target.value)}
+                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-zinc-300 font-mono focus:outline-none focus:border-[#D4AF37]"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Status & Work Model */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">حالة التحضير:</label>
+                    <select
+                      value={adminAttStatus}
+                      onChange={(e) => setAdminAttStatus(e.target.value as any)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    >
+                      <option value="حاضر">حاضر (في الوقت)</option>
+                      <option value="متأخر">متأخر</option>
+                      <option value="غياب">غياب كلي</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#8E8E93] block">نموذج العمل:</label>
+                    <select
+                      value={adminAttWorkModel}
+                      onChange={(e) => setAdminAttWorkModel(e.target.value as any)}
+                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    >
+                      <option value="on-site">حضوري (ميداني/مكتبي)</option>
+                      <option value="remote">عن بعد</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Admin Notes */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#8E8E93] block">ملاحظات الإدارة (اختياري):</label>
+                  <input
+                    type="text"
+                    value={adminAttNotes}
+                    onChange={(e) => setAdminAttNotes(e.target.value)}
+                    placeholder="مثال: تسجيل دخول بطلب مباشر من الموظف / تعديل تقني"
+                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] placeholder-[#52525B] focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Submit Actions */}
+                <div className="flex gap-2 pt-3 border-t border-[#27272A]">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#D4AF37]/10 flex items-center justify-center gap-1.5"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    <span>تأكيد وتسجيل الإجراء الإداري</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsAdminAttModalOpen(false)}
+                    className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================== */}
+        {/* GLOBAL MODAL 3: QUICK ACTION ATTENDANCE CONFIRMATION */}
+        {/* ========================================== */}
+        {confirmAttAction && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-md p-6 relative shadow-2xl text-right">
+              <button
+                type="button"
+                onClick={() => setConfirmAttAction(null)}
+                className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                  confirmAttAction.type === 'check-in' 
+                    ? 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-400' 
+                    : 'bg-rose-950/80 border border-rose-500/40 text-rose-400'
+                }`}>
+                  {confirmAttAction.type === 'check-in' ? <UserCheck className="w-6 h-6" /> : <UserX className="w-6 h-6" />}
+                </div>
+                <div>
+                  <h4 className="text-base font-extrabold text-[#E4E4E7]">
+                    {confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل حضور إداري' : 'تأكيد تسجيل انصراف إداري'}
+                  </h4>
+                  <p className="text-xs text-[#8E8E93]">
+                    يرجى التأكيد لتسجيل الإجراء مباشرة لليوم
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-[#0F0F11] border border-[#27272A] rounded-xl p-4 mb-5 space-y-2.5 text-xs">
+                <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
+                  <span className="text-[#8E8E93]">اسم الموظف:</span>
+                  <span className="font-bold text-[#E4E4E7] text-sm">{confirmAttAction.empName}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
+                  <span className="text-[#8E8E93]">الوقت الحالي:</span>
+                  <span className="font-mono font-bold text-[#D4AF37] text-sm">{getFormattedCurrentTime()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8E8E93]">نوع الإجراء:</span>
+                  <span className={`font-extrabold ${confirmAttAction.type === 'check-in' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {confirmAttAction.type === 'check-in' ? 'تسجيل دخول (حضور)' : 'تسجيل خروج (انصراف)'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={executeConfirmedAdminAttendance}
+                  className={`flex-1 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center gap-1.5 ${
+                    confirmAttAction.type === 'check-in'
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
+                      : 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20'
+                  }`}
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل الحضور' : 'تأكيد تسجيل الانصراف'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmAttAction(null)}
+                  className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
