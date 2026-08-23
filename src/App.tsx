@@ -10,7 +10,6 @@ import { getScheduleForDate, calculateAttendanceStatus } from './utils/scheduleH
 import EmployeePanel from './components/EmployeePanel';
 import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
-import ThemeSwitcher from './components/ThemeSwitcher';
 import { collection, onSnapshot, query, where, doc } from 'firebase/firestore';
 import {
   db,
@@ -1121,15 +1120,15 @@ export default function App() {
 
   if (!isLoaded || !isInitialDataLoaded) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4">
         <Clock className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
-        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 font-serif italic">جاري تحميل نظام checkInTime للتحضير الذكي...</p>
+        <p className="text-sm font-bold text-slate-700 font-serif italic">جاري تحميل نظام checkInTime للتحضير الذكي...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200" dir="rtl" id="app-wrapper">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans" dir="rtl" id="app-wrapper">
 
       {/* Super Admin Preview Banner */}
       {localStorage.getItem(`hader_super_admin_active_${activeTenantId}`) === 'true' && !isSuperAdminMode && (
@@ -1159,34 +1158,31 @@ export default function App() {
       )}
 
       {/* Main Core Application Header */}
-      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-4 px-6 sticky top-0 z-40 shadow-xs transition-colors duration-200">
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 py-4 px-6 sticky top-0 z-40 shadow-xs">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
           {/* Logo / Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-none text-white">
+            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-200 text-white">
               <ClipboardList className="w-5 h-5" />
             </div>
             <div className="text-right">
-              <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+              <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">
                 {isSuperAdminMode ? 'checkInTime | لوحة المصمم العام' : `${activeCompanyName}`}
               </h1>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 tracking-normal font-medium">
+              <p className="text-[11px] text-slate-500 mt-0.5 tracking-normal font-medium">
                 {isSuperAdminMode ? 'إدارة كافة المؤسسات والمشاريع وعمليات التهيئة' : 'النظام الذكي لإدارة الموارد البشرية والتحضير'}
               </p>
             </div>
           </div>
 
           {/* Header Action Elements */}
-          <div className="flex items-center gap-2.5">
-            {/* Global Theme Switcher */}
-            <ThemeSwitcher variant="dropdown" />
-
+          <div className="flex items-center gap-3">
             {isSuperAdminMode ? (
               <button
                 type="button"
                 onClick={handleSuperAdminLogout}
-                className="inline-flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150 shadow-xs"
+                className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150 shadow-xs"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>الخروج من الإدارة العامة</span>
@@ -1201,9 +1197,9 @@ export default function App() {
                     setAdminLoginError('');
                     setShowAdminLoginModal(true);
                   }}
-                  className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150 shadow-xs"
+                  className="inline-flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150 shadow-xs"
                 >
-                  <Shield className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <Shield className="w-3.5 h-3.5 text-indigo-600" />
                   <span>دخول الإدارة</span>
                 </button>
               </div>
@@ -1222,7 +1218,7 @@ export default function App() {
                         localStorage.removeItem(`hader_logged_in_emp_id_${activeTenantId}`);
                         localStorage.removeItem(`hader_super_admin_active_${activeTenantId}`);
                       }}
-                      className="inline-flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150 shadow-xs"
+                      className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-150 shadow-xs"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>تسجيل الخروج</span>
@@ -1241,72 +1237,66 @@ export default function App() {
         <div className="fixed inset-0 z-50 overflow-hidden text-right" id="admin-side-drawer-root" role="dialog" aria-modal="true">
           {/* Backdrop Overlay */}
           <div 
-            className="absolute inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-xs transition-opacity duration-300 cursor-pointer" 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300 cursor-pointer" 
             onClick={() => setIsAdminDrawerOpen(false)}
           ></div>
 
           {/* Sliding Panel Content */}
-          <div className="absolute inset-y-0 right-0 max-w-sm w-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between p-6 transform transition-transform duration-300">
+          <div className="absolute inset-y-0 right-0 max-w-sm w-full bg-white border-l border-slate-200 shadow-2xl flex flex-col justify-between p-6 transform transition-transform duration-300">
             
             {/* Drawer Body Area */}
             <div className="space-y-6">
               
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200">
                 <button 
                   type="button"
                   onClick={() => setIsAdminDrawerOpen(false)}
-                  className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
                   title="إغلاق القائمة"
                 >
                   <X className="w-4 h-4" />
                 </button>
                 <div className="text-right">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">بيانات مدير النظام</h2>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">لوحة التحكم والمحاكاة</p>
+                  <h2 className="text-sm font-bold text-slate-900">بيانات مدير النظام</h2>
+                  <p className="text-[10px] text-slate-500 mt-0.5">لوحة التحكم والمحاكاة</p>
                 </div>
               </div>
 
               {/* Admin Profile Block */}
-              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-100 dark:shadow-none shrink-0">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-100 shrink-0">
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">{currentAdminName}</h3>
-                  <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">كامل صلاحيات لوحة التحكم والتهيئة لمؤسسة: {activeCompanyName}</p>
+                  <h3 className="text-xs font-bold text-slate-900">{currentAdminName}</h3>
+                  <p className="text-[9px] text-slate-500 mt-0.5">كامل صلاحيات لوحة التحكم والتهيئة لمؤسسة: {activeCompanyName}</p>
                 </div>
-              </div>
-
-              {/* Theme quick toggle inside drawer */}
-              <div className="space-y-2">
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold block">مظهر التطبيق:</span>
-                <ThemeSwitcher variant="segmented" className="w-full justify-center" />
               </div>
 
               {/* Admin Login Credentials Box */}
               <div className="space-y-2">
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold block">بيانات دخول المدير:</span>
-                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl p-3.5 space-y-2 text-xs font-mono">
-                  <div className="flex justify-between items-center bg-white dark:bg-slate-800 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-900 dark:text-white font-bold">{currentAdminUsername}</span>
-                    <span className="text-slate-500 dark:text-slate-400 text-[10px]">اسم المستخدم</span>
+                <span className="text-[10px] text-slate-600 font-bold block">بيانات دخول المدير:</span>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs font-mono">
+                  <div className="flex justify-between items-center bg-white px-3 py-2 rounded-lg border border-slate-200">
+                    <span className="text-slate-900 font-bold">{currentAdminUsername}</span>
+                    <span className="text-slate-500 text-[10px]">اسم المستخدم</span>
                   </div>
-                  <div className="flex justify-between items-center bg-white dark:bg-slate-800 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="flex justify-between items-center bg-white px-3 py-2 rounded-lg border border-slate-200">
                     <div className="flex items-center gap-2">
                       <button 
                         type="button" 
                         onClick={() => setIsAdminPasswordVisible(!isAdminPasswordVisible)}
-                        className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 cursor-pointer"
+                        className="text-indigo-600 hover:text-indigo-700 cursor-pointer"
                         title={isAdminPasswordVisible ? "إخفاء كلمة المرور" : "عرض كلمة المرور"}
                       >
                         {isAdminPasswordVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
-                      <span className="text-slate-900 dark:text-white font-bold">
+                      <span className="text-slate-900 font-bold">
                         {isAdminPasswordVisible ? currentAdminPassword : '••••••••'}
                       </span>
                     </div>
-                    <span className="text-slate-500 dark:text-slate-400 text-[10px]">كلمة المرور</span>
+                    <span className="text-slate-500 text-[10px]">كلمة المرور</span>
                   </div>
                 </div>
               </div>
@@ -1314,9 +1304,9 @@ export default function App() {
 
               {/* Account Simulation Switcher Option */}
               <div className="space-y-2">
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold block">تبديل حساب المحاكاة النشط:</span>
-                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl p-3 flex flex-col gap-2">
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">تتيح لك المحاكاة الدخول كأحد موظفيك لمراجعة تجربة التحضير، دون الحاجة لتسجيل الخروج.</p>
+                <span className="text-[10px] text-slate-600 font-bold block">تبديل حساب المحاكاة النشط:</span>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2">
+                  <p className="text-[10px] text-slate-500 leading-relaxed">تتيح لك المحاكاة الدخول كأحد موظفيك لمراجعة تجربة التحضير، دون الحاجة لتسجيل الخروج.</p>
                   
                   <div className="relative mt-1">
                     <select
@@ -1326,9 +1316,9 @@ export default function App() {
                         setSelectedUser(e.target.value);
                         setIsAdminDrawerOpen(false);
                       }}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs px-3 py-2.5 rounded-lg text-slate-900 dark:text-white font-bold focus:outline-none focus:border-indigo-600 cursor-pointer appearance-none shadow-xs"
+                      className="w-full bg-white border border-slate-300 text-xs px-3 py-2.5 rounded-lg text-slate-900 font-bold focus:outline-none focus:border-indigo-600 cursor-pointer appearance-none shadow-xs"
                     >
-                      <option value="admin" className="text-indigo-700 dark:text-indigo-400">مدير النظام (الرئيسي)</option>
+                      <option value="admin" className="text-indigo-700">مدير النظام (الرئيسي)</option>
                       {employees.map(emp => (
                         <option key={emp.id} value={emp.id}>
                           الموظف: {emp.name} ({emp.role})
@@ -1343,12 +1333,12 @@ export default function App() {
               </div>
 
               {/* Warning factory reset action */}
-              <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl p-4 text-xs space-y-3">
-                <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold justify-end">
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-xs space-y-3">
+                <div className="flex items-center gap-2 text-rose-700 font-bold justify-end">
                   <span>إعادة تهيئة النظام بالكامل</span>
-                  <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
                 </div>
-                <p className="text-[10px] text-rose-600/90 dark:text-rose-400/90 leading-relaxed">
+                <p className="text-[10px] text-rose-600/90 leading-relaxed">
                   سيقوم هذا الإجراء بحذف كافة السجلات والموظفين المضافين والطلبات، والبدء بقائمة موظفين فارغة تماماً.
                 </p>
                 <button
@@ -1368,11 +1358,11 @@ export default function App() {
             </div>
 
             {/* Close Drawer Footer Button */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+            <div className="pt-4 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setIsAdminDrawerOpen(false)}
-                className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer text-center"
+                className="w-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer text-center"
               >
                 إغلاق القائمة الجانبية
               </button>
@@ -1440,14 +1430,14 @@ export default function App() {
             <div className="max-w-xl mx-auto space-y-6 animate-in fade-in duration-300">
               
               {/* Card container */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl relative text-right">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl relative text-right">
                 
-                <div className="text-center pb-6 border-b border-slate-100 dark:border-slate-800 mb-6">
-                  <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-center justify-center shadow-xs text-indigo-600 dark:text-indigo-400 mx-auto mb-3">
+                <div className="text-center pb-6 border-b border-slate-100 mb-6">
+                  <div className="w-14 h-14 bg-indigo-50 border border-indigo-200 rounded-2xl flex items-center justify-center shadow-xs text-indigo-600 mx-auto mb-3">
                     <Users className="w-7 h-7" />
                   </div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">بوابة الخدمة الذاتية للموظفين</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">الرجاء تحديد اسمك من القائمة وإدخال كلمة المرور للتحضير</p>
+                  <h2 className="text-xl font-bold text-slate-900">بوابة الخدمة الذاتية للموظفين</h2>
+                  <p className="text-xs text-slate-500 mt-1.5">الرجاء تحديد اسمك من القائمة وإدخال كلمة المرور للتحضير</p>
                 </div>
 
                 {portalLoginEmployeeId === '' ? (
@@ -1459,7 +1449,7 @@ export default function App() {
                         placeholder="ابحث عن اسمك في الكادر..."
                         value={employeePortalSearch}
                         onChange={(e) => setEmployeePortalSearch(e.target.value)}
-                        className="w-full bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:border-indigo-600 rounded-xl text-xs pl-4 pr-10 py-3 text-right focus:outline-none text-slate-900 dark:text-white font-medium shadow-xs transition-all"
+                        className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-indigo-600 rounded-xl text-xs pl-4 pr-10 py-3 text-right focus:outline-none text-slate-900 font-medium shadow-xs transition-all"
                       />
                       <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-4" />
                     </div>
@@ -1473,7 +1463,7 @@ export default function App() {
 
                         if (filtered.length === 0) {
                           return (
-                            <div className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+                            <div className="text-center py-8 text-xs text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                               {employees.length === 0 ? 'لا يوجد موظفون مضافون بالنظام حالياً.' : 'لا توجد نتائج مطابقة لبحثك.'}
                             </div>
                           );
@@ -1488,20 +1478,20 @@ export default function App() {
                               setPortalPasswordInput('');
                               setPortalPasswordError('');
                             }}
-                            className="w-full text-right p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 flex items-center justify-between transition-all cursor-pointer group shadow-2xs"
+                            className="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-300 flex items-center justify-between transition-all cursor-pointer group shadow-2xs"
                           >
-                            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1.5">
+                            <span className="text-[10px] font-bold text-slate-500 group-hover:text-indigo-600 transition-colors flex items-center gap-1.5">
                               {emp.workModel === 'on-site' ? (
-                                <span className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-full text-[9px] font-semibold">حضوري</span>
+                                <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full text-[9px] font-semibold">حضوري</span>
                               ) : (
-                                <span className="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full text-[9px] font-semibold">عن بُعد</span>
+                                <span className="bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full text-[9px] font-semibold">عن بُعد</span>
                               )}
                               <span>اختر ←</span>
                             </span>
                             <div className="flex items-center gap-3">
                               <div className="text-right">
-                                <h3 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{emp.name}</h3>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{emp.role}</p>
+                                <h3 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{emp.name}</h3>
+                                <p className="text-[10px] text-slate-500 mt-0.5">{emp.role}</p>
                               </div>
                               <span className={`w-8 h-8 rounded-full ${emp.avatarColor} text-white flex items-center justify-center text-xs font-extrabold shadow-sm shrink-0`}>
                                 {emp.name.split(' ').map(n => n[0]).join('')}
@@ -1521,7 +1511,7 @@ export default function App() {
                     return (
                       <div className="space-y-5 animate-in fade-in duration-200">
                         {/* Selected employee info summary */}
-                        <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                           <button
                             type="button"
                             onClick={() => {
@@ -1529,14 +1519,14 @@ export default function App() {
                               setPortalPasswordInput('');
                               setPortalPasswordError('');
                             }}
-                            className="text-[10px] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer font-bold shadow-2xs"
+                            className="text-[10px] text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer font-bold shadow-2xs"
                           >
                             تغيير الموظف
                           </button>
                           <div className="flex items-center gap-3">
                             <div className="text-right">
-                              <h3 className="text-xs font-bold text-slate-900 dark:text-white">{emp.name}</h3>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{emp.role}</p>
+                              <h3 className="text-xs font-bold text-slate-900">{emp.name}</h3>
+                              <p className="text-[10px] text-slate-500 mt-0.5">{emp.role}</p>
                             </div>
                             <span className={`w-9 h-9 rounded-full ${emp.avatarColor} text-white flex items-center justify-center text-xs font-extrabold shadow-sm`}>
                               {emp.name.split(' ').map(n => n[0]).join('')}
@@ -1546,10 +1536,10 @@ export default function App() {
 
                         {/* Password form field */}
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block flex items-center justify-between">
-                            <span className="text-slate-400 dark:text-slate-500 font-normal">* حقل مطلوب</span>
-                            <span className="text-indigo-700 dark:text-indigo-400 font-bold flex items-center gap-1">
-                              <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                          <label className="text-xs font-bold text-slate-600 block flex items-center justify-between">
+                            <span className="text-slate-400 font-normal">* حقل مطلوب</span>
+                            <span className="text-indigo-700 font-bold flex items-center gap-1">
+                              <Lock className="w-3.5 h-3.5 text-indigo-600" />
                               أدخل الرقم السري للموظف
                             </span>
                           </label>
@@ -1563,7 +1553,7 @@ export default function App() {
                                 setPortalPasswordInput(e.target.value);
                                 setPortalPasswordError('');
                               }}
-                              className="w-full bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:border-indigo-600 rounded-xl text-xs pl-10 pr-4 py-3 text-right focus:outline-none text-slate-900 dark:text-white font-mono shadow-xs"
+                              className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-indigo-600 rounded-xl text-xs pl-10 pr-4 py-3 text-right focus:outline-none text-slate-900 font-mono shadow-xs"
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   if (portalPasswordInput === emp.password) {
@@ -1580,13 +1570,13 @@ export default function App() {
                             <button
                               type="button"
                               onClick={() => setPortalPasswordVisible(!portalPasswordVisible)}
-                              className="absolute left-3 top-3.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                              className="absolute left-3 top-3.5 text-slate-400 hover:text-slate-700 transition-colors"
                             >
                               {portalPasswordVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
                           {portalPasswordError && (
-                            <p className="text-[10px] font-bold text-rose-700 dark:text-rose-400 mt-1 bg-rose-50 dark:bg-rose-950/40 p-2 rounded-lg border border-rose-200 dark:border-rose-800">
+                            <p className="text-[10px] font-bold text-rose-700 mt-1 bg-rose-50 p-2 rounded-lg border border-rose-200">
                               {portalPasswordError}
                             </p>
                           )}
@@ -1605,7 +1595,7 @@ export default function App() {
                                 setPortalPasswordError('رمز المرور غير صحيح، يرجى إعادة المحاولة.');
                               }
                             }}
-                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md shadow-indigo-100 dark:shadow-none cursor-pointer text-center"
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md shadow-indigo-100 cursor-pointer text-center"
                           >
                             دخول وبدء التحضير الذاتي
                           </button>
@@ -1617,7 +1607,7 @@ export default function App() {
                               setPortalPasswordInput('');
                               setPortalPasswordError('');
                             }}
-                            className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs px-4 rounded-xl transition-colors cursor-pointer"
+                            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs px-4 rounded-xl transition-colors cursor-pointer"
                           >
                             إلغاء
                           </button>
@@ -1867,19 +1857,19 @@ export default function App() {
       
       {/* Admin Login Modal Overlay */}
       {showAdminLoginModal && (
-        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-sm shadow-2xl relative text-right">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-sm shadow-2xl relative text-right">
             
             <button 
               id="btn-close-admin-portal-login"
               onClick={() => setShowAdminLoginModal(false)}
-              className="absolute left-4 top-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+              className="absolute left-4 top-4 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <Shield className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h4 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <Shield className="w-5 h-5 text-indigo-600" />
               بوابة التحقق لمدير النظام
             </h4>
 
@@ -1954,25 +1944,25 @@ export default function App() {
               className="space-y-4"
             >
               {adminLoginError && (
-                <p className="text-[10px] text-rose-700 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-950/40 p-2 rounded border border-rose-200 dark:border-rose-800">
+                <p className="text-[10px] text-rose-700 font-bold bg-rose-50 p-2 rounded border border-rose-200">
                   {adminLoginError}
                 </p>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">اسم مستخدم المدير</label>
+                <label className="text-xs font-bold text-slate-700 block">اسم مستخدم المدير</label>
                 <input
                   type="text"
                   required
                   placeholder="admin"
                   value={adminUsernameInput}
                   onChange={(e) => setAdminUsernameInput(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 dark:text-white font-mono shadow-xs"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-lg text-xs px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono shadow-xs"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">كلمة مرور لوحة الإدارة</label>
+                <label className="text-xs font-bold text-slate-700 block">كلمة مرور لوحة الإدارة</label>
                 <div className="relative">
                   <input
                     type={adminLoginPasswordVisible ? 'text' : 'password'}
@@ -1980,12 +1970,12 @@ export default function App() {
                     placeholder="••••••••"
                     value={adminPasswordInput}
                     onChange={(e) => setAdminPasswordInput(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs pl-10 pr-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 dark:text-white font-mono shadow-xs"
+                    className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-lg text-xs pl-10 pr-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono shadow-xs"
                   />
                   <button
                     type="button"
                     onClick={() => setAdminLoginPasswordVisible(!adminLoginPasswordVisible)}
-                    className="absolute left-3 top-3 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                    className="absolute left-3 top-3 text-slate-400 hover:text-slate-700 transition-colors"
                   >
                     {adminLoginPasswordVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -1994,7 +1984,7 @@ export default function App() {
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md shadow-indigo-100 dark:shadow-none cursor-pointer text-center"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md shadow-indigo-100 cursor-pointer text-center"
               >
                 التحقق وتسجيل الدخول كمدير
               </button>
@@ -2004,12 +1994,12 @@ export default function App() {
       )}
 
       {/* Pure, Honest Footer */}
-      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors duration-200" id="footer-system">
+      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500" id="footer-system">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>© 2026 checkInTime - تطبيق التحضير والمراقبة الذكي. جميع الحقوق محفوظة.</p>
           <div className="flex gap-4">
-            <span className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium cursor-pointer">سياسة الخصوصية</span>
-            <span className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium cursor-pointer">شروط الخدمة</span>
+            <span className="hover:text-indigo-600 transition-colors font-medium cursor-pointer">سياسة الخصوصية</span>
+            <span className="hover:text-indigo-600 transition-colors font-medium cursor-pointer">شروط الخدمة</span>
           </div>
         </div>
       </footer>
