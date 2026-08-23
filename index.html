@@ -8,6 +8,24 @@
     <!-- PWA Manifest & Meta Tags -->
     <script>
       (function() {
+        // Immediate Theme initialization
+        try {
+          var storedTheme = localStorage.getItem('hader_theme_mode');
+          var isDark = false;
+          if (storedTheme === 'dark') {
+            isDark = true;
+          } else if (storedTheme === 'system' || !storedTheme) {
+            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+
         var params = new URLSearchParams(window.location.search);
         var tenant = params.get('tenant') || 'default';
         var portal = params.get('portal') || 'admin';
@@ -29,7 +47,7 @@
         document.head.appendChild(link);
       })();
     </script>
-    <meta name="theme-color" content="#D4AF37" />
+    <meta name="theme-color" content="#4F46E5" />
     
     <!-- iOS / Apple Add to Home Screen Support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />

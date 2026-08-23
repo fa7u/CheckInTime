@@ -511,22 +511,19 @@ END:VCALENDAR`;
   return (
     <div className="space-y-6" id="employee-panel-root">
       {/* Top Banner - Employee Info */}
-      <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#D4AF37] opacity-5 blur-[60px] pointer-events-none"></div>
-        
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
         <div className="flex items-center gap-4 relative z-10">
-          <div className={`w-16 h-16 rounded-full ${employee.avatarColor} text-white flex items-center justify-center text-xl font-bold shadow-md`}>
+          <div className={`w-16 h-16 rounded-2xl ${employee.avatarColor} text-white flex items-center justify-center text-xl font-bold shadow-md`}>
             {employee.name.split(' ').map(n => n[0]).join('')}
           </div>
           <div className="text-right">
-            <h2 className="text-xl font-bold text-[#E4E4E7]">{employee.name}</h2>
-            <p className="text-sm text-[#8E8E93] font-medium">{employee.role}</p>
+            <h2 className="text-xl font-bold text-slate-900">{employee.name}</h2>
+            <p className="text-sm text-slate-500 font-medium">{employee.role}</p>
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="text-xs bg-[#1A1C1E] text-[#8E8E93] border border-[#27272A] px-2.5 py-0.5 rounded-full font-medium">
+              <span className="text-xs bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-full font-medium">
                 معرّف الموظف: {employee.id}
               </span>
-              <span className="text-xs bg-blue-950/30 text-blue-400 border border-blue-900/30 px-2.5 py-0.5 rounded-full font-medium">
+              <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-full font-medium">
                 تاريخ الانضمام: {employee.joinDate}
               </span>
             </div>
@@ -534,11 +531,11 @@ END:VCALENDAR`;
         </div>
 
         {/* Current Date & Time Clock Display */}
-        <div className="flex items-center gap-3 bg-[#0F0F11] px-4 py-3 rounded-xl border border-[#27272A] relative z-10">
-          <Clock className="w-5 h-5 text-[#D4AF37] animate-pulse" />
+        <div className="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200 relative z-10 shadow-2xs">
+          <Clock className="w-5 h-5 text-indigo-600 animate-pulse" />
           <div className="text-right">
-            <p className="text-[10px] text-[#8E8E93] uppercase tracking-normal">الوقت والتاريخ الحالي</p>
-            <p className="text-sm font-bold text-[#E4E4E7] font-serif">
+            <p className="text-[10px] text-slate-500 uppercase tracking-normal font-semibold">الوقت والتاريخ الحالي</p>
+            <p className="text-sm font-bold text-slate-900">
               {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
@@ -548,50 +545,47 @@ END:VCALENDAR`;
       {/* Check In / Out Center Module */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Interactive Panel (Button and Settings) */}
-        <div className="lg:col-span-7 bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl flex flex-col items-center justify-center space-y-6 relative overflow-hidden">
-          {/* Ambient Glow */}
-          <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37] opacity-5 blur-[80px] pointer-events-none"></div>
-
+        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col items-center justify-center space-y-6 relative overflow-hidden">
           <div className="w-full relative z-10">
-            <h3 className="text-lg font-serif italic text-[#D4AF37] text-right mb-4">بوابة تسجيل الدخول اليومي</h3>
+            <h3 className="text-lg font-bold text-slate-900 text-right mb-4">بوابة تسجيل الدخول اليومي</h3>
             
             {/* Work Model Mode (Assigned by Admin) */}
-            <div className="bg-[#0A0A0B]/60 p-3.5 rounded-xl mb-3 border border-[#27272A] flex items-center justify-between text-right">
-              <span className="text-xs text-[#8E8E93] font-bold">طبيعة نظام العمل المعتمد لك:</span>
+            <div className="bg-slate-50 p-3.5 rounded-2xl mb-3 border border-slate-200 flex items-center justify-between text-right">
+              <span className="text-xs text-slate-600 font-bold">طبيعة نظام العمل المعتمد لك:</span>
               {activeModel === 'on-site' ? (
-                <span className="inline-flex items-center gap-1.5 text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-3.5 py-1.5 rounded-lg font-bold text-xs">
-                  <Landmark className="w-4 h-4 text-[#D4AF37]" />
+                <span className="inline-flex items-center gap-1.5 text-indigo-700 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-xl font-bold text-xs">
+                  <Landmark className="w-4 h-4 text-indigo-600" />
                   <span>حضوري (من المكتب)</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3.5 py-1.5 rounded-lg font-bold text-xs">
-                  <Laptop className="w-4 h-4 text-blue-400" />
+                <span className="inline-flex items-center gap-1.5 text-purple-700 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl font-bold text-xs">
+                  <Laptop className="w-4 h-4 text-purple-600" />
                   <span>عن بُعد (خارج المكتب)</span>
                 </span>
               )}
             </div>
 
             {/* Today Schedule Details Bar */}
-            <div className={`p-3.5 rounded-xl mb-4 border text-right flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+            <div className={`p-3.5 rounded-2xl mb-4 border text-right flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
               todaySchedule.isCustomSaturday 
-                ? 'bg-amber-950/30 border-[#D4AF37]/40 text-amber-200' 
-                : 'bg-[#0A0A0B]/60 border-[#27272A] text-[#8E8E93]'
+                ? 'bg-amber-50 border-amber-200 text-amber-900' 
+                : 'bg-slate-50 border-slate-200 text-slate-600'
             }`}>
               <div className="flex items-center gap-2">
-                <Clock className={`w-4 h-4 shrink-0 ${todaySchedule.isCustomSaturday ? 'text-[#D4AF37]' : 'text-[#8E8E93]'}`} />
-                <span className="text-xs font-bold text-[#E4E4E7]">
+                <Clock className={`w-4 h-4 shrink-0 ${todaySchedule.isCustomSaturday ? 'text-amber-600' : 'text-slate-500'}`} />
+                <span className="text-xs font-bold text-slate-900">
                   {todaySchedule.isCustomSaturday ? 'دوام السبت الاستثنائي اليوم:' : 'ساعات العمل الرسمية لليوم:'}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs font-mono text-[#E4E4E7]">
-                <span className="bg-[#121214] px-2 py-0.5 rounded border border-[#27272A] text-emerald-400 font-bold">
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-900">
+                <span className="bg-white px-2 py-0.5 rounded-lg border border-slate-200 text-emerald-700 font-bold shadow-2xs">
                   {formatTimeStr(todaySchedule.startTime)}
                 </span>
-                <span className="text-[#8E8E93]">-</span>
-                <span className="bg-[#121214] px-2 py-0.5 rounded border border-[#27272A] text-rose-400 font-bold">
+                <span className="text-slate-400">-</span>
+                <span className="bg-white px-2 py-0.5 rounded-lg border border-slate-200 text-rose-700 font-bold shadow-2xs">
                   {formatTimeStr(todaySchedule.endTime)}
                 </span>
-                <span className="text-[10px] text-[#8E8E93] font-sans mr-1">
+                <span className="text-[10px] text-slate-500 font-sans mr-1">
                   (سماح {todaySchedule.gracePeriod} د)
                 </span>
               </div>
@@ -600,59 +594,47 @@ END:VCALENDAR`;
 
           {/* Location Verification Settings (Shows if on-site is assigned) */}
           {activeModel === 'on-site' && (
-            <div className="w-full bg-[#0A0A0B] p-4 rounded-xl border border-[#27272A] space-y-3 relative z-10">
+            <div className="w-full bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 relative z-10">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#8E8E93] flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <Compass className="w-3.5 h-3.5 text-indigo-600" />
                   حالة تحديد الموقع الجغرافي (GPS حقيقي):
                 </span>
               </div>
               
-              <div className="text-[11px] text-[#8E8E93]">
+              <div className="text-[11px] text-slate-600">
                 {isLocating ? (
-                  <span className="text-blue-400 font-medium animate-pulse flex items-center gap-1.5">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></span>
+                  <span className="text-indigo-600 font-medium animate-pulse flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></span>
                     جاري رصد إحداثيات GPS الحقيقية للمتصفح...
                   </span>
                 ) : realCoords ? (
-                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                     موقعك الحالي: {realCoords.lat.toFixed(4)} , {realCoords.lng.toFixed(4)} (يبعد {Math.round(realDistance || 0)} متر عن المقر)
                   </span>
                 ) : gpsError ? (
-                  <span className="text-rose-400 font-semibold flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                  <span className="text-rose-700 font-semibold flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
                     {gpsError}
                   </span>
                 ) : (
-                  <span className="text-amber-400 font-medium flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-amber-700 font-medium flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
                     اضغط على زر التحضير بالأسفل وسيطلب المتصفح إذن تحديد موقعك للتحقق.
                   </span>
                 )}
               </div>
 
-              <div className="text-[11px] text-[#8E8E93] flex items-start gap-1 bg-[#121214] p-2.5 rounded-lg border border-[#27272A]">
-                <MapPin className="w-3.5 h-3.5 text-[#D4AF37] mt-0.5 shrink-0" />
-                <span>مقر العمل المحدد: <strong className="text-white">{officeSettings.addressName}</strong> (النطاق المسموح: {officeSettings.radius} متر).</span>
+              <div className="text-[11px] text-slate-600 flex items-start gap-1 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                <MapPin className="w-3.5 h-3.5 text-indigo-600 mt-0.5 shrink-0" />
+                <span>مقر العمل المحدد: <strong className="text-slate-900">{officeSettings.addressName}</strong> (النطاق المسموح: {officeSettings.radius} متر).</span>
               </div>
             </div>
           )}
 
           {/* The MAIN Action Button */}
           <div className="relative py-4 flex flex-col items-center z-10">
-            {/* Visual Radar Pulse background */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              {(!todayRecord && !pendingCheckInRequest) && (
-                <div className={`w-32 h-32 rounded-full absolute animate-ping opacity-10 duration-1000 ${
-                  activeModel === 'on-site' ? 'bg-[#D4AF37]' : 'bg-blue-500'
-                }`}></div>
-              )}
-              {(todayRecord && !todayRecord.checkOut && !pendingCheckOutRequest) && (
-                <div className="w-32 h-32 rounded-full absolute animate-ping opacity-10 duration-1000 bg-rose-500"></div>
-              )}
-            </div>
-
             {/* Attendance Main Button */}
             <button
               id="attendance-action-btn"
@@ -663,24 +645,24 @@ END:VCALENDAR`;
                 !!pendingCheckInRequest ||
                 !!pendingCheckOutRequest
               }
-              className={`w-40 h-40 rounded-full font-bold text-lg shadow-2xl border-2 transition-all duration-300 z-10 flex flex-col items-center justify-center gap-1 cursor-pointer transform hover:scale-105 active:scale-95 ${
+              className={`w-40 h-40 rounded-full font-bold text-lg shadow-xl border-2 transition-all duration-300 z-10 flex flex-col items-center justify-center gap-1 cursor-pointer transform hover:scale-105 active:scale-95 ${
                 // Case 1: Checked Out Completed
                 todayRecord && todayRecord.checkOut
-                  ? 'bg-[#121214] border-[#27272A] text-[#8E8E93] cursor-not-allowed shadow-none'
+                  ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-not-allowed shadow-none'
                   // Case 2: Pending Approval
                   : (pendingCheckInRequest || pendingCheckOutRequest)
-                    ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 animate-pulse cursor-not-allowed'
+                    ? 'bg-amber-50 border-amber-300 text-amber-700 animate-pulse cursor-not-allowed'
                     // Case 3: Checked In, ready to Check Out
                     : todayRecord && !todayRecord.checkOut
-                      ? 'bg-rose-950/20 border-rose-500/40 hover:bg-rose-900/30 text-rose-400 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
+                      ? 'bg-rose-50 border-rose-400 hover:bg-rose-100 text-rose-700 shadow-md shadow-rose-100'
                       // Case 4: Not Checked In, ready to Check In
                       : activeModel === 'on-site'
-                        ? 'bg-[#0A0A0B] border-[#D4AF37] hover:bg-[#D4AF37]/10 text-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.15)]'
-                        : 'bg-[#0A0A0B] border-blue-500 hover:bg-blue-500/10 text-blue-400 shadow-[0_0_25px_rgba(59,130,246,0.15)]'
+                        ? 'bg-indigo-600 border-indigo-700 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200'
+                        : 'bg-purple-600 border-purple-700 hover:bg-purple-700 text-white shadow-lg shadow-purple-200'
               }`}
             >
-              <Clock className="w-6 h-6 mb-1 text-[#D4AF37]" />
-              <span className="tracking-normal">
+              <Clock className={`w-7 h-7 mb-0.5 ${todayRecord && todayRecord.checkOut ? 'text-slate-400' : todayRecord && !todayRecord.checkOut ? 'text-rose-600' : 'text-white'}`} />
+              <span className="tracking-tight text-base font-black">
                 {todayRecord && todayRecord.checkOut
                   ? 'عمل مكتمل'
                   : pendingCheckInRequest
@@ -691,7 +673,7 @@ END:VCALENDAR`;
                         ? 'تسجيل الانصراف'
                         : 'تسجيل الحضور'}
               </span>
-              <span className="text-[10px] font-normal opacity-80 uppercase tracking-wider font-serif italic">
+              <span className="text-[10px] font-medium opacity-90 tracking-wide">
                 {todayRecord && todayRecord.checkOut
                   ? 'Completed'
                   : todayRecord && !todayRecord.checkOut
@@ -705,13 +687,13 @@ END:VCALENDAR`;
 
           {/* Check Out Confirmation Dialog */}
           {showCheckOutConfirm && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs text-right">
-              <div className="w-full max-w-sm bg-[#1A1C1E] border border-rose-500/30 rounded-xl p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-start gap-3 text-rose-400">
-                  <AlertCircle className="w-6 h-6 text-rose-500 shrink-0 mt-0.5" />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs text-right">
+              <div className="w-full max-w-sm bg-white border border-rose-200 rounded-3xl p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-start gap-3 text-rose-700">
+                  <AlertCircle className="w-6 h-6 text-rose-600 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-base text-white">هل أنت متأكد من تسجيل الانصراف؟</h4>
-                    <p className="text-xs text-[#8E8E93] mt-2 leading-relaxed">
+                    <h4 className="font-bold text-base text-slate-900">هل أنت متأكد من تسجيل الانصراف؟</h4>
+                    <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                       سيتم تسجيل وقت انصرافك الفعلي لليوم الآن. يرجى التأكد من إنهاء كافة مهامك قبل تأكيد الخروج.
                     </p>
                   </div>
@@ -723,14 +705,14 @@ END:VCALENDAR`;
                       setShowCheckOutConfirm(false);
                       executeAttendanceAction();
                     }}
-                    className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2.5 px-3 rounded-lg transition-colors cursor-pointer"
+                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs"
                   >
                     نعم، تأكيد الانصراف
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowCheckOutConfirm(false)}
-                    className="flex-1 bg-[#121214] hover:bg-[#27272A] text-[#8E8E93] font-bold text-xs py-2.5 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-slate-300 transition-colors cursor-pointer"
                   >
                     تراجع
                   </button>
@@ -741,15 +723,15 @@ END:VCALENDAR`;
 
           {/* Out of Range Request Confirmation Prompt */}
           {showOutOfRangeConfirm && outOfRangeDistance && (
-            <div className="w-full bg-[#1A1C1E] border border-amber-500/30 rounded-xl p-4 space-y-3 relative z-10 text-right animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex items-start gap-2.5 text-amber-400">
-                <Compass className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="w-full bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3 relative z-10 text-right animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-start gap-2.5 text-amber-800">
+                <Compass className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-xs">تنبيه: أنت خارج النطاق الجغرافي!</h4>
-                  <p className="text-[11px] text-[#8E8E93] mt-1 leading-relaxed">
-                    أنت تبعد حالياً <strong className="text-white">{Math.round(outOfRangeDistance)} متر</strong> عن مقر العمل، بينما النطاق المسموح هو {officeSettings.radius} متر فقط.
+                  <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                    أنت تبعد حالياً <strong className="text-slate-900">{Math.round(outOfRangeDistance)} متر</strong> عن مقر العمل، بينما النطاق المسموح هو {officeSettings.radius} متر فقط.
                   </p>
-                  <p className="text-[11px] text-[#8E8E93] mt-1">
+                  <p className="text-[11px] text-slate-600 mt-1">
                     هل ترغب في تقديم طلب معلق للمدير للموافقة على تحضيرك بشكل استثنائي؟
                   </p>
                 </div>
@@ -766,14 +748,14 @@ END:VCALENDAR`;
                     }
                     setShowOutOfRangeConfirm(false);
                   }}
-                  className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-bold text-xs py-2 px-3 rounded-lg transition-colors cursor-pointer"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-xl transition-colors cursor-pointer shadow-xs"
                 >
                   نعم، إرسال الطلب للمدير
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowOutOfRangeConfirm(false)}
-                  className="flex-1 bg-[#121214] hover:bg-[#27272A] text-[#8E8E93] font-bold text-xs py-2 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl border border-slate-300 transition-colors cursor-pointer"
                 >
                   تراجع
                 </button>
@@ -783,8 +765,8 @@ END:VCALENDAR`;
 
           {/* Feedback Messages */}
           {errorMessage && (
-            <div className="w-full bg-rose-950/20 border border-rose-900/40 rounded-xl p-3.5 flex items-start gap-2.5 text-rose-400 text-sm relative z-10" id="employee-error-msg">
-              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+            <div className="w-full bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-start gap-2.5 text-rose-700 text-sm relative z-10" id="employee-error-msg">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div className="text-right">
                 <p className="font-bold">خطأ في التحضير:</p>
                 <p className="text-xs mt-0.5">{errorMessage}</p>
@@ -796,31 +778,31 @@ END:VCALENDAR`;
           <div className="w-full relative z-10 space-y-4">
             {todayRecord ? (
               <div className="space-y-4">
-                <div className="bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
                     <span>تأكيد تسجيل الحضور لليوم:</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs text-[#E4E4E7] border-t border-[#27272A] pt-2">
+                  <div className="grid grid-cols-2 gap-3 text-xs text-slate-800 border-t border-emerald-100 pt-2">
                     <div>
-                      <span className="text-[#8E8E93] block">وقت الحضور:</span>
-                      <strong className="text-sm font-bold font-mono text-emerald-400">{todayRecord.checkIn}</strong>
+                      <span className="text-slate-500 block">وقت الحضور:</span>
+                      <strong className="text-sm font-bold font-mono text-emerald-700">{todayRecord.checkIn}</strong>
                     </div>
                     <div>
-                      <span className="text-[#8E8E93] block">وقت الانصراف:</span>
-                      <strong className="text-sm font-bold font-mono text-rose-400">{todayRecord.checkOut || 'قيد العمل...'}</strong>
+                      <span className="text-slate-500 block">وقت الانصراف:</span>
+                      <strong className="text-sm font-bold font-mono text-rose-700">{todayRecord.checkOut || 'قيد العمل...'}</strong>
                     </div>
                     <div>
-                      <span className="text-[#8E8E93] block">حالة التحضير:</span>
-                      <strong className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                        todayRecord.status === 'حاضر' ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/30' : 'bg-amber-900/20 text-amber-400 border border-amber-900/30'
+                      <span className="text-slate-500 block">حالة التحضير:</span>
+                      <strong className={`px-2 py-0.5 rounded-lg text-[11px] font-bold ${
+                        todayRecord.status === 'حاضر' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
                       }`}>
                         {todayRecord.status}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-[#8E8E93] block">ساعات العمل اليوم:</span>
-                      <strong className="text-sm font-bold text-[#D4AF37] font-serif italic">
+                      <span className="text-slate-500 block">ساعات العمل اليوم:</span>
+                      <strong className="text-sm font-bold text-indigo-700 font-mono">
                         {todayRecord.checkOut ? `${todayRecord.totalHours} ساعة` : 'جار الحساب...'}
                       </strong>
                     </div>
@@ -829,98 +811,96 @@ END:VCALENDAR`;
 
                 {/* If they checked in but checkout is pending */}
                 {pendingCheckOutRequest && (
-                  <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 flex items-start gap-3 text-amber-400 animate-in fade-in duration-300">
-                    <Clock className="w-5 h-5 text-amber-500 animate-spin mt-0.5 shrink-0" />
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-800 animate-in fade-in duration-300">
+                    <Clock className="w-5 h-5 text-amber-600 animate-spin mt-0.5 shrink-0" />
                     <div className="text-right">
                       <p className="font-bold text-xs">طلب تسجيل الانصراف قيد المراجعة ⏳</p>
-                      <p className="text-[11px] text-[#8E8E93] mt-0.5">لقد قمت بإرسال طلب انصراف في انتظار موافقة المدير وتأكيده.</p>
+                      <p className="text-[11px] text-slate-600 mt-0.5">لقد قمت بإرسال طلب انصراف في انتظار موافقة المدير وتأكيده.</p>
                     </div>
                   </div>
                 )}
 
                 {/* If checkout request was rejected */}
                 {!pendingCheckOutRequest && todayCheckOutRequest && todayCheckOutRequest.status === 'rejected' && (
-                  <div className="bg-rose-950/20 border border-rose-900/40 rounded-xl p-4 flex items-start gap-3 text-rose-400 animate-in fade-in duration-300">
-                    <XCircle className="w-5 h-5 text-rose-500 mt-0.5 shrink-0" />
+                  <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-start gap-3 text-rose-700 animate-in fade-in duration-300">
+                    <XCircle className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
                     <div className="text-right">
                       <p className="font-bold text-xs">تم رفض طلب تسجيل الانصراف ❌</p>
-                      <p className="text-[11px] text-[#8E8E93] mt-0.5">تم رفض طلب تسجيل الانصراف الخاص بك من قبل الإدارة. يرجى إعادة تقديم الطلب بالضغط على زر تسجيل الانصراف أعلاه.</p>
+                      <p className="text-[11px] text-slate-600 mt-0.5">تم رفض طلب تسجيل الانصراف الخاص بك من قبل الإدارة. يرجى إعادة تقديم الطلب بالضغط على زر تسجيل الانصراف أعلاه.</p>
                       {todayCheckOutRequest.notes && (
-                        <p className="text-[11px] text-rose-400 font-bold mt-1">الملاحظة من الإدارة: {todayCheckOutRequest.notes}</p>
+                        <p className="text-[11px] text-rose-700 font-bold mt-1">الملاحظة من الإدارة: {todayCheckOutRequest.notes}</p>
                       )}
                     </div>
                   </div>
                 )}
               </div>
             ) : (pendingCheckInRequest || pendingCheckOutRequest) ? (
-              <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 space-y-2 text-right animate-in fade-in duration-300">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                  <Clock className="w-5 h-5 text-amber-500 animate-spin" />
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2 text-right animate-in fade-in duration-300">
+                <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+                  <Clock className="w-5 h-5 text-amber-600 animate-spin" />
                   <span>بانتظار موافقة الإدارة:</span>
                 </div>
-                <p className="text-xs text-[#8E8E93] leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   لقد قمت بإرسال طلب التحضير عن بعد للعمل في تاريخ اليوم. ستتلقى إشعاراً فور مراجعة المدير للطلب وقبوله.
                 </p>
               </div>
             ) : (todayCheckInRequest && todayCheckInRequest.status === 'rejected') ? (
-              <div className="bg-rose-950/20 border border-rose-900/40 rounded-xl p-4 space-y-2 text-right animate-in fade-in duration-300 font-sans">
-                <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
-                  <XCircle className="w-5 h-5 text-rose-500" />
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-2 text-right animate-in fade-in duration-300 font-sans">
+                <div className="flex items-center gap-2 text-rose-700 font-bold text-sm">
+                  <XCircle className="w-5 h-5 text-rose-600" />
                   <span>تم رفض طلب الحضور من قبل الإدارة ❌</span>
                 </div>
-                <p className="text-xs text-[#8E8E93] leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   تم رفض طلب تسجيل حضورك لليوم من قبل المدير. يمكنك محاولة تسجيل الحضور مرة أخرى بالضغط على زر تسجيل الحضور أعلاه، أو التواصل مع الإدارة للاستفسار.
                 </p>
                 {todayCheckInRequest.notes && (
-                  <p className="text-xs text-rose-400 font-bold mt-1">
+                  <p className="text-xs text-rose-700 font-bold mt-1">
                     الملاحظة من الإدارة: {todayCheckInRequest.notes}
                   </p>
                 )}
               </div>
             ) : (
-              <div className="bg-[#0A0A0B] border border-[#27272A] rounded-xl p-4 text-center text-xs text-[#8E8E93] animate-in fade-in duration-300">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-500 animate-in fade-in duration-300">
                 أنت لم تقم بتسجيل الحضور أو الانصراف لليوم بعد. يرجى اختيار طبيعة العمل والضغط على الزر أعلاه للبدء.
               </div>
             )}
           </div>
 
           {/* Card: Smart Notification Reminders */}
-          <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl relative overflow-hidden">
-            <div className="absolute -top-10 -left-10 w-24 h-24 bg-[#D4AF37] opacity-5 blur-[50px] pointer-events-none"></div>
-            
-            <h3 className="text-base font-bold text-[#E4E4E7] mb-3 flex items-center gap-2 justify-start font-sans">
-              <Bell className="w-5 h-5 text-[#D4AF37]" />
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm relative overflow-hidden w-full">
+            <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2 justify-start font-sans">
+              <Bell className="w-5 h-5 text-indigo-600" />
               <span>نظام التنبيهات والمنبهات الذكية للدوام</span>
             </h3>
 
-            <p className="text-xs text-[#8E8E93] leading-relaxed mb-4 text-right">
+            <p className="text-xs text-slate-500 leading-relaxed mb-4 text-right">
               حتى لا تنسى تسجيل حضورك أو انصرافك اليومي، صممنا لك نوعين من المنبهات لضمان التنبيه الفعال قبل الدوام والانصراف بـ 5 دقائق:
             </p>
 
             <div className="space-y-4">
               {/* Option 1: Browser / App Notifications */}
-              <div className="bg-[#1A1C1E] border border-[#27272A] rounded-xl p-4 text-right space-y-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-right space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-md">خيار 1: إشعارات الهاتف / المتصفح (PWA)</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                  <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg">خيار 1: إشعارات الهاتف / المتصفح (PWA)</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${
                     notificationsEnabled 
-                      ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/40' 
-                      : 'bg-rose-950/40 text-rose-400 border border-rose-900/40'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                      : 'bg-slate-200 text-slate-700'
                   }`}>
                     {notificationsEnabled ? 'مفعّلة' : 'غير نشطة'}
                   </span>
                 </div>
-                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   ترسل لك إشعارات ذكية في شريط التنبيهات. (قد تتوقف إذا قام نظام الهاتف بحذف التطبيق كلياً من الذاكرة العشوائية لتوفير البطارية).
                 </p>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={handleToggleNotifications}
-                    className={`flex-1 font-bold text-[11px] py-2 px-3 rounded-lg transition-colors cursor-pointer ${
+                    className={`flex-1 font-bold text-[11px] py-2 px-3 rounded-xl transition-colors cursor-pointer ${
                       notificationsEnabled 
-                        ? 'bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20' 
-                        : 'bg-[#D4AF37] hover:bg-[#B3922E] text-[#0A0A0B]'
+                        ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200' 
+                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
                     }`}
                   >
                     <span>{notificationsEnabled ? 'إيقاف إشعارات المتصفح' : 'تفعيل إشعارات المتصفح'}</span>
@@ -929,7 +909,7 @@ END:VCALENDAR`;
                     <button
                       type="button"
                       onClick={handleSendTestNotification}
-                      className="bg-[#121214] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-[11px] py-2 px-3 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                      className="bg-white hover:bg-slate-100 text-slate-800 font-bold text-[11px] py-2 px-3 rounded-xl border border-slate-200 transition-colors cursor-pointer shadow-2xs"
                     >
                       <span>تجربة الإرسال 🧪</span>
                     </button>
@@ -938,48 +918,48 @@ END:VCALENDAR`;
               </div>
 
               {/* Option 2: 100% Guaranteed Native Calendar Reminders */}
-              <div className="bg-[#1A1C1E] border border-[#D4AF37]/20 rounded-xl p-4 text-right space-y-3 relative animate-in fade-in duration-200">
+              <div className="bg-slate-50 border border-indigo-100 rounded-2xl p-4 text-right space-y-3 relative animate-in fade-in duration-200">
                 <div className="absolute top-3 left-3">
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-900/40 px-2 py-0.5 rounded">مضمون 100%</span>
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-lg">مضمون 100%</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#D4AF37]" />
-                  <span className="text-[11px] font-bold text-white">خيار 2: منبهات تقويم الهاتف الافتراضية (موصى به)</span>
+                  <Calendar className="w-4 h-4 text-indigo-600" />
+                  <span className="text-[11px] font-bold text-slate-900">خيار 2: منبهات تقويم الهاتف الافتراضية (موصى به)</span>
                 </div>
                 
-                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   <strong>تخصيص مواقيت التقويم والمنبهات:</strong> إذا اختلف وقت دوامك الفعلي، يمكنك تعديله بالأسفل فوراً وتحديد وقت رنين المنبه المناسب لك قبل تحميل ملف التقويم الجديد.
                 </p>
 
                 {/* Customizable inputs */}
-                <div className="bg-[#0A0A0B] p-3 rounded-lg border border-[#27272A]/80 space-y-3 text-right">
+                <div className="bg-white p-3 rounded-xl border border-slate-200 space-y-3 text-right shadow-2xs">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] text-[#8E8E93] block mb-1">⏰ بداية الدوام:</label>
+                      <label className="text-[10px] text-slate-500 font-semibold block mb-1">⏰ بداية الدوام:</label>
                       <input
                         type="time"
                         value={customStartTime}
                         onChange={(e) => setCustomStartTime(e.target.value)}
-                        className="w-full bg-[#121214] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white font-mono focus:outline-none focus:border-[#D4AF37] text-center"
+                        className="w-full bg-slate-50 border border-slate-300 text-xs px-2.5 py-1.5 rounded-lg text-slate-900 font-mono focus:outline-none focus:border-indigo-600 text-center"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] text-[#8E8E93] block mb-1">🚪 نهاية الدوام:</label>
+                      <label className="text-[10px] text-slate-500 font-semibold block mb-1">🚪 نهاية الدوام:</label>
                       <input
                         type="time"
                         value={customEndTime}
                         onChange={(e) => setCustomEndTime(e.target.value)}
-                        className="w-full bg-[#121214] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white font-mono focus:outline-none focus:border-[#D4AF37] text-center"
+                        className="w-full bg-slate-50 border border-slate-300 text-xs px-2.5 py-1.5 rounded-lg text-slate-900 font-mono focus:outline-none focus:border-indigo-600 text-center"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[10px] text-[#8E8E93] block mb-1">🔔 تنبيه رنين المنبه قبل الدوام بـ:</label>
+                    <label className="text-[10px] text-slate-500 font-semibold block mb-1">🔔 تنبيه رنين المنبه قبل الدوام بـ:</label>
                     <select
                       value={alarmOffsetMinutes}
                       onChange={(e) => setAlarmOffsetMinutes(Number(e.target.value))}
-                      className="w-full bg-[#121214] border border-[#27272A] text-xs px-2.5 py-1.5 rounded-lg text-white focus:outline-none focus:border-[#D4AF37] text-right"
+                      className="w-full bg-slate-50 border border-slate-300 text-xs px-2.5 py-1.5 rounded-lg text-slate-900 focus:outline-none focus:border-indigo-600 text-right"
                     >
                       <option value="0">في نفس موعد الدوام تماماً (0 دقيقة)</option>
                       <option value="5">قبل الموعد بـ 5 دقائق</option>
@@ -993,25 +973,23 @@ END:VCALENDAR`;
                   </div>
                 </div>
 
-                <p className="text-[11px] text-[#8E8E93] leading-relaxed">
-                  <span className="text-white font-medium">سيرن الهاتف كمنبه حتى لو كان التطبيق محذوفاً ومغلقاً كلياً من الخلفية أو الهاتف مغلقاً!</span>
+                <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                  سيرن الهاتف كمنبه حتى لو كان التطبيق محذوفاً ومغلقاً كلياً من الخلفية أو الهاتف مغلقاً!
                 </p>
 
                 <button
                   type="button"
                   onClick={handleDownloadCalendarAlarms}
-                  className="w-full bg-[#121214] hover:bg-emerald-950/20 text-[#D4AF37] hover:text-emerald-400 font-bold text-[11px] py-2.5 px-3 rounded-lg border border-[#D4AF37]/30 hover:border-emerald-500/30 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full bg-white hover:bg-slate-100 text-indigo-700 font-bold text-[11px] py-2.5 px-3 rounded-xl border border-indigo-200 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
                 >
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5 text-indigo-600" />
                   <span>تحميل ملف تقويم المنبهات المخصصة 📅</span>
                 </button>
               </div>
 
-
-
               {/* Success / Info Alerts */}
               {notificationSuccessMsg && (
-                <div className="bg-emerald-950/30 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl text-right leading-relaxed animate-in fade-in duration-200">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-2xl text-right leading-relaxed animate-in fade-in duration-200">
                   {notificationSuccessMsg}
                 </div>
               )}
@@ -1019,12 +997,9 @@ END:VCALENDAR`;
           </div>
 
           {/* Quick personal statistics summary */}
-          <div className="bg-gradient-to-br from-[#0F0F11] to-[#121214] border border-[#27272A] text-[#E4E4E7] rounded-2xl p-6 shadow-xl relative overflow-hidden">
-            {/* Elegant Ambient Background lines */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37] opacity-5 blur-[50px] pointer-events-none"></div>
-
-            <h3 className="text-base font-serif italic text-[#D4AF37] mb-4 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
+          <div className="bg-white border border-slate-200 text-slate-800 rounded-3xl p-6 shadow-sm relative overflow-hidden w-full">
+            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-indigo-600" />
               مؤشرات الأداء لشهر يونيو 2026
             </h3>
 
@@ -1041,31 +1016,31 @@ END:VCALENDAR`;
               return (
                 <div className="space-y-4 relative z-10">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-[#8E8E93]">نسبة الالتزام بالحضور:</span>
-                    <span className="text-sm font-extrabold text-[#D4AF37] font-serif">{attendanceRate}%</span>
+                    <span className="text-xs text-slate-500 font-medium">نسبة الالتزام بالحضور:</span>
+                    <span className="text-sm font-extrabold text-indigo-700 font-mono">{attendanceRate}%</span>
                   </div>
-                  <div className="w-full bg-[#0A0A0B] rounded-full h-2 overflow-hidden border border-[#27272A]">
-                    <div className="bg-[#D4AF37] h-full rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" style={{ width: `${attendanceRate}%` }}></div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                    <div className="bg-indigo-600 h-full rounded-full transition-all" style={{ width: `${attendanceRate}%` }}></div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 pt-2 text-center">
-                    <div className="bg-[#0A0A0B] p-2 rounded-lg border border-[#27272A]">
-                      <span className="text-[10px] text-[#8E8E93] block">حاضر</span>
-                      <strong className="text-base font-bold text-[#E4E4E7] font-serif">{presentDays - lateDays}</strong>
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                      <span className="text-[10px] text-slate-500 block font-semibold">حاضر</span>
+                      <strong className="text-base font-bold text-emerald-700 font-mono">{presentDays - lateDays}</strong>
                     </div>
-                    <div className="bg-[#0A0A0B] p-2 rounded-lg border border-[#27272A]">
-                      <span className="text-[10px] text-[#8E8E93] block">تأخير</span>
-                      <strong className="text-base font-bold text-amber-400 font-serif">{lateDays}</strong>
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                      <span className="text-[10px] text-slate-500 block font-semibold">تأخير</span>
+                      <strong className="text-base font-bold text-amber-600 font-mono">{lateDays}</strong>
                     </div>
-                    <div className="bg-[#0A0A0B] p-2 rounded-lg border border-[#27272A]">
-                      <span className="text-[10px] text-[#8E8E93] block">غياب</span>
-                      <strong className="text-base font-bold text-rose-400 font-serif">{absentDays}</strong>
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                      <span className="text-[10px] text-slate-500 block font-semibold">غياب</span>
+                      <strong className="text-base font-bold text-rose-600 font-mono">{absentDays}</strong>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-[#27272A] flex justify-between items-center text-xs">
-                    <span className="text-[#8E8E93]">إجمالي الساعات المنجزة:</span>
-                    <strong className="font-bold text-[#D4AF37] text-sm font-serif italic">{Math.round(totalWorkedHours)} ساعة</strong>
+                  <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                    <span className="text-slate-500">إجمالي الساعات المنجزة:</span>
+                    <strong className="font-bold text-indigo-700 text-sm font-mono">{Math.round(totalWorkedHours)} ساعة</strong>
                   </div>
                 </div>
               );
@@ -1075,22 +1050,22 @@ END:VCALENDAR`;
       </div>
 
       {/* Bottom Log: Personal Attendance Records History */}
-      <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl relative overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 relative z-10">
           <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-[#D4AF37]" />
-            <h3 className="text-lg font-serif italic text-[#D4AF37]">سجل الحضور والانصراف التاريخي</h3>
+            <History className="w-5 h-5 text-indigo-600" />
+            <h3 className="text-lg font-bold text-slate-900">سجل الحضور والانصراف التاريخي</h3>
           </div>
 
           {/* Month Filtering Dropdown */}
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            <Calendar className="w-4 h-4 text-[#8E8E93]" />
-            <span className="text-xs text-[#8E8E93] font-medium">الشهر:</span>
+            <Calendar className="w-4 h-4 text-slate-400" />
+            <span className="text-xs text-slate-500 font-medium">الشهر:</span>
             <select
               id="employee-month-filter"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="bg-[#0A0A0B] border border-[#27272A] rounded-lg text-xs font-semibold px-2.5 py-1.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] cursor-pointer"
+              className="bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 cursor-pointer shadow-2xs"
             >
               <option value="all">كل الأشهر المتاحة</option>
               {uniqueMonths.map((m) => {
@@ -1108,20 +1083,20 @@ END:VCALENDAR`;
         </div>
 
         {/* Attendance Records Table */}
-        <div className="overflow-x-auto rounded-xl border border-[#27272A] relative z-10">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 relative z-10 shadow-2xs">
           <table className="w-full text-right border-collapse text-sm">
             <thead>
-              <tr className="bg-[#0F0F11] border-b border-[#27272A] text-[#8E8E93] font-bold">
-                <th className="px-4 py-3.5 text-right font-medium">اليوم والتاريخ</th>
-                <th className="px-4 py-3.5 text-right font-medium">طبيعة العمل</th>
-                <th className="px-4 py-3.5 text-right font-medium">تسجيل الحضور</th>
-                <th className="px-4 py-3.5 text-right font-medium">تسجيل الانصراف</th>
-                <th className="px-4 py-3.5 text-right font-medium">الحالة اليومية</th>
-                <th className="px-4 py-3.5 text-right font-medium">عدد الساعات المنجزة</th>
-                <th className="px-4 py-3.5 text-right font-medium">اعتماد الإدارة</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                <th className="px-4 py-3.5 text-right font-bold text-xs">اليوم والتاريخ</th>
+                <th className="px-4 py-3.5 text-right font-bold text-xs">طبيعة العمل</th>
+                <th className="px-4 py-3.5 text-right font-bold text-xs">تسجيل الحضور</th>
+                <th className="px-4 py-3.5 text-right font-bold text-xs">تسجيل الانصراف</th>
+                <th className="px-4 py-3.5 text-right font-bold text-xs">الحالة اليومية</th>
+                <th className="px-4 py-3.5 text-right font-bold text-xs">عدد الساعات المنجزة</th>
+                <th className="px-4 py-3.5 text-right font-bold text-xs">اعتماد الإدارة</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+            <tbody className="divide-y divide-slate-100 text-slate-800">
               {filteredRecords.length > 0 ? (
                 filteredRecords.map((rec) => {
                   const dateObj = new Date(rec.date);
@@ -1133,57 +1108,57 @@ END:VCALENDAR`;
                   });
 
                   return (
-                    <tr key={rec.id} className="hover:bg-[#18181B]/40 transition-colors duration-150">
-                      <td className="px-4 py-4 font-bold text-[#E4E4E7]">
+                    <tr key={rec.id} className="hover:bg-slate-50/80 transition-colors duration-150">
+                      <td className="px-4 py-4 font-bold text-slate-900">
                         {formattedDate}
                       </td>
                       <td className="px-4 py-4 text-xs">
                         {rec.workModel === 'on-site' ? (
-                          <span className="inline-flex items-center gap-1 text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-2.5 py-0.5 rounded-full font-bold">
+                          <span className="inline-flex items-center gap-1 text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full font-bold">
                             <Landmark className="w-3 h-3" />
                             حضوري
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                          <span className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full font-bold">
                             <Laptop className="w-3 h-3" />
                             عن بُعد
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-4 font-mono text-[#E4E4E7] font-bold">{rec.checkIn}</td>
-                      <td className="px-4 py-4 font-mono text-[#E4E4E7] font-bold">
-                        {rec.checkOut || <span className="text-[#8E8E93] font-normal">--:--</span>}
+                      <td className="px-4 py-4 font-mono text-slate-900 font-bold">{rec.checkIn}</td>
+                      <td className="px-4 py-4 font-mono text-slate-900 font-bold">
+                        {rec.checkOut || <span className="text-slate-400 font-normal">--:--</span>}
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold ${
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${
                           rec.status === 'حاضر'
-                            ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/40'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : rec.status === 'متأخر'
-                              ? 'bg-amber-950/30 text-amber-400 border border-amber-900/40'
-                              : 'bg-rose-950/30 text-rose-400 border border-rose-900/40'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
                         }`}>
                           {rec.status}
                         </span>
                       </td>
-                      <td className="px-4 py-4 font-bold font-mono text-[#D4AF37]">
+                      <td className="px-4 py-4 font-bold font-mono text-indigo-700">
                         {rec.totalHours > 0 ? `${rec.totalHours} س` : '-'}
                       </td>
                       <td className="px-4 py-4">
                         {rec.workModel === 'on-site' ? (
-                          <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="text-emerald-700 font-semibold text-xs flex items-center gap-1">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                             تلقائي (ميداني)
                           </span>
                         ) : rec.isApproved ? (
-                          <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="text-emerald-700 font-semibold text-xs flex items-center gap-1">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                             معتمد
                           </span>
                         ) : rec.status === 'غياب' ? (
-                          <span className="text-[#8E8E93] text-xs">لا يوجد</span>
+                          <span className="text-slate-400 text-xs">لا يوجد</span>
                         ) : (
-                          <span className="text-amber-400 font-semibold text-xs flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                          <span className="text-amber-700 font-semibold text-xs flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
                             طلب مرفوض / معلق
                           </span>
                         )}
@@ -1193,7 +1168,7 @@ END:VCALENDAR`;
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-[#8E8E93]">
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
                     لا توجد سجلات حضور مسجلة لهذا الشهر.
                   </td>
                 </tr>

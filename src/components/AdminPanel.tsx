@@ -819,7 +819,7 @@ export default function AdminPanel({
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid #D4AF37;
+            border-bottom: 3px solid #4F46E5;
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
@@ -848,7 +848,7 @@ export default function AdminPanel({
           }
           .report-subtitle {
             font-size: 13px;
-            color: #D4AF37;
+            color: #4F46E5;
             font-weight: 600;
             margin: 5px 0 0 0;
           }
@@ -1209,7 +1209,7 @@ export default function AdminPanel({
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #D4AF37;
+            border-bottom: 2px solid #4F46E5;
             padding-bottom: 8px;
             margin-bottom: 12px;
           }
@@ -1238,7 +1238,7 @@ export default function AdminPanel({
           }
           .report-subtitle {
             font-size: 10px;
-            color: #D4AF37;
+            color: #4F46E5;
             font-weight: 600;
             margin: 2px 0 0 0;
           }
@@ -1519,23 +1519,23 @@ export default function AdminPanel({
     <div className="flex flex-col gap-6 min-h-[600px] text-right" id="admin-panel-root">
       
       {/* 1. COMPACT TOP-RIGHT MENU TRIGGER (MINIMALIST) */}
-      <div className="flex items-center justify-between bg-[#121214]/40 border border-[#27272A]/40 rounded-2xl p-3 shadow-lg">
+      <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             id="btn-open-admin-side-menu"
             type="button"
             onClick={() => setIsSideMenuOpen(true)}
-            className="p-3 rounded-xl bg-[#121214] hover:bg-[#1C1D21] border border-[#27272A] hover:border-[#D4AF37]/50 text-[#D4AF37] hover:text-[#F3C63F] transition-all duration-150 cursor-pointer shadow-md hover:scale-[1.03] flex items-center gap-2"
+            className="p-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 text-indigo-600 transition-all duration-150 cursor-pointer shadow-xs hover:scale-[1.02] flex items-center gap-2"
             title="فتح القائمة الجانبية"
           >
             <Menu className="w-5 h-5" />
-            <span className="text-xs font-bold text-white hidden sm:inline">القائمة الجانبية</span>
+            <span className="text-xs font-bold text-slate-800 hidden sm:inline">القائمة الجانبية</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-[#8E8E93]">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
           <span>القسم المعروض:</span>
-          <span className="text-[#D4AF37] font-bold bg-[#121214] px-2.5 py-1.5 rounded-lg border border-[#27272A]">
+          <span className="text-indigo-700 font-bold bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
             {activeTab === 'dashboard' && 'لوحة التحكم والملخص'}
             {activeTab === 'employees' && 'إدارة الموظفين'}
             {activeTab === 'reports' && 'صفحة التقارير'}
@@ -1549,39 +1549,39 @@ export default function AdminPanel({
         <div className="fixed inset-0 z-50 overflow-hidden text-right" id="admin-panel-drawer" role="dialog" aria-modal="true">
           {/* Backdrop Blur Overlay */}
           <div 
-            className="absolute inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 cursor-pointer" 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300 cursor-pointer" 
             onClick={() => setIsSideMenuOpen(false)}
           ></div>
 
           {/* Sliding Panel Content (Right-aligned drawer) */}
-          <div className="absolute inset-y-0 right-0 max-w-sm w-full bg-[#121214] border-l border-[#27272A] shadow-2xl flex flex-col justify-between p-6 transform transition-transform duration-300">
+          <div className="absolute inset-y-0 right-0 max-w-sm w-full bg-white border-l border-slate-200 shadow-2xl flex flex-col justify-between p-6 transform transition-transform duration-300">
             
             <div className="space-y-6">
               
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-[#27272A]">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200">
                 <button 
                   type="button"
                   onClick={() => setIsSideMenuOpen(false)}
-                  className="p-1.5 rounded-lg bg-[#1A1C1E] hover:bg-[#27272A] border border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7] transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-500 hover:text-slate-900 transition-all cursor-pointer"
                   title="إغلاق القائمة"
                 >
                   <X className="w-4 h-4" />
                 </button>
                 <div className="text-right">
-                  <h2 className="text-sm font-bold text-[#E4E4E7]">قائمة الإدارة</h2>
-                  <p className="text-[10px] text-[#8E8E93] mt-0.5">خيارات لوحة التحكم والتهيئة</p>
+                  <h2 className="text-sm font-bold text-slate-900">قائمة الإدارة</h2>
+                  <p className="text-[10px] text-slate-500 mt-0.5">خيارات لوحة التحكم والتهيئة</p>
                 </div>
               </div>
 
               {/* Admin Profile Section inside Drawer */}
-              <div className="bg-[#0F0F11] border border-[#27272A]/80 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#1A1C1E] to-[#121214] border border-[#D4AF37]/30 flex items-center justify-center shadow-lg text-[#D4AF37] shrink-0">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shrink-0">
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white">مدير النظام (الرئيسي)</h3>
-                  <p className="text-[9px] text-[#8E8E93] mt-0.5">لوحة التحكم والقرارات الإدارية</p>
+                  <h3 className="text-xs font-bold text-slate-900">مدير النظام (الرئيسي)</h3>
+                  <p className="text-[9px] text-slate-500 mt-0.5">لوحة التحكم والقرارات الإدارية</p>
                 </div>
               </div>
 
@@ -1596,17 +1596,17 @@ export default function AdminPanel({
                   }}
                   className={`w-full text-right px-4 py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 ${
                     activeTab === 'dashboard'
-                      ? 'bg-[#1D1E22] text-[#D4AF37] border border-[#D4AF37]/20 font-bold'
-                      : 'text-[#8E8E93] hover:text-[#E4E4E7] hover:bg-[#1A1A1E]'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  <LayoutDashboard className={`w-5 h-5 shrink-0 ${activeTab === 'dashboard' ? 'text-[#D4AF37]' : 'text-[#8E8E93]'}`} />
+                  <LayoutDashboard className={`w-5 h-5 shrink-0 ${activeTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <div className="flex-1">
                     <span className="block text-xs font-bold">لوحة التحكم والملخص</span>
-                    <span className="block text-[9px] text-[#8E8E93] font-normal">رصد الحالات اليومية والطلبات</span>
+                    <span className="block text-[9px] text-slate-500 font-normal">رصد الحالات اليومية والطلبات</span>
                   </div>
                   {activePending.length > 0 && (
-                    <span className="bg-amber-500 text-slate-950 text-[10px] px-2 py-0.5 rounded-full font-extrabold animate-pulse">
+                    <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">
                       {activePending.length}
                     </span>
                   )}
@@ -1620,16 +1620,16 @@ export default function AdminPanel({
                   }}
                   className={`w-full text-right px-4 py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 ${
                     activeTab === 'employees'
-                      ? 'bg-[#1D1E22] text-[#D4AF37] border border-[#D4AF37]/20 font-bold'
-                      : 'text-[#8E8E93] hover:text-[#E4E4E7] hover:bg-[#1A1A1E]'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  <Users className={`w-5 h-5 shrink-0 ${activeTab === 'employees' ? 'text-[#D4AF37]' : 'text-[#8E8E93]'}`} />
+                  <Users className={`w-5 h-5 shrink-0 ${activeTab === 'employees' ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <div className="flex-1">
                     <span className="block text-xs font-bold">إدارة الموظفين</span>
-                    <span className="block text-[9px] text-[#8E8E93] font-normal">تسجيل وبيانات الكادر</span>
+                    <span className="block text-[9px] text-slate-500 font-normal">تسجيل وبيانات الكادر</span>
                   </div>
-                  <span className="bg-[#1A1C1E] border border-[#27272A] text-[#E4E4E7] text-[10px] px-2 py-0.5 rounded-full font-semibold font-mono">
+                  <span className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] px-2 py-0.5 rounded-full font-semibold font-mono">
                     {employees.length}
                   </span>
                 </button>
@@ -1642,14 +1642,14 @@ export default function AdminPanel({
                   }}
                   className={`w-full text-right px-4 py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 ${
                     activeTab === 'reports'
-                      ? 'bg-[#1D1E22] text-[#D4AF37] border border-[#D4AF37]/20 font-bold'
-                      : 'text-[#8E8E93] hover:text-[#E4E4E7] hover:bg-[#1A1A1E]'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  <FileText className={`w-5 h-5 shrink-0 ${activeTab === 'reports' ? 'text-[#D4AF37]' : 'text-[#8E8E93]'}`} />
+                  <FileText className={`w-5 h-5 shrink-0 ${activeTab === 'reports' ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <div className="flex-1">
                     <span className="block text-xs font-bold">صفحة التقارير</span>
-                    <span className="block text-[9px] text-[#8E8E93] font-normal">أداء الحضور الشهري</span>
+                    <span className="block text-[9px] text-slate-500 font-normal">أداء الحضور الشهري</span>
                   </div>
                 </button>
 
@@ -1661,14 +1661,14 @@ export default function AdminPanel({
                   }}
                   className={`w-full text-right px-4 py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 ${
                     activeTab === 'settings'
-                      ? 'bg-[#1D1E22] text-[#D4AF37] border border-[#D4AF37]/20 font-bold'
-                      : 'text-[#8E8E93] hover:text-[#E4E4E7] hover:bg-[#1A1A1E]'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  <Settings className={`w-5 h-5 shrink-0 ${activeTab === 'settings' ? 'text-[#D4AF37]' : 'text-[#8E8E93]'}`} />
+                  <Settings className={`w-5 h-5 shrink-0 ${activeTab === 'settings' ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <div className="flex-1">
                     <span className="block text-xs font-bold">إعدادات موقع المنشأة</span>
-                    <span className="block text-[9px] text-[#8E8E93] font-normal">النطاق الجغرافي للمقر</span>
+                    <span className="block text-[9px] text-slate-500 font-normal">النطاق الجغرافي للمقر</span>
                   </div>
                 </button>
 
@@ -1677,11 +1677,11 @@ export default function AdminPanel({
             </div>
 
             {/* Drawer Footer close button */}
-            <div className="pt-4 border-t border-[#27272A]">
+            <div className="pt-4 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setIsSideMenuOpen(false)}
-                className="w-full bg-[#1A1C1E] hover:bg-[#27272A] border border-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer text-center"
+                className="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer text-center"
               >
                 إغلاق القائمة الجانبية
               </button>
@@ -1699,85 +1699,83 @@ export default function AdminPanel({
           <div className="space-y-6" id="admin-tab-dashboard">
             
             {/* Elegant Welcome Banner */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
-              <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#D4AF37] opacity-5 blur-[60px] pointer-events-none"></div>
-
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
               <div className="flex items-center gap-3 relative z-10 text-right">
-                <div className="w-12 h-12 rounded-xl bg-[#1A1C1E] text-[#D4AF37] border border-[#27272A] flex items-center justify-center">
-                  <LayoutDashboard className="w-6 h-6 text-[#D4AF37]" />
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
+                  <LayoutDashboard className="w-6 h-6 text-indigo-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-[#E4E4E7]">لوحة تحكم النظام الموحدة</h2>
-                  <p className="text-xs text-[#8E8E93] mt-0.5">رصد فوري لحالات حضور وانصراف الموظفين والطلبات المعلقة</p>
+                  <h2 className="text-lg font-bold text-slate-900">لوحة تحكم النظام الموحدة</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">رصد فوري لحالات حضور وانصراف الموظفين والطلبات المعلقة</p>
                 </div>
               </div>
 
               <div className="flex gap-4 relative z-10 shrink-0">
-                <div className="bg-[#0F0F11] px-4 py-2 rounded-xl border border-[#27272A] text-center">
-                  <p className="text-[10px] text-[#8E8E93] font-medium">الطلبات المعلقة</p>
-                  <p className="text-lg font-extrabold text-amber-500 font-mono">{activePending.length}</p>
+                <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
+                  <p className="text-[10px] text-slate-500 font-medium">الطلبات المعلقة</p>
+                  <p className="text-lg font-extrabold text-amber-600 font-mono">{activePending.length}</p>
                 </div>
-                <div className="bg-[#0F0F11] px-4 py-2 rounded-xl border border-[#27272A] text-center">
-                  <p className="text-[10px] text-[#8E8E93] font-medium">إجمالي الموظفين</p>
-                  <p className="text-lg font-extrabold text-blue-400 font-mono">{employees.length}</p>
+                <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
+                  <p className="text-[10px] text-slate-500 font-medium">إجمالي الموظفين</p>
+                  <p className="text-lg font-extrabold text-indigo-600 font-mono">{employees.length}</p>
                 </div>
               </div>
             </div>
 
             {/* General Metrics Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="bg-[#121214] border border-[#27272A] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-xs">
                 <div className="text-right">
-                  <span className="text-[11px] text-[#8E8E93]">نسبة الانضباط</span>
-                  <p className="text-xl font-bold text-emerald-400 mt-1 font-mono">
+                  <span className="text-[11px] text-slate-500">نسبة الانضباط</span>
+                  <p className="text-xl font-bold text-emerald-600 mt-1 font-mono">
                     {reports.attendanceRate || 0}%
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-emerald-950/30 text-emerald-400 border border-emerald-900/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
                   <CheckCircle className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="bg-[#121214] border border-[#27272A] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-xs">
                 <div className="text-right">
-                  <span className="text-[11px] text-[#8E8E93]">المتواجدون حالياً</span>
-                  <p className="text-xl font-bold text-amber-500 mt-1 font-mono">
+                  <span className="text-[11px] text-slate-500">المتواجدون حالياً</span>
+                  <p className="text-xl font-bold text-amber-600 mt-1 font-mono">
                     {activeNowCount} موظفين
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-amber-950/30 text-amber-500 border border-amber-900/20 flex items-center justify-center">
-                  <Users className="w-5 h-5 animate-pulse" />
+                <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="bg-[#121214] border border-[#27272A] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-xs">
                 <div className="text-right">
-                  <span className="text-[11px] text-[#8E8E93]">إجمالي ساعات هذا الشهر</span>
-                  <p className="text-xl font-bold text-blue-400 mt-1 font-mono">
+                  <span className="text-[11px] text-slate-500">إجمالي ساعات هذا الشهر</span>
+                  <p className="text-xl font-bold text-indigo-600 mt-1 font-mono">
                     {reports.totalHours || 0} ساعة
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-blue-950/30 text-blue-400 border border-blue-900/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
                   <Clock className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="bg-[#121214] border border-[#27272A] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-xs">
                 <div className="text-right flex-1 min-w-0">
-                  <span className="text-[11px] text-[#8E8E93] block">المقر الرئيسي للمطابقة</span>
-                  <p className="text-[11px] font-bold text-amber-500 mt-1 truncate" title={officeSettings.addressName}>
+                  <span className="text-[11px] text-slate-500 block">المقر الرئيسي للمطابقة</span>
+                  <p className="text-[11px] font-bold text-slate-800 mt-1 truncate" title={officeSettings.addressName}>
                     {officeSettings.addressName}
                   </p>
                   <button
                     type="button"
                     onClick={() => setActiveTab('settings')}
-                    className="text-[10px] text-[#D4AF37] hover:underline flex items-center gap-1 mt-1 font-bold cursor-pointer"
+                    className="text-[10px] text-indigo-600 hover:underline flex items-center gap-1 mt-1 font-bold cursor-pointer"
                   >
-                    <Settings className="w-3 h-3 text-[#D4AF37]" />
+                    <Settings className="w-3 h-3 text-indigo-600" />
                     <span>تعديل موقع المنشأة</span>
                   </button>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-amber-950/30 text-[#D4AF37] border border-amber-900/20 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
               </div>
@@ -1786,19 +1784,18 @@ export default function AdminPanel({
             {/* Recharts Graphical Dashboard Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="dashboard-charts-grid">
               {/* Chart 1: Daily Attendance Status (Pie Chart) */}
-              <div className="bg-[#121214] border border-[#27272A] rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
-                <div className="absolute -top-12 -left-12 w-24 h-24 bg-emerald-500 opacity-[0.02] blur-3xl pointer-events-none"></div>
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-[#E4E4E7] flex items-center gap-2 mb-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                     <span>توزيع حالات التحضير (اليوم)</span>
                   </h3>
-                  <p className="text-[11px] text-[#8E8E93] mb-4">النسبة المئوية لحالات حضور وغياب جميع الموظفين المسجلين لليوم</p>
+                  <p className="text-[11px] text-slate-500 mb-4">النسبة المئوية لحالات حضور وغياب جميع الموظفين المسجلين لليوم</p>
                 </div>
                 
                 <div className="h-[220px] w-full flex items-center justify-center relative">
                   {employees.length === 0 ? (
-                    <span className="text-xs text-[#8E8E93]">لا توجد بيانات كافية</span>
+                    <span className="text-xs text-slate-400">لا توجد بيانات كافية</span>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -1807,7 +1804,7 @@ export default function AdminPanel({
                             { name: 'حاضر بالوقت', value: countPresent, color: '#10B981' },
                             { name: 'متأخر عن العمل', value: countLate, color: '#F59E0B' },
                             { name: 'غياب مسجل', value: countAbsent, color: '#EF4444' },
-                            { name: 'لم يحضر بعد', value: countNotCheckedIn, color: '#3F3F46' }
+                            { name: 'لم يحضر بعد', value: countNotCheckedIn, color: '#94A3B8' }
                           ].filter(d => d.value > 0)}
                           cx="50%"
                           cy="50%"
@@ -1820,21 +1817,22 @@ export default function AdminPanel({
                             { name: 'حاضر بالوقت', value: countPresent, color: '#10B981' },
                             { name: 'متأخر عن العمل', value: countLate, color: '#F59E0B' },
                             { name: 'غياب مسجل', value: countAbsent, color: '#EF4444' },
-                            { name: 'لم يحضر بعد', value: countNotCheckedIn, color: '#3F3F46' }
+                            { name: 'لم يحضر بعد', value: countNotCheckedIn, color: '#94A3B8' }
                           ].filter(d => d.value > 0).map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: '#121214',
-                            borderColor: '#27272A',
+                            backgroundColor: '#FFFFFF',
+                            borderColor: '#E2E8F0',
                             borderRadius: '12px',
-                            color: '#E4E4E7',
+                            color: '#0F172A',
                             fontSize: '11px',
                             textAlign: 'right',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                           }}
-                          itemStyle={{ color: '#E4E4E7' }}
+                          itemStyle={{ color: '#0F172A' }}
                           formatter={(value: any) => [`${value} موظف`, 'العدد']}
                         />
                       </PieChart>
@@ -1842,15 +1840,15 @@ export default function AdminPanel({
                   )}
                   {/* Central Text for Pie Chart */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-[10px] text-[#8E8E93]">نسبة الحضور</span>
-                    <span className="text-xl font-extrabold text-[#E4E4E7] font-mono mt-0.5">
+                    <span className="text-[10px] text-slate-400">نسبة الحضور</span>
+                    <span className="text-xl font-extrabold text-slate-800 font-mono mt-0.5">
                       {Math.round(((countPresent + countLate) / (employees.length || 1)) * 100)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Customized Legends with Counts */}
-                <div className="grid grid-cols-2 gap-2 mt-4 text-[10px] text-[#E4E4E7]">
+                <div className="grid grid-cols-2 gap-2 mt-4 text-[10px] text-slate-700">
                   <div className="flex items-center gap-1.5 justify-start">
                     <span className="w-2.5 h-2.5 rounded bg-[#10B981] shrink-0"></span>
                     <span className="truncate">حاضر بالوقت ({countPresent})</span>
@@ -1864,63 +1862,63 @@ export default function AdminPanel({
                     <span className="truncate">غياب ({countAbsent})</span>
                   </div>
                   <div className="flex items-center gap-1.5 justify-start">
-                    <span className="w-2.5 h-2.5 rounded bg-[#3F3F46] shrink-0"></span>
+                    <span className="w-2.5 h-2.5 rounded bg-[#94A3B8] shrink-0"></span>
                     <span className="truncate">لم يحضر ({countNotCheckedIn})</span>
                   </div>
                 </div>
               </div>
 
               {/* Chart 2: Departure Status Today (Bar Chart / Progress Stack) */}
-              <div className="bg-[#121214] border border-[#27272A] rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
-                <div className="absolute -top-12 -left-12 w-24 h-24 bg-[#F43F5E] opacity-[0.02] blur-3xl pointer-events-none"></div>
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-[#E4E4E7] flex items-center gap-2 mb-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                     <span>حالة الانصراف اليومية</span>
                   </h3>
-                  <p className="text-[11px] text-[#8E8E93] mb-4">مقارنة بين عدد الموظفين على رأس العمل والذين سجلوا انصرافهم</p>
+                  <p className="text-[11px] text-slate-500 mb-4">مقارنة بين عدد الموظفين على رأس العمل والذين سجلوا انصرافهم</p>
                 </div>
 
                 <div className="h-[220px] w-full flex items-center justify-center relative">
                   {employees.length === 0 ? (
-                    <span className="text-xs text-[#8E8E93]">لا توجد بيانات كافية</span>
+                    <span className="text-xs text-slate-400">لا توجد بيانات كافية</span>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={[
-                          { name: 'على رأس العمل', 'الموظفين': countOnDuty, color: '#3B82F6' },
+                          { name: 'على رأس العمل', 'الموظفين': countOnDuty, color: '#4F46E5' },
                           { name: 'سجل الانصراف', 'الموظفين': countCheckedOut, color: '#F43F5E' },
                         ]}
                         barSize={32}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1F1F22" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                         <XAxis 
                           dataKey="name" 
-                          stroke="#8E8E93" 
+                          stroke="#64748B" 
                           fontSize={10} 
                           tickLine={false}
                           axisLine={false} 
                         />
                         <YAxis 
-                          stroke="#8E8E93" 
+                          stroke="#64748B" 
                           fontSize={10} 
                           tickLine={false}
                           axisLine={false} 
                           allowDecimals={false}
                         />
                         <Tooltip
-                          cursor={{ fill: '#1A1C1E', opacity: 0.3 }}
+                          cursor={{ fill: '#F8FAFC' }}
                           contentStyle={{
-                            backgroundColor: '#121214',
-                            borderColor: '#27272A',
+                            backgroundColor: '#FFFFFF',
+                            borderColor: '#E2E8F0',
                             borderRadius: '12px',
-                            color: '#E4E4E7',
+                            color: '#0F172A',
                             fontSize: '11px',
                             textAlign: 'right',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                           }}
                         />
                         <Bar dataKey="الموظفين" radius={[6, 6, 0, 0]}>
-                          <Cell fill="#3B82F6" />
+                          <Cell fill="#4F46E5" />
                           <Cell fill="#F43F5E" />
                         </Bar>
                       </BarChart>
@@ -1929,27 +1927,26 @@ export default function AdminPanel({
                 </div>
 
                 {/* Customized Stats summary */}
-                <div className="grid grid-cols-2 gap-4 mt-4 text-center border-t border-[#1F1F22] pt-3 text-xs">
+                <div className="grid grid-cols-2 gap-4 mt-4 text-center border-t border-slate-100 pt-3 text-xs">
                   <div>
-                    <span className="text-[#8E8E93] block text-[9px] mb-0.5">المغادرون</span>
-                    <span className="text-rose-400 font-extrabold font-mono text-sm">{countCheckedOut} موظف</span>
+                    <span className="text-slate-500 block text-[9px] mb-0.5">المغادرون</span>
+                    <span className="text-rose-600 font-extrabold font-mono text-sm">{countCheckedOut} موظف</span>
                   </div>
                   <div>
-                    <span className="text-[#8E8E93] block text-[9px] mb-0.5">على رأس العمل</span>
-                    <span className="text-blue-400 font-extrabold font-mono text-sm">{countOnDuty} موظف</span>
+                    <span className="text-slate-500 block text-[9px] mb-0.5">على رأس العمل</span>
+                    <span className="text-indigo-600 font-extrabold font-mono text-sm">{countOnDuty} موظف</span>
                   </div>
                 </div>
               </div>
 
               {/* Chart 3: Weekly Attendance & Departure Trend (Area Chart) */}
-              <div className="bg-[#121214] border border-[#27272A] rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
-                <div className="absolute -top-12 -left-12 w-24 h-24 bg-[#D4AF37] opacity-[0.02] blur-3xl pointer-events-none"></div>
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-[#E4E4E7] flex items-center gap-2 mb-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                     <span>معدل الحضور والانصراف (أسبوعي)</span>
                   </h3>
-                  <p className="text-[11px] text-[#8E8E93] mb-4">معدل الانضباط والالتزام اليومي لآخر 7 أيام عمل بالمنشأة</p>
+                  <p className="text-[11px] text-slate-500 mb-4">معدل الانضباط والالتزام اليومي لآخر 7 أيام عمل بالمنشأة</p>
                 </div>
 
                 <div className="h-[220px] w-full">
@@ -1965,16 +1962,16 @@ export default function AdminPanel({
                           <stop offset="95%" stopColor="#F43F5E" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1F1F22" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                       <XAxis 
                         dataKey="date" 
-                        stroke="#8E8E93" 
+                        stroke="#64748B" 
                         fontSize={10} 
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis 
-                        stroke="#8E8E93" 
+                        stroke="#64748B" 
                         fontSize={10} 
                         tickLine={false}
                         axisLine={false}
@@ -1983,12 +1980,13 @@ export default function AdminPanel({
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#121214',
-                          borderColor: '#27272A',
+                          backgroundColor: '#FFFFFF',
+                          borderColor: '#E2E8F0',
                           borderRadius: '12px',
-                          color: '#E4E4E7',
+                          color: '#0F172A',
                           fontSize: '11px',
                           textAlign: 'right',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                         }}
                       />
                       <Area 
@@ -2012,7 +2010,7 @@ export default function AdminPanel({
                 </div>
 
                 {/* Legend indicator for Area chart */}
-                <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#E4E4E7]">
+                <div className="flex justify-center gap-4 mt-4 text-[10px] text-slate-700">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
                     <span>معدل الحضور اليومي</span>
@@ -2026,26 +2024,26 @@ export default function AdminPanel({
             </div>
 
             {/* Live Daily Attendance Status Section ("الوضع الحالي") */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl relative overflow-hidden text-right" id="live-status-section">
-              <div className="border-b border-[#27272A] pb-4 mb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs relative overflow-hidden text-right" id="live-status-section">
+              <div className="border-b border-slate-200 pb-4 mb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                 <div className="text-right">
-                  <h3 className="text-base font-bold text-[#E4E4E7] flex items-center justify-start gap-2">
+                  <h3 className="text-base font-bold text-slate-900 flex items-center justify-start gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
                     <span>الوضع الحالي لموظفي المنشأة (اليوم)</span>
                   </h3>
-                  <p className="text-xs text-[#8E8E93] mt-0.5">متابعة فورية ومباشرة لحالة حضور وانصراف الموظفين خلال ساعات العمل الحالية</p>
+                  <p className="text-xs text-slate-500 mt-0.5">متابعة فورية ومباشرة لحالة حضور وانصراف الموظفين خلال ساعات العمل الحالية</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
                     onClick={openGeneralAdminAttModal}
-                    className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl transition-all shadow-md shadow-[#D4AF37]/15 flex items-center gap-1.5 cursor-pointer hover:scale-[1.02]"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer hover:scale-[1.02]"
                     title="تسجيل حضور أو انصراف لأي موظف مع إمكانية تحديد التوقيت بدقة"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>تسجيل تحضير إداري يدوي</span>
                   </button>
-                  <div className="text-xs text-[#8E8E93] font-mono bg-[#0F0F11] border border-[#27272A] px-3 py-1.5 rounded-xl self-start sm:self-auto">
+                  <div className="text-xs text-slate-600 font-mono bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl self-start sm:self-auto">
                     {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   </div>
                 </div>
@@ -2053,17 +2051,17 @@ export default function AdminPanel({
 
               {/* Global Success Notification Banner for Admin CheckIn/CheckOut */}
               {globalSuccessBanner && (
-                <div className="mb-4 bg-emerald-950/60 border border-emerald-500/50 text-emerald-200 px-4 py-3 rounded-xl text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-950/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
                       <CheckCircle className="w-4 h-4" />
                     </div>
-                    <span className="text-sm font-extrabold text-emerald-300">{globalSuccessBanner}</span>
+                    <span className="text-sm font-bold text-emerald-800">{globalSuccessBanner}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setGlobalSuccessBanner(null)}
-                    className="text-emerald-400 hover:text-emerald-100 p-1 rounded-lg transition-colors cursor-pointer hover:bg-emerald-900/40"
+                    className="text-emerald-600 hover:text-emerald-900 p-1 rounded-lg transition-colors cursor-pointer hover:bg-emerald-100"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -2076,21 +2074,21 @@ export default function AdminPanel({
                 if (!isSaturday || !officeSettings?.enableSaturdayCustomSchedule) return null;
                 const satSchedule = getScheduleForDate(new Date(), officeSettings);
                 return (
-                  <div className="mb-4 bg-gradient-to-r from-amber-950/40 via-amber-900/20 to-amber-950/40 border border-[#D4AF37]/50 text-amber-200 px-4 py-3 rounded-xl text-xs flex items-center justify-between shadow-lg shadow-amber-950/20 animate-in fade-in duration-200">
+                  <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-xl text-xs flex items-center justify-between shadow-xs animate-in fade-in duration-200">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0 font-extrabold text-xs">
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 font-extrabold text-xs">
                         السبت
                       </div>
                       <div>
-                        <div className="font-extrabold text-amber-300 text-sm flex items-center gap-2">
+                        <div className="font-extrabold text-amber-900 text-sm flex items-center gap-2">
                           <span>جدول دوام السبت المخصص مفعّل اليوم</span>
                         </div>
-                        <p className="text-xs text-amber-200/90 mt-0.5">
-                          ساعات العمل المعتمدة اليوم: من <span className="font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{satSchedule.startTime}</span> إلى <span className="font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{satSchedule.endTime}</span> | مهلة السماح: <span className="font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{satSchedule.gracePeriod} دقيقة</span>
+                        <p className="text-xs text-amber-800 mt-0.5">
+                          ساعات العمل المعتمدة اليوم: من <span className="font-mono font-bold text-slate-900 bg-white px-1.5 py-0.5 rounded border border-amber-200">{satSchedule.startTime}</span> إلى <span className="font-mono font-bold text-slate-900 bg-white px-1.5 py-0.5 rounded border border-amber-200">{satSchedule.endTime}</span> | مهلة السماح: <span className="font-bold text-slate-900 bg-white px-1.5 py-0.5 rounded border border-amber-200">{satSchedule.gracePeriod} دقيقة</span>
                         </p>
                       </div>
                     </div>
-                    <span className="hidden sm:inline-block text-[11px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 px-2.5 py-1 rounded-lg shrink-0">
+                    <span className="hidden sm:inline-block text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg shrink-0">
                       استثناء نشط
                     </span>
                   </div>
@@ -2109,11 +2107,11 @@ export default function AdminPanel({
                 return (
                   <div className={`p-4 rounded-xl mb-4 text-right flex flex-col md:flex-row items-center justify-between gap-3 border ${
                     isEveryoneCheckedOut 
-                      ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400 shadow-md animate-fade-in' 
-                      : 'bg-zinc-900/30 border-[#27272A] text-zinc-400'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-xs animate-fade-in' 
+                      : 'bg-slate-50 border-slate-200 text-slate-700'
                   }`}>
                     <div>
-                      <p className="text-xs font-bold text-[#E4E4E7] flex items-center gap-2">
+                      <p className="text-xs font-bold text-slate-900 flex items-center gap-2">
                         {isEveryoneCheckedOut ? (
                           <>
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -2126,7 +2124,7 @@ export default function AdminPanel({
                           </>
                         )}
                       </p>
-                      <p className="text-[11px] text-rose-400 font-bold mt-1">
+                      <p className="text-[11px] text-rose-600 font-semibold mt-1">
                         * تنبيه ذكي: عند الترحيل والتصفير الآن، سيقوم النظام تلقائياً برصد جميع الموظفين الذين لم يسجلوا حضورهم اليوم وتسجيلهم بحالة "غياب كلي" وإدراجهم في التقارير لضمان دقة كشف الحضور والانصراف.
                       </p>
                     </div>
@@ -2140,8 +2138,8 @@ export default function AdminPanel({
                         }}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
                           isEveryoneCheckedOut 
-                            ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10' 
-                            : 'bg-[#27272A] hover:bg-[#323235] text-[#E4E4E7] border border-[#3A3A3D]'
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs' 
+                            : 'bg-slate-200 hover:bg-slate-300 text-slate-800 border border-slate-300'
                         }`}
                       >
                         <Archive className="w-3.5 h-3.5" />
@@ -2153,14 +2151,14 @@ export default function AdminPanel({
               })()}
 
               {employees.length === 0 ? (
-                <div className="text-center py-8 text-[#8E8E93] text-xs">
+                <div className="text-center py-8 text-slate-500 text-xs">
                   لا يوجد موظفون مضافون بالنظام حالياً لمتابعة وضعهم اليومي.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-[#27272A]">
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
                   <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
                     <thead>
-                      <tr className="bg-[#0F0F11] border-b border-[#27272A] text-[#8E8E93] font-bold">
+                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
                         <th className="px-4 py-3 text-right">الموظف</th>
                         <th className="px-4 py-3 text-right">نموذج العمل</th>
                         <th className="px-4 py-3 text-right">حالة التحضير اليومية</th>
@@ -2170,7 +2168,7 @@ export default function AdminPanel({
                         <th className="px-4 py-3 text-center">الإجراءات والسجلات</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                    <tbody className="divide-y divide-slate-200 text-slate-800">
                       {employees.map((emp) => {
                         const todayRecord = attendanceRecords.find(r => r.employeeId === emp.id && r.date === todayStr && !r.archived);
                         
@@ -2181,61 +2179,61 @@ export default function AdminPanel({
                         let statusBadge = null;
                         if (todayRecord) {
                           if (todayRecord.status === 'حاضر') {
-                            statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-900/30">حاضر</span>;
+                            statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">حاضر</span>;
                           } else if (todayRecord.status === 'متأخر') {
-                            statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/30">متأخر</span>;
+                            statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">متأخر</span>;
                           } else {
-                            statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/40 text-rose-400 border border-rose-900/30">غياب</span>;
+                            statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">غياب</span>;
                           }
                         } else if (pendingIn) {
-                          statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-950/40 text-blue-400 border border-blue-900/30 animate-pulse">طلب حضور معلق</span>;
+                          statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 animate-pulse">طلب حضور معلق</span>;
                         } else {
-                          statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-900 text-zinc-500 border border-zinc-800">لم يحضر بعد</span>;
+                          statusBadge = <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">لم يحضر بعد</span>;
                         }
 
                         return (
-                          <tr key={emp.id} className="hover:bg-[#0F0F11]/40 transition-colors">
-                            <td className="px-4 py-3 font-bold text-[#E4E4E7]">
+                          <tr key={emp.id} className="hover:bg-slate-50/70 transition-colors">
+                            <td className="px-4 py-3 font-bold text-slate-900">
                               <div className="flex items-center gap-2">
                                 <span className={`w-7 h-7 rounded-full ${emp.avatarColor} text-white flex items-center justify-center text-[10px] font-bold shrink-0`}>
                                   {emp.name.split(' ').map(n => n[0]).join('')}
                                 </span>
                                 <div>
                                   <p className="text-xs">{emp.name}</p>
-                                  <p className="text-[9px] text-[#8E8E93] font-normal">{emp.role}</p>
+                                  <p className="text-[9px] text-slate-500 font-normal">{emp.role}</p>
                                 </div>
                               </div>
                             </td>
                             <td className="px-4 py-3">
                               {emp.workModel === 'on-site' ? (
-                                <span className="text-slate-300">حضوري (ميداني)</span>
+                                <span className="text-slate-700">حضوري (ميداني)</span>
                               ) : (
-                                <span className="text-[#D4AF37] font-medium">عن بُعد</span>
+                                <span className="text-indigo-600 font-medium">عن بُعد</span>
                               )}
                             </td>
                             <td className="px-4 py-3">
                               {statusBadge}
                             </td>
-                            <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                            <td className="px-4 py-3 font-mono text-emerald-600 font-bold">
                               {todayRecord ? todayRecord.checkIn : '-'}
                             </td>
                             <td className="px-4 py-3 font-mono">
                               {todayRecord ? (
                                 todayRecord.checkOut ? (
-                                  <span className="text-rose-400 font-bold">{todayRecord.checkOut}</span>
+                                  <span className="text-rose-600 font-bold">{todayRecord.checkOut}</span>
                                 ) : pendingOut ? (
-                                  <span className="text-blue-400 animate-pulse font-bold">طلب انصراف معلق</span>
+                                  <span className="text-blue-600 animate-pulse font-bold">طلب انصراف معلق</span>
                                 ) : (
-                                  <span className="text-amber-500 font-medium animate-pulse">على رأس العمل</span>
+                                  <span className="text-amber-600 font-medium animate-pulse">على رأس العمل</span>
                                 )
                               ) : '-'}
                             </td>
                             <td className="px-4 py-3 font-mono">
                               {todayRecord ? (
                                 todayRecord.checkOut ? (
-                                  <span className="text-emerald-400 font-bold">{todayRecord.totalHours} ساعة (مكتملة)</span>
+                                  <span className="text-emerald-600 font-bold">{todayRecord.totalHours} ساعة (مكتملة)</span>
                                 ) : (
-                                  <span className="text-amber-400 font-semibold">{getHoursWorked(todayRecord)} ساعة (مستمرة)</span>
+                                  <span className="text-amber-600 font-semibold">{getHoursWorked(todayRecord)} ساعة (مستمرة)</span>
                                 )
                               ) : '-'}
                             </td>
@@ -2243,15 +2241,15 @@ export default function AdminPanel({
                               {todayRecord && !todayRecord.checkOut ? (
                                 <div className="flex items-center justify-center gap-1.5">
                                   {forceCheckOutConfirmId === emp.id ? (
-                                    <div className="flex items-center gap-1 bg-rose-950/20 border border-rose-900/30 p-1 rounded-lg">
-                                      <span className="text-[9px] text-rose-300 font-bold">متأكد؟</span>
+                                    <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 p-1 rounded-lg">
+                                      <span className="text-[9px] text-rose-700 font-bold">متأكد؟</span>
                                       <button
                                         type="button"
                                         onClick={() => {
                                           onForceCheckOut?.(emp.id);
                                           setForceCheckOutConfirmId(null);
                                         }}
-                                        className="text-emerald-400 hover:text-emerald-300 p-0.5 bg-emerald-950/40 rounded transition-colors cursor-pointer"
+                                        className="text-emerald-600 hover:text-emerald-700 p-0.5 bg-emerald-100 rounded transition-colors cursor-pointer"
                                         title="نعم"
                                       >
                                         <Check className="w-3 h-3" />
@@ -2259,7 +2257,7 @@ export default function AdminPanel({
                                       <button
                                         type="button"
                                         onClick={() => setForceCheckOutConfirmId(null)}
-                                        className="text-rose-400 hover:text-rose-300 p-0.5 bg-rose-900/10 rounded transition-colors cursor-pointer"
+                                        className="text-rose-600 hover:text-rose-700 p-0.5 bg-rose-100 rounded transition-colors cursor-pointer"
                                         title="إلغاء"
                                       >
                                         <X className="w-3 h-3" />
@@ -2270,26 +2268,26 @@ export default function AdminPanel({
                                       <button
                                         type="button"
                                         onClick={() => requestAdminCheckOutConfirmation(emp, todayRecord)}
-                                        className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
+                                        className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs hover:scale-105"
                                         title="تسجيل انصراف فوري بالوقت الحالي"
                                       >
-                                        <UserX className="w-3.5 h-3.5 text-rose-400" />
+                                        <UserX className="w-3.5 h-3.5 text-rose-600" />
                                         <span>تسجيل انصراف</span>
                                       </button>
                                       <button
                                         type="button"
                                         onClick={() => openAdminAttModalForCheckOut(emp, todayRecord)}
-                                        className="p-1.5 bg-[#1F1F23] hover:bg-[#27272A] text-zinc-300 hover:text-white border border-[#27272A] rounded-xl transition-all cursor-pointer"
+                                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl transition-all cursor-pointer"
                                         title="تحديد وقت الانصراف بدقة يدوياً"
                                       >
-                                        <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                        <Clock className="w-3.5 h-3.5 text-indigo-600" />
                                       </button>
                                     </div>
                                   )}
                                 </div>
                               ) : todayRecord && todayRecord.checkOut ? (
                                 <div className="flex items-center justify-center gap-2">
-                                  <span className="text-emerald-400 font-bold text-[11px] bg-emerald-950/30 border border-emerald-900/30 px-2 py-0.5 rounded-lg">مكتمل ✓</span>
+                                  <span className="text-emerald-700 font-bold text-[11px] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">مكتمل ✓</span>
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -2301,10 +2299,10 @@ export default function AdminPanel({
                                       setEditRecWorkModel(todayRecord.workModel || 'on-site');
                                       setEditRecError('');
                                     }}
-                                    className="bg-[#1F1F23] hover:bg-[#27272A] text-zinc-300 border border-[#27272A] text-[10px] px-2 py-0.5 rounded-md font-semibold transition-all cursor-pointer inline-flex items-center gap-1"
+                                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[10px] px-2 py-0.5 rounded-md font-semibold transition-all cursor-pointer inline-flex items-center gap-1"
                                     title="تعديل السجل الإداري"
                                   >
-                                    <Pencil className="w-3 h-3 text-[#D4AF37]" />
+                                    <Pencil className="w-3 h-3 text-indigo-600" />
                                     <span>تعديل</span>
                                   </button>
                                 </div>
@@ -2313,19 +2311,19 @@ export default function AdminPanel({
                                   <button
                                     type="button"
                                     onClick={() => requestAdminCheckInConfirmation(emp)}
-                                    className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-200 border border-emerald-800/50 text-[11px] px-3 py-1.5 rounded-xl font-extrabold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm hover:scale-105"
+                                    className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs hover:scale-105"
                                     title="تسجيل حضور فوري بالوقت الحالي"
                                   >
-                                    <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                                    <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
                                     <span>تسجيل حضور</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => openAdminAttModalForCheckIn(emp)}
-                                    className="p-1.5 bg-[#1F1F23] hover:bg-[#27272A] text-zinc-300 hover:text-white border border-[#27272A] rounded-xl transition-all cursor-pointer"
+                                    className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl transition-all cursor-pointer"
                                     title="تحديد وقت الحضور بدقة يدوياً"
                                   >
-                                    <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                    <Clock className="w-3.5 h-3.5 text-indigo-600" />
                                   </button>
                                 </div>
                               )}
@@ -2340,13 +2338,13 @@ export default function AdminPanel({
             </div>
 
             {/* Daily Remote Approvals Module */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl relative">
-              <div className="border-b border-[#27272A] pb-4 mb-4 flex justify-between items-center">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs relative">
+              <div className="border-b border-slate-200 pb-4 mb-4 flex justify-between items-center">
                 <div className="text-right">
-                  <h3 className="text-base font-bold text-[#E4E4E7]">طلبات التحضير المعلقة</h3>
-                  <p className="text-xs text-[#8E8E93] mt-0.5">طلبات العمل عن بعد والتحضير خارج النطاق الجغرافي التي تحتاج مراجعة</p>
+                  <h3 className="text-base font-bold text-slate-900">طلبات التحضير المعلقة</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">طلبات العمل عن بعد والتحضير خارج النطاق الجغرافي التي تحتاج مراجعة</p>
                 </div>
-                <span className="bg-[#0F0F11] text-amber-500 border border-amber-500/30 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] px-2.5 py-1 rounded-full font-bold">
                   {activePending.length} طلبات معلقة
                 </span>
               </div>
@@ -2354,18 +2352,18 @@ export default function AdminPanel({
               {activePending.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {activePending.map((req) => (
-                    <div key={req.id} className="border border-[#27272A] rounded-xl p-4 space-y-3 bg-[#0F0F11] hover:border-[#D4AF37]/50 transition-all duration-200 text-right">
+                    <div key={req.id} className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50 hover:border-indigo-300 transition-all duration-200 text-right">
                       <div className="flex justify-between items-start">
                         <div className="text-right">
-                          <h4 className="font-bold text-[#E4E4E7]">{req.employeeName}</h4>
-                          <p className="text-xs text-[#8E8E93]">{req.role}</p>
+                          <h4 className="font-bold text-slate-900">{req.employeeName}</h4>
+                          <p className="text-xs text-slate-500">{req.role}</p>
                         </div>
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                           req.notes?.includes('خارج النطاق')
-                            ? 'bg-amber-950/40 text-amber-400 border border-amber-900/30'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
                             : req.type === 'check-in' 
-                              ? 'bg-blue-950/40 text-blue-400 border border-blue-900/30' 
-                              : 'bg-rose-950/40 text-rose-400 border border-rose-900/30'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
                         }`}>
                           {req.notes?.includes('خارج النطاق')
                             ? (req.type === 'check-in' ? 'حضور خارج النطاق' : 'انصراف خارج النطاق')
@@ -2374,28 +2372,28 @@ export default function AdminPanel({
                       </div>
 
                       {req.notes && (
-                        <div className="bg-[#1A1C1E] border border-[#27272A] p-2 rounded-lg text-xs text-[#D4AF37] flex items-center gap-1.5 justify-start">
-                          <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <div className="bg-white border border-slate-200 p-2 rounded-lg text-xs text-slate-700 flex items-center gap-1.5 justify-start">
+                          <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                           <span>{req.notes}</span>
                         </div>
                       )}
 
-                      <div className="border-t border-[#27272A] pt-3 grid grid-cols-2 gap-2 text-xs text-[#8E8E93]">
+                      <div className="border-t border-slate-200 pt-3 grid grid-cols-2 gap-2 text-xs text-slate-500">
                         <div>
                           <span>تاريخ الطلب:</span>
-                          <strong className="block text-[#E4E4E7] mt-0.5 font-mono">{req.date}</strong>
+                          <strong className="block text-slate-900 mt-0.5 font-mono">{req.date}</strong>
                         </div>
                         <div>
                           <span>ساعة التسجيل:</span>
-                          <strong className="block text-[#E4E4E7] mt-0.5 font-mono">{req.time}</strong>
+                          <strong className="block text-slate-900 mt-0.5 font-mono">{req.time}</strong>
                         </div>
                       </div>
 
-                      <div className="flex gap-2 pt-2 border-t border-[#27272A]">
+                      <div className="flex gap-2 pt-2 border-t border-slate-200">
                         <button
                           id={`btn-approve-${req.id}`}
                           onClick={() => onApproveRequest(req.id)}
-                          className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 border border-emerald-600/30 transition-colors duration-150 cursor-pointer"
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer shadow-xs"
                         >
                           <CheckCircle className="w-3.5 h-3.5" />
                           <span>اعتماد وقبول</span>
@@ -2404,7 +2402,7 @@ export default function AdminPanel({
                         <button
                           id={`btn-reject-${req.id}`}
                           onClick={() => onRejectRequest(req.id)}
-                          className="flex-1 bg-[#1A1C1E] hover:bg-rose-950/20 text-rose-400 font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 border border-[#27272A] hover:border-rose-900/40 transition-colors duration-150 cursor-pointer"
+                          className="flex-1 bg-white hover:bg-rose-50 text-rose-600 font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 border border-slate-200 hover:border-rose-200 transition-colors duration-150 cursor-pointer"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           <span>رفض الطلب</span>
@@ -2414,10 +2412,10 @@ export default function AdminPanel({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 border border-dashed border-[#27272A] bg-[#0F0F11] rounded-xl">
-                  <Check className="w-8 h-8 text-emerald-400 mx-auto mb-2 bg-emerald-950/40 p-1.5 rounded-full border border-emerald-900/30" />
-                  <p className="text-sm font-bold text-[#E4E4E7]">لا توجد أي طلبات معلقة حالياً!</p>
-                  <p className="text-xs text-[#8E8E93] mt-1">تمت معالجة كافة طلبات الحضور والانصراف عن بُعد بنجاح.</p>
+                <div className="text-center py-12 border border-dashed border-slate-200 bg-slate-50 rounded-xl">
+                  <Check className="w-8 h-8 text-emerald-600 mx-auto mb-2 bg-emerald-100 p-1.5 rounded-full" />
+                  <p className="text-sm font-bold text-slate-900">لا توجد أي طلبات معلقة حالياً!</p>
+                  <p className="text-xs text-slate-500 mt-1">تمت معالجة كافة طلبات الحضور والانصراف عن بُعد بنجاح.</p>
                 </div>
               )}
             </div>
@@ -2429,29 +2427,29 @@ export default function AdminPanel({
         {activeTab === 'employees' && (
           <div className="space-y-6" id="admin-tab-employees">
             
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
                 <div className="text-right">
-                  <h3 className="text-lg font-bold text-[#E4E4E7]">قائمة شؤون الموظفين</h3>
-                  <p className="text-xs text-[#8E8E93]">إضافة، تعديل وحذف موظفي المنشأة وتعيين بيانات الدخول الخاصة بهم</p>
+                  <h3 className="text-lg font-bold text-slate-900">قائمة شؤون الموظفين</h3>
+                  <p className="text-xs text-slate-500">إضافة، تعديل وحذف موظفي المنشأة وتعيين بيانات الدخول الخاصة بهم</p>
                 </div>
 
                 <button
                   id="btn-open-add-emp-modal"
                   onClick={() => setShowAddModal(true)}
-                  className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-1.5 transition-colors duration-150 self-start sm:self-auto cursor-pointer"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center gap-1.5 transition-colors duration-150 self-start sm:self-auto cursor-pointer shadow-xs"
                 >
-                  <Plus className="w-4 h-4 text-slate-950" />
+                  <Plus className="w-4 h-4 text-white" />
                   <span>إضافة موظف جديد</span>
                 </button>
               </div>
 
               {/* Employees List Directory Table */}
               {employees.length > 0 ? (
-                <div className="overflow-x-auto rounded-xl border border-[#27272A]">
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
                   <table className="w-full min-w-[950px] text-right border-collapse text-sm whitespace-nowrap">
                     <thead>
-                      <tr className="bg-[#0F0F11] border-b border-[#27272A] text-[#8E8E93] font-bold">
+                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
                         <th className="px-4 py-3 text-right">الموظف</th>
                         <th className="px-4 py-3 text-right">البريد الإلكتروني</th>
                         <th className="px-4 py-3 text-right">نموذج العمل</th>
@@ -2460,44 +2458,44 @@ export default function AdminPanel({
                         <th className="px-4 py-3 text-right">الإجراءات</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                    <tbody className="divide-y divide-slate-200 text-slate-800">
                       {employees.map((emp) => (
-                        <tr key={emp.id} className="hover:bg-[#0F0F11]/50 transition-colors">
-                          <td className="px-4 py-3 font-bold text-[#E4E4E7]">
+                        <tr key={emp.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="px-4 py-3 font-bold text-slate-900">
                             <div className="flex items-center gap-3">
                               <span className={`w-8 h-8 rounded-full ${emp.avatarColor} text-white flex items-center justify-center text-xs font-bold shrink-0`}>
                                 {emp.name.split(' ').map(n => n[0]).join('')}
                               </span>
                               <div>
                                 <p>{emp.name}</p>
-                                <p className="text-[10px] text-[#8E8E93] font-normal">{emp.role}</p>
+                                <p className="text-[10px] text-slate-500 font-normal">{emp.role}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-[#8E8E93] font-medium font-mono text-xs">{emp.email}</td>
+                          <td className="px-4 py-3 text-slate-600 font-medium font-mono text-xs">{emp.email}</td>
                           <td className="px-4 py-3 text-xs">
                             {emp.workModel === 'on-site' ? (
-                              <span className="bg-blue-950/30 text-blue-400 px-2.5 py-0.5 rounded-full font-bold border border-blue-900/30">حضوري (مكتبي)</span>
+                              <span className="bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200">حضوري (مكتبي)</span>
                             ) : (
-                              <span className="bg-violet-950/30 text-violet-400 px-2.5 py-0.5 rounded-full font-bold border border-violet-900/30">عن بُعد</span>
+                              <span className="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-bold border border-indigo-200">عن بُعد</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-xs">
                             {emp.username ? (
-                              <div className="bg-[#0F0F11] p-2 rounded-lg border border-[#27272A] space-y-1 font-mono max-w-[200px]">
+                              <div className="bg-slate-50 p-2 rounded-lg border border-slate-200 space-y-1 font-mono max-w-[200px]">
                                 <div className="text-right flex justify-between gap-2">
-                                  <span className="text-[#8E8E93] text-[9px]">المستخدم:</span>
-                                  <span className="text-slate-200 font-bold">{emp.username}</span>
+                                  <span className="text-slate-500 text-[9px]">المستخدم:</span>
+                                  <span className="text-slate-800 font-bold">{emp.username}</span>
                                 </div>
                                 <div className="text-right flex justify-between gap-2 items-center">
-                                  <span className="text-[#8E8E93] text-[9px]">المرور:</span>
+                                  <span className="text-slate-500 text-[9px]">المرور:</span>
                                   <div className="flex items-center gap-1">
-                                    <span className="text-[#D4AF37] font-bold">
+                                    <span className="text-indigo-600 font-bold">
                                       {visiblePasswords[emp.id] ? emp.password : '••••••••'}
                                     </span>
                                     <button 
                                       onClick={() => togglePasswordVisibility(emp.id)}
-                                      className="text-[#8E8E93] hover:text-[#E4E4E7]"
+                                      className="text-slate-400 hover:text-slate-600"
                                     >
                                       {visiblePasswords[emp.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                                     </button>
@@ -2505,22 +2503,22 @@ export default function AdminPanel({
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-[#8E8E93] italic text-xs">لا توجد بيانات دخول</span>
+                              <span className="text-slate-400 italic text-xs">لا توجد بيانات دخول</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-[#8E8E93] font-mono text-xs font-semibold">{emp.joinDate}</td>
+                          <td className="px-4 py-3 text-slate-600 font-mono text-xs font-semibold">{emp.joinDate}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1.5 justify-start">
                               {deleteConfirmId === emp.id ? (
-                                <div className="flex items-center gap-1 bg-rose-950/20 border border-rose-900/30 p-1 rounded-lg">
-                                  <span className="text-[10px] text-rose-300 font-bold">حذف؟</span>
+                                <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 p-1 rounded-lg">
+                                  <span className="text-[10px] text-rose-700 font-bold">حذف؟</span>
                                   <button
                                     type="button"
                                     onClick={() => {
                                       onDeleteEmployee(emp.id);
                                       setDeleteConfirmId(null);
                                     }}
-                                    className="text-emerald-400 hover:text-emerald-300 p-1 bg-emerald-950/40 rounded-md transition-colors cursor-pointer"
+                                    className="text-emerald-600 hover:text-emerald-700 p-1 bg-emerald-100 rounded-md transition-colors cursor-pointer"
                                     title="تأكيد الحذف"
                                   >
                                     <Check className="w-3.5 h-3.5" />
@@ -2528,7 +2526,7 @@ export default function AdminPanel({
                                   <button
                                     type="button"
                                     onClick={() => setDeleteConfirmId(null)}
-                                    className="text-rose-400 hover:text-rose-300 p-1 bg-rose-900/10 rounded-md transition-colors cursor-pointer"
+                                    className="text-rose-600 hover:text-rose-700 p-1 bg-rose-100 rounded-md transition-colors cursor-pointer"
                                     title="إلغاء"
                                   >
                                     <X className="w-3.5 h-3.5" />
@@ -2539,7 +2537,7 @@ export default function AdminPanel({
                                   <button
                                     id={`btn-edit-emp-${emp.id}`}
                                     onClick={() => handleStartEditEmployee(emp)}
-                                    className="text-[#D4AF37] hover:text-[#F3C63F] p-1.5 hover:bg-[#D4AF37]/10 rounded-lg transition-all duration-150 cursor-pointer"
+                                    className="text-indigo-600 hover:text-indigo-700 p-1.5 hover:bg-indigo-50 rounded-lg transition-all duration-150 cursor-pointer"
                                     title="تعديل بيانات الموظف"
                                   >
                                     <Edit className="w-4 h-4" />
@@ -2547,7 +2545,7 @@ export default function AdminPanel({
                                   <button
                                     id={`btn-delete-emp-${emp.id}`}
                                     onClick={() => setDeleteConfirmId(emp.id)}
-                                    className="text-rose-400 hover:text-rose-300 p-1.5 hover:bg-rose-950/20 rounded-lg transition-all duration-150 cursor-pointer"
+                                    className="text-rose-600 hover:text-rose-700 p-1.5 hover:bg-rose-50 rounded-lg transition-all duration-150 cursor-pointer"
                                     title="حذف الموظف"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -2562,15 +2560,15 @@ export default function AdminPanel({
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-16 border border-dashed border-[#27272A] bg-[#0F0F11] rounded-xl">
-                  <UserPlus className="w-10 h-10 text-[#8E8E93] mx-auto mb-3" />
-                  <p className="text-sm font-bold text-[#E4E4E7]">لا يوجد موظفون مسجلون حالياً</p>
-                  <p className="text-xs text-[#8E8E93] mt-1 mb-4">اضغط على الزر أعلاه لإضافة الموظف الأول وتخصيص حسابه</p>
+                <div className="text-center py-16 border border-dashed border-slate-200 bg-slate-50 rounded-xl">
+                  <UserPlus className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-slate-900">لا يوجد موظفون مسجلون حالياً</p>
+                  <p className="text-xs text-slate-500 mt-1 mb-4">اضغط على الزر أعلاه لإضافة الموظف الأول وتخصيص حسابه</p>
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2 px-4 rounded-xl inline-flex items-center gap-1.5"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-4 rounded-xl inline-flex items-center gap-1.5 shadow-xs"
                   >
-                    <Plus className="w-4 h-4 text-slate-950" />
+                    <Plus className="w-4 h-4 text-white" />
                     <span>سجل أول موظف الآن</span>
                   </button>
                 </div>
@@ -2578,16 +2576,16 @@ export default function AdminPanel({
             </div>
 
             {/* Shareable Link Under Employees Table */}
-            <div className="bg-[#121214] border border-dashed border-[#D4AF37]/30 rounded-2xl p-5 shadow-lg flex flex-col lg:flex-row items-center justify-between gap-4 mt-6 text-right">
+            <div className="bg-indigo-50/60 border border-dashed border-indigo-200 rounded-2xl p-5 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4 mt-6 text-right">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-[#D4AF37]/10 rounded-xl border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] shrink-0 mt-0.5">
+                <div className="w-10 h-10 bg-indigo-100 rounded-xl border border-indigo-200 flex items-center justify-center text-indigo-600 shrink-0 mt-0.5">
                   <Link2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                     بوابة الخدمة الذاتية للموظفين (رابط التحضير الذاتي المباشر)
                   </h4>
-                  <p className="text-[11px] text-[#8E8E93] mt-1 max-w-xl leading-relaxed">
+                  <p className="text-[11px] text-slate-600 mt-1 max-w-xl leading-relaxed">
                     قم بنسخ الرابط المباشر وإرساله لموظفيك؛ حيث يمكن للموظف فتح الرابط من جواله، واختيار اسمه، ثم إدخال رقم المرور السري الخاص به لتسجيل حضوره وانصرافه بنجاح دون الحاجة لحساب الإدارة.
                   </p>
                 </div>
@@ -2598,7 +2596,7 @@ export default function AdminPanel({
                   type="text"
                   readOnly
                   value={`${window.location.origin}${window.location.pathname}?portal=employee&tenant=${activeTenantId}`}
-                  className="w-full lg:w-64 bg-[#0F0F11] border border-[#27272A] rounded-xl px-3 py-2 text-xs text-[#E4E4E7] font-mono focus:outline-none text-left select-all focus:border-[#D4AF37]"
+                  className="w-full lg:w-64 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none text-left select-all focus:border-indigo-600 shadow-2xs"
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
                 <button
@@ -2609,9 +2607,9 @@ export default function AdminPanel({
                     setCopiedTableLink(true);
                     setTimeout(() => setCopiedTableLink(false), 2500);
                   }}
-                  className="bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 text-xs px-4 py-2 rounded-xl font-extrabold transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5 shrink-0"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0"
                 >
-                  <Copy className="w-3.5 h-3.5 text-slate-950" />
+                  <Copy className="w-3.5 h-3.5 text-white" />
                   <span>{copiedTableLink ? 'تم نسخ الرابط!' : 'نسخ رابط البوابة'}</span>
                 </button>
               </div>
@@ -2619,30 +2617,30 @@ export default function AdminPanel({
 
             {/* Employee Add Form modal (Overlay) */}
             {showAddModal && (
-              <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-                <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 w-full max-w-md shadow-2xl relative text-right">
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-md shadow-xl relative text-right">
                   <button 
                     id="btn-close-add-emp-modal"
                     onClick={() => setShowAddModal(false)}
-                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors"
+                    className="absolute left-4 top-4 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
 
-                  <h4 className="text-lg font-bold text-[#E4E4E7] mb-4 flex items-center gap-1.5">
-                    <UserPlus className="w-5 h-5 text-[#D4AF37]" />
+                  <h4 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-1.5">
+                    <UserPlus className="w-5 h-5 text-indigo-600" />
                     تسجيل موظف جديد بالنظام
                   </h4>
 
                   <form onSubmit={handleAddEmployeeSubmit} className="space-y-4">
                     {formError && (
-                      <p className="text-xs text-rose-400 font-bold bg-rose-950/30 p-2 rounded border border-rose-900/30">
+                      <p className="text-xs text-rose-700 font-bold bg-rose-50 p-2 rounded border border-rose-200">
                         {formError}
                       </p>
                     )}
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">اسم الموظف الثلاثي *</label>
+                      <label className="text-xs font-bold text-slate-700 block">اسم الموظف الثلاثي *</label>
                       <input
                         id="form-emp-name"
                         type="text"
@@ -2650,12 +2648,12 @@ export default function AdminPanel({
                         placeholder="مثال: أحمد علي الغامدي"
                         value={newEmpName}
                         onChange={(e) => setNewEmpName(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">البريد الإلكتروني المهني *</label>
+                      <label className="text-xs font-bold text-slate-700 block">البريد الإلكتروني المهني *</label>
                       <input
                         id="form-emp-email"
                         type="email"
@@ -2663,12 +2661,12 @@ export default function AdminPanel({
                         placeholder="ahmed@company.com"
                         value={newEmpEmail}
                         onChange={(e) => setNewEmpEmail(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">المسمى الوظيفي والصفة *</label>
+                      <label className="text-xs font-bold text-slate-700 block">المسمى الوظيفي والصفة *</label>
                       <input
                         id="form-emp-role"
                         type="text"
@@ -2676,17 +2674,17 @@ export default function AdminPanel({
                         placeholder="مثال: مهندس برمجيات أول"
                         value={newEmpRole}
                         onChange={(e) => setNewEmpRole(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">طبيعة ونموذج العمل المعتمد *</label>
+                      <label className="text-xs font-bold text-slate-700 block">طبيعة ونموذج العمل المعتمد *</label>
                       <select
                         id="form-emp-model"
                         value={newEmpModel}
                         onChange={(e) => setNewEmpModel(e.target.value as WorkModel)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900"
                       >
                         <option value="on-site">حضوري (مكتبي بالتحقق الجغرافي)</option>
                         <option value="remote">عن بعد (يتطلب موافقة التحضير اليومي)</option>
@@ -2694,10 +2692,10 @@ export default function AdminPanel({
                     </div>
 
                     {/* Username & Password */}
-                    <div className="grid grid-cols-2 gap-3 border-t border-[#27272A] pt-3">
+                    <div className="grid grid-cols-2 gap-3 border-t border-slate-200 pt-3">
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#D4AF37] block flex items-center gap-1">
-                          <Key className="w-3 h-3 text-[#D4AF37]" />
+                        <label className="text-xs font-bold text-indigo-600 block flex items-center gap-1">
+                          <Key className="w-3 h-3 text-indigo-600" />
                           اسم المستخدم *
                         </label>
                         <input
@@ -2707,13 +2705,13 @@ export default function AdminPanel({
                           placeholder="ahmed.gh"
                           value={newEmpUsername}
                           onChange={(e) => setNewEmpUsername(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                          className="w-full bg-white border border-slate-200 rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#D4AF37] block flex items-center gap-1">
-                          <Key className="w-3 h-3 text-[#D4AF37]" />
+                        <label className="text-xs font-bold text-indigo-600 block flex items-center gap-1">
+                          <Key className="w-3 h-3 text-indigo-600" />
                           كلمة المرور *
                         </label>
                         <input
@@ -2723,7 +2721,7 @@ export default function AdminPanel({
                           placeholder="كلمة مرور الدخول"
                           value={newEmpPassword}
                           onChange={(e) => setNewEmpPassword(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                          className="w-full bg-white border border-slate-200 rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                         />
                       </div>
                     </div>
@@ -2732,7 +2730,7 @@ export default function AdminPanel({
                       <button
                         id="btn-submit-add-emp"
                         type="submit"
-                        className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 rounded-lg transition-colors cursor-pointer shadow-xs"
                       >
                         إضافة الموظف الآن
                       </button>
@@ -2740,7 +2738,7 @@ export default function AdminPanel({
                         id="btn-cancel-add-emp"
                         type="button"
                         onClick={() => setShowAddModal(false)}
-                        className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                       >
                         إلغاء الأمر
                       </button>
@@ -2752,33 +2750,33 @@ export default function AdminPanel({
 
             {/* Employee Edit Form modal (Overlay) */}
             {showEditModal && editingEmployee && (
-              <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-                <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 w-full max-w-md shadow-2xl relative text-right">
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-md shadow-xl relative text-right">
                   <button 
                     id="btn-close-edit-emp-modal"
                     onClick={() => {
                       setShowEditModal(false);
                       setEditingEmployee(null);
                     }}
-                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer"
+                    className="absolute left-4 top-4 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
 
-                  <h4 className="text-lg font-bold text-[#E4E4E7] mb-4 flex items-center gap-1.5">
-                    <Edit className="w-5 h-5 text-[#D4AF37]" />
+                  <h4 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-1.5">
+                    <Edit className="w-5 h-5 text-indigo-600" />
                     تعديل بيانات الموظف
                   </h4>
 
                   <form onSubmit={handleEditEmployeeSubmit} className="space-y-4">
                     {editFormError && (
-                      <p className="text-xs text-rose-400 font-bold bg-rose-950/30 p-2 rounded border border-rose-900/30">
+                      <p className="text-xs text-rose-700 font-bold bg-rose-50 p-2 rounded border border-rose-200">
                         {editFormError}
                       </p>
                     )}
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">اسم الموظف الثلاثي *</label>
+                      <label className="text-xs font-bold text-slate-700 block">اسم الموظف الثلاثي *</label>
                       <input
                         id="edit-form-emp-name"
                         type="text"
@@ -2786,12 +2784,12 @@ export default function AdminPanel({
                         placeholder="مثال: أحمد علي الغامدي"
                         value={editEmpName}
                         onChange={(e) => setEditEmpName(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">البريد الإلكتروني المهني *</label>
+                      <label className="text-xs font-bold text-slate-700 block">البريد الإلكتروني المهني *</label>
                       <input
                         id="edit-form-emp-email"
                         type="email"
@@ -2799,12 +2797,12 @@ export default function AdminPanel({
                         placeholder="ahmed@company.com"
                         value={editEmpEmail}
                         onChange={(e) => setEditEmpEmail(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">المسمى الوظيفي والصفة *</label>
+                      <label className="text-xs font-bold text-slate-700 block">المسمى الوظيفي والصفة *</label>
                       <input
                         id="edit-form-emp-role"
                         type="text"
@@ -2812,17 +2810,17 @@ export default function AdminPanel({
                         placeholder="مثال: مهندس برمجيات أول"
                         value={editEmpRole}
                         onChange={(e) => setEditEmpRole(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-[#8E8E93] block">طبيعة ونموذج العمل المعتمد *</label>
+                      <label className="text-xs font-bold text-slate-700 block">طبيعة ونموذج العمل المعتمد *</label>
                       <select
                         id="edit-form-emp-model"
                         value={editEmpModel}
                         onChange={(e) => setEditEmpModel(e.target.value as WorkModel)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-white border border-slate-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900"
                       >
                         <option value="on-site">حضوري (مكتبي بالتحقق الجغرافي)</option>
                         <option value="remote">عن بعد (يتطلب موافقة التحضير اليومي)</option>
@@ -2830,10 +2828,10 @@ export default function AdminPanel({
                     </div>
 
                     {/* Username & Password */}
-                    <div className="grid grid-cols-2 gap-3 border-t border-[#27272A] pt-3">
+                    <div className="grid grid-cols-2 gap-3 border-t border-slate-200 pt-3">
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#D4AF37] block flex items-center gap-1">
-                          <Key className="w-3 h-3 text-[#D4AF37]" />
+                        <label className="text-xs font-bold text-indigo-600 block flex items-center gap-1">
+                          <Key className="w-3 h-3 text-indigo-600" />
                           اسم المستخدم *
                         </label>
                         <input
@@ -2843,13 +2841,13 @@ export default function AdminPanel({
                           placeholder="ahmed.gh"
                           value={editEmpUsername}
                           onChange={(e) => setEditEmpUsername(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                          className="w-full bg-white border border-slate-200 rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#D4AF37] block flex items-center gap-1">
-                          <Key className="w-3 h-3 text-[#D4AF37]" />
+                        <label className="text-xs font-bold text-indigo-600 block flex items-center gap-1">
+                          <Key className="w-3 h-3 text-indigo-600" />
                           كلمة المرور *
                         </label>
                         <input
@@ -2859,7 +2857,7 @@ export default function AdminPanel({
                           placeholder="كلمة مرور الدخول"
                           value={editEmpPassword}
                           onChange={(e) => setEditEmpPassword(e.target.value)}
-                          className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                          className="w-full bg-white border border-slate-200 rounded-lg text-xs px-2.5 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                         />
                       </div>
                     </div>
@@ -2868,7 +2866,7 @@ export default function AdminPanel({
                       <button
                         id="btn-submit-edit-emp"
                         type="submit"
-                        className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 rounded-lg transition-colors cursor-pointer shadow-xs"
                       >
                         حفظ التعديلات
                       </button>
@@ -2879,7 +2877,7 @@ export default function AdminPanel({
                           setShowEditModal(false);
                           setEditingEmployee(null);
                         }}
-                        className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                       >
                         إلغاء الأمر
                       </button>
@@ -2897,14 +2895,14 @@ export default function AdminPanel({
           <div className="space-y-6" id="admin-tab-reports">
             
             {/* Month & Target Selection Bar */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 relative overflow-hidden">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 relative overflow-hidden">
               <div className="flex items-center gap-2 relative z-10 text-right">
-                <span className="text-sm font-bold text-[#8E8E93]">فلترة بيانات التقرير للشهر:</span>
+                <span className="text-sm font-bold text-slate-700">فلترة بيانات التقرير للشهر:</span>
                 <select
                   id="admin-report-month-select"
                   value={reportMonth}
                   onChange={(e) => setReportMonth(e.target.value)}
-                  className="bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm font-bold px-3 py-1.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] cursor-pointer"
+                  className="bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold px-3 py-1.5 focus:outline-none focus:border-indigo-600 text-slate-900 cursor-pointer"
                 >
                   <option value="2026-07">يوليو 2026 (الحالي)</option>
                   <option value="2026-06">يونيو 2026</option>
@@ -2916,17 +2914,17 @@ export default function AdminPanel({
                 <button
                   id="btn-export-excel"
                   onClick={() => handleExport('Excel')}
-                  className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-semibold text-xs py-2 px-3.5 rounded-lg border border-[#27272A] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2 px-3.5 rounded-lg border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <Download className="w-3.5 h-3.5 text-emerald-600" />
                   <span>تصدير Excel</span>
                 </button>
                 <button
                   id="btn-export-pdf"
                   onClick={() => handleExport('PDF')}
-                  className="bg-rose-950/30 hover:bg-rose-950/50 text-rose-300 font-semibold text-xs py-2 px-3.5 rounded-lg border border-rose-900/40 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs py-2 px-3.5 rounded-lg border border-rose-200 flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <FileText className="w-3.5 h-3.5 text-rose-400" />
+                  <FileText className="w-3.5 h-3.5 text-rose-600" />
                   <span>تصدير PDF الشهري</span>
                 </button>
               </div>
@@ -2935,61 +2933,61 @@ export default function AdminPanel({
             {/* Key Executive Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
-              <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-5 shadow-xl flex items-center justify-between relative overflow-hidden">
+              <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex items-center justify-between relative overflow-hidden">
                 <div className="text-right">
-                  <span className="text-xs text-[#8E8E93] font-medium">معدل الحضور العام</span>
-                  <p className="text-2xl font-extrabold text-[#E4E4E7] mt-1 font-serif">{reports.attendanceRate}%</p>
-                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/30 border border-emerald-900/30 px-2 py-0.5 rounded-full inline-block mt-1">ممتاز</span>
+                  <span className="text-xs text-slate-500 font-medium">معدل الحضور العام</span>
+                  <p className="text-2xl font-extrabold text-slate-900 mt-1 font-serif">{reports.attendanceRate}%</p>
+                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full inline-block mt-1">ممتاز</span>
                 </div>
                 <div className="w-14 h-14 relative flex items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90">
-                    <circle cx="28" cy="28" r="24" className="stroke-[#1A1C1E]" strokeWidth="4" fill="transparent" />
+                    <circle cx="28" cy="28" r="24" className="stroke-slate-100" strokeWidth="4" fill="transparent" />
                     <circle cx="28" cy="28" r="24" className="stroke-emerald-500" strokeWidth="4" fill="transparent"
                       strokeDasharray={2 * Math.PI * 24}
                       strokeDashoffset={2 * Math.PI * 24 * (1 - (reports.attendanceRate || 0) / 100)} />
                   </svg>
-                  <span className="absolute text-[10px] font-extrabold text-[#E4E4E7] font-mono">{reports.attendanceRate}%</span>
+                  <span className="absolute text-[10px] font-extrabold text-slate-900 font-mono">{reports.attendanceRate}%</span>
                 </div>
               </div>
 
-              <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-5 shadow-xl flex items-center justify-between relative overflow-hidden">
+              <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex items-center justify-between relative overflow-hidden">
                 <div className="text-right">
-                  <span className="text-xs text-[#8E8E93] font-medium">إجمالي الساعات المنجزة</span>
-                  <p className="text-2xl font-extrabold text-blue-400 mt-1 font-serif">{reports.totalHours} ساعة</p>
-                  <span className="text-[10px] text-[#8E8E93] font-medium block mt-1">كافة الموظفين</span>
+                  <span className="text-xs text-slate-500 font-medium">إجمالي الساعات المنجزة</span>
+                  <p className="text-2xl font-extrabold text-indigo-600 mt-1 font-serif">{reports.totalHours} ساعة</p>
+                  <span className="text-[10px] text-slate-500 font-medium block mt-1">كافة الموظفين</span>
                 </div>
-                <div className="w-12 h-12 bg-blue-950/30 text-blue-400 border border-blue-900/30 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl flex items-center justify-center">
                   <Clock className="w-6 h-6" />
                 </div>
               </div>
 
               <div 
                 onClick={() => setReportDetailType('absent')}
-                className="bg-[#121214] rounded-2xl border border-[#27272A] hover:border-rose-500/50 p-5 shadow-xl flex items-center justify-between relative overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] group"
+                className="bg-white rounded-2xl border border-slate-200 hover:border-rose-300 p-5 shadow-xs flex items-center justify-between relative overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] group"
                 title="اضغط لعرض الموظفين الغائبين"
               >
                 <div className="text-right">
-                  <span className="text-xs text-[#8E8E93] font-medium group-hover:text-rose-400 transition-colors">إجمالي أيام الغياب</span>
-                  <p className="text-2xl font-extrabold text-rose-400 mt-1 font-serif">{reports.totalAbsences} يوم</p>
-                  <span className="text-[10px] text-rose-400 font-semibold bg-rose-950/30 border border-rose-900/30 px-2 py-0.5 rounded-full inline-block mt-1">اضغط للتفاصيل</span>
+                  <span className="text-xs text-slate-500 font-medium group-hover:text-rose-600 transition-colors">إجمالي أيام الغياب</span>
+                  <p className="text-2xl font-extrabold text-rose-600 mt-1 font-serif">{reports.totalAbsences} يوم</p>
+                  <span className="text-[10px] text-rose-700 font-semibold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full inline-block mt-1">اضغط للتفاصيل</span>
                 </div>
-                <div className="w-12 h-12 bg-rose-950/30 text-rose-400 border border-rose-900/30 group-hover:bg-rose-900/40 group-hover:border-rose-500 rounded-xl flex items-center justify-center transition-all">
+                <div className="w-12 h-12 bg-rose-50 text-rose-600 border border-rose-200 group-hover:bg-rose-100 group-hover:border-rose-300 rounded-xl flex items-center justify-center transition-all">
                   <AlertTriangle className="w-6 h-6" />
                 </div>
               </div>
 
               <div 
                 onClick={() => setReportDetailType('late')}
-                className="bg-[#121214] rounded-2xl border border-[#27272A] hover:border-amber-500/50 p-5 shadow-xl flex items-center justify-between relative overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] group"
+                className="bg-white rounded-2xl border border-slate-200 hover:border-amber-300 p-5 shadow-xs flex items-center justify-between relative overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] group"
                 title="اضغط لعرض الموظفين المتأخرين"
               >
                 <div className="text-right">
-                  <span className="text-xs text-[#8E8E93] font-medium group-hover:text-amber-400 transition-colors">أيام التأخير المرصودة</span>
-                  <p className="text-2xl font-extrabold text-amber-400 mt-1 font-serif">{reports.totalLates} يوم</p>
-                  <span className="text-[10px] text-amber-400 font-semibold bg-amber-950/30 border border-amber-900/30 px-2 py-0.5 rounded-full inline-block mt-1">اضغط للتفاصيل</span>
+                  <span className="text-xs text-slate-500 font-medium group-hover:text-amber-600 transition-colors">أيام التأخير المرصودة</span>
+                  <p className="text-2xl font-extrabold text-amber-600 mt-1 font-serif">{reports.totalLates} يوم</p>
+                  <span className="text-[10px] text-amber-700 font-semibold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full inline-block mt-1">اضغط للتفاصيل</span>
                 </div>
-                <div className="w-12 h-12 bg-amber-950/30 text-[#D4AF37] border border-amber-900/30 group-hover:bg-amber-900/40 group-hover:border-amber-500 rounded-xl flex items-center justify-center transition-all">
-                  <Clock className="w-6 h-6 animate-pulse" />
+                <div className="w-12 h-12 bg-amber-50 text-amber-600 border border-amber-200 group-hover:bg-amber-100 group-hover:border-amber-300 rounded-xl flex items-center justify-center transition-all">
+                  <Clock className="w-6 h-6" />
                 </div>
               </div>
 
@@ -2997,36 +2995,36 @@ export default function AdminPanel({
 
             {/* Popup Modal for Absent/Late Details */}
             {reportDetailType && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-                <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 w-full max-w-2xl shadow-2xl relative text-right flex flex-col max-h-[85vh]">
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-2xl shadow-xl relative text-right flex flex-col max-h-[85vh]">
                   <button 
                     id="btn-close-report-detail"
                     onClick={() => setReportDetailType(null)}
-                    className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer"
+                    className="absolute left-4 top-4 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
 
-                  <h4 className="text-lg font-bold text-[#E4E4E7] mb-2 flex items-center justify-start gap-2">
+                  <h4 className="text-lg font-bold text-slate-900 mb-2 flex items-center justify-start gap-2">
                     {reportDetailType === 'absent' ? (
                       <>
-                        <AlertTriangle className="w-5 h-5 text-rose-500" />
+                        <AlertTriangle className="w-5 h-5 text-rose-600" />
                         <span>تفاصيل أيام الغياب المرصودة لشهر {reportMonth}</span>
                       </>
                     ) : (
                       <>
-                        <Clock className="w-5 h-5 text-amber-400" />
+                        <Clock className="w-5 h-5 text-amber-600" />
                         <span>تفاصيل أيام التأخير المرصودة لشهر {reportMonth}</span>
                       </>
                     )}
                   </h4>
-                  <p className="text-xs text-[#8E8E93] mb-4">
+                  <p className="text-xs text-slate-500 mb-4">
                     {reportDetailType === 'absent' 
                       ? 'قائمة بجميع سجلات الغياب المسجلة للموظفين خلال فترة الفلترة المحددة' 
                       : 'قائمة بجميع حالات التأخير (الحضور بعد الساعة 08:30 ص) المسجلة للموظفين'}
                   </p>
 
-                  <div className="overflow-y-auto flex-1 rounded-xl border border-[#27272A] bg-[#0F0F11]">
+                  <div className="overflow-y-auto flex-1 rounded-xl border border-slate-200 bg-white">
                     {(() => {
                       const records = reportDetailType === 'absent' 
                         ? attendanceRecords.filter(r => r.status === 'غياب' && r.date.startsWith(reportMonth))
@@ -3034,7 +3032,7 @@ export default function AdminPanel({
 
                       if (records.length === 0) {
                         return (
-                          <div className="text-center py-12 text-[#8E8E93] text-sm">
+                          <div className="text-center py-12 text-slate-500 text-sm">
                             لا توجد سجلات مرصودة لهذا القسم خلال هذا الشهر.
                           </div>
                         );
@@ -3043,7 +3041,7 @@ export default function AdminPanel({
                       return (
                         <table className="w-full min-w-[600px] text-right border-collapse text-xs whitespace-nowrap">
                           <thead>
-                            <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
+                            <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
                               <th className="px-4 py-3">الموظف</th>
                               <th className="px-4 py-3">طبيعة العمل</th>
                               <th className="px-4 py-3">التاريخ</th>
@@ -3051,11 +3049,11 @@ export default function AdminPanel({
                               <th className="px-4 py-3">الحالة</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                          <tbody className="divide-y divide-slate-200 text-slate-800">
                             {records.map((rec) => {
                               const emp = employees.find(e => e.id === rec.employeeId);
                               return (
-                                <tr key={rec.id} className="hover:bg-[#121214]/55 transition-colors">
+                                <tr key={rec.id} className="hover:bg-slate-50/70 transition-colors">
                                   <td className="px-4 py-3 font-bold">
                                     <div className="flex items-center gap-2">
                                       {emp ? (
@@ -3068,31 +3066,31 @@ export default function AdminPanel({
                                         </span>
                                       )}
                                       <div>
-                                        <p>{rec.employeeName}</p>
-                                        <p className="text-[9px] text-[#8E8E93] font-normal">{emp?.role || 'موظف'}</p>
+                                        <p className="text-slate-900">{rec.employeeName}</p>
+                                        <p className="text-[9px] text-slate-500 font-normal">{emp?.role || 'موظف'}</p>
                                       </div>
                                     </div>
                                   </td>
                                   <td className="px-4 py-3">
                                     {rec.workModel === 'on-site' ? (
-                                      <span className="text-slate-300">حضوري</span>
+                                      <span className="text-slate-700">حضوري</span>
                                     ) : (
-                                      <span className="text-[#D4AF37]">عن بعد</span>
+                                      <span className="text-indigo-600 font-medium">عن بعد</span>
                                     )}
                                   </td>
-                                  <td className="px-4 py-3 font-mono">
+                                  <td className="px-4 py-3 font-mono text-slate-700">
                                     {rec.date}
                                   </td>
                                   {reportDetailType === 'late' && (
-                                    <td className="px-4 py-3 font-mono text-amber-400 font-bold">
+                                    <td className="px-4 py-3 font-mono text-amber-700 font-bold">
                                       {rec.checkIn || '-'}
                                     </td>
                                   )}
                                   <td className="px-4 py-3">
                                     {rec.status === 'غياب' ? (
-                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/40 text-rose-400 border border-rose-900/30">غياب</span>
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">غياب</span>
                                     ) : (
-                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/30">متأخر</span>
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">متأخر</span>
                                     )}
                                   </td>
                                 </tr>
@@ -3104,11 +3102,11 @@ export default function AdminPanel({
                     })()}
                   </div>
 
-                  <div className="flex justify-end mt-4 border-t border-[#27272A] pt-4">
+                  <div className="flex justify-end mt-4 border-t border-slate-200 pt-4">
                     <button
                       type="button"
                       onClick={() => setReportDetailType(null)}
-                      className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2 px-5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                     >
                       إغلاق النافذة
                     </button>
@@ -3118,14 +3116,14 @@ export default function AdminPanel({
             )}
 
             {/* Visual attendance ratios stacked bar */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl text-right">
-              <h4 className="text-sm font-bold text-[#E4E4E7] mb-4">توزيع نسب الحضور والغياب الإجمالية للشهر</h4>
-              <div className="w-full h-4 bg-[#0F0F11] rounded-full overflow-hidden flex flex-row-reverse mb-3 border border-[#27272A]">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs text-right">
+              <h4 className="text-sm font-bold text-slate-900 mb-4">توزيع نسب الحضور والغياب الإجمالية للشهر</h4>
+              <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex flex-row-reverse mb-3 border border-slate-200">
                 <div className="bg-emerald-500 h-full" style={{ width: `${reports.presentRate}%` }} title="حاضر في الموعد"></div>
                 <div className="bg-amber-400 h-full" style={{ width: `${reports.lateRate}%` }} title="حاضر متأخر"></div>
                 <div className="bg-rose-500 h-full" style={{ width: `${reports.absentRate}%` }} title="غياب"></div>
               </div>
-              <div className="flex flex-wrap justify-end gap-6 text-xs text-[#8E8E93] font-medium">
+              <div className="flex flex-wrap justify-end gap-6 text-xs text-slate-600 font-medium">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded bg-emerald-500"></span>
                   <span>حضور في الموعد ({reports.presentRate}%)</span>
@@ -3142,15 +3140,15 @@ export default function AdminPanel({
             </div>
 
             {/* Detailed Employee Attendance Table */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] overflow-hidden shadow-xl text-right">
-              <div className="p-5 border-b border-[#27272A] flex items-center justify-between">
-                <span className="text-xs font-mono text-[#8E8E93]">عدد الموظفين: {reports.employeeBreakdown.length}</span>
-                <h4 className="text-sm font-bold text-[#E4E4E7]">كشف تفصيلي لحضور وانصراف الموظفين</h4>
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs text-right">
+              <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+                <span className="text-xs font-mono text-slate-500">عدد الموظفين: {reports.employeeBreakdown.length}</span>
+                <h4 className="text-sm font-bold text-slate-900">كشف تفصيلي لحضور وانصراف الموظفين</h4>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
                   <thead>
-                    <tr className="bg-[#0F0F11] text-[#8E8E93] text-xs border-b border-[#27272A]">
+                    <tr className="bg-slate-50 text-slate-600 text-xs border-b border-slate-200">
                       <th className="px-4 py-3 font-bold">الموظف</th>
                       <th className="px-4 py-3 font-bold">طبيعة العمل</th>
                       <th className="px-4 py-3 font-bold">أيام الحضور</th>
@@ -3160,34 +3158,34 @@ export default function AdminPanel({
                       <th className="px-4 py-3 font-bold">نسبة الالتزام</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                  <tbody className="divide-y divide-slate-200 text-slate-800">
                     {reports.employeeBreakdown.map((b) => (
-                      <tr key={b.id} className="hover:bg-[#0F0F11]/50 transition-colors">
-                        <td className="px-4 py-3 font-bold text-[#E4E4E7]">
+                      <tr key={b.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="px-4 py-3 font-bold text-slate-900">
                           <div>
                             <p>{b.name}</p>
-                            <p className="text-[10px] text-[#8E8E93] font-normal">{b.role}</p>
+                            <p className="text-[10px] text-slate-500 font-normal">{b.role}</p>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-xs">
                           {b.workModel === 'on-site' ? (
-                            <span className="bg-blue-950/30 text-blue-400 px-2.5 py-0.5 rounded-full font-bold border border-blue-900/30">حضوري</span>
+                            <span className="bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200">حضوري</span>
                           ) : (
-                            <span className="bg-violet-950/30 text-violet-400 px-2.5 py-0.5 rounded-full font-bold border border-violet-900/30">عن بعد</span>
+                            <span className="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-bold border border-indigo-200">عن بعد</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 font-bold font-mono text-emerald-400">{b.presents} أيام</td>
-                        <td className="px-4 py-3 font-bold font-mono text-amber-400">{b.lates} مرات</td>
-                        <td className="px-4 py-3 font-bold font-mono text-rose-400">{b.absences} أيام</td>
-                        <td className="px-4 py-3 font-extrabold font-mono text-white">{b.hours} س</td>
+                        <td className="px-4 py-3 font-bold font-mono text-emerald-600">{b.presents} أيام</td>
+                        <td className="px-4 py-3 font-bold font-mono text-amber-600">{b.lates} مرات</td>
+                        <td className="px-4 py-3 font-bold font-mono text-rose-600">{b.absences} أيام</td>
+                        <td className="px-4 py-3 font-extrabold font-mono text-slate-900">{b.hours} س</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
-                            <div className="w-12 bg-[#0F0F11] rounded-full h-1.5 overflow-hidden border border-[#27272A]">
+                            <div className="w-12 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200">
                               <div className={`h-full rounded-full ${
                                 b.attendancePercentage >= 90 ? 'bg-emerald-500' : b.attendancePercentage >= 75 ? 'bg-amber-400' : 'bg-rose-500'
                               }`} style={{ width: `${b.attendancePercentage}%` }}></div>
                             </div>
-                            <span className="text-xs font-bold font-mono text-[#E4E4E7]">{b.attendancePercentage}%</span>
+                            <span className="text-xs font-bold font-mono text-slate-800">{b.attendancePercentage}%</span>
                           </div>
                         </td>
                       </tr>
@@ -3200,48 +3198,48 @@ export default function AdminPanel({
             {/* ========================================== */}
             {/* NEW MODULE: ADVANCED PERIOD & CRUD MANAGEMENT */}
             {/* ========================================== */}
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl text-right space-y-6">
-              <div className="border-b border-[#27272A] pb-4">
-                <h4 className="text-base font-extrabold text-[#D4AF37] flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#D4AF37]" />
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs text-right space-y-6">
+              <div className="border-b border-slate-200 pb-4">
+                <h4 className="text-base font-extrabold text-indigo-600 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-600" />
                   <span>فلترة وتصدير التقارير المتقدمة للفترات والتحكم بالسجلات</span>
                 </h4>
-                <p className="text-xs text-[#8E8E93] mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   اختر فترة مخصصة وفلتر الحضور لتصدير ملفات Excel/PDF وتعديل أو حذف أي سجل للتحضير بشكل كامل وفوري.
                 </p>
               </div>
 
               {/* 5-Columns Filter Bar */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-[#0F0F11] p-4 rounded-xl border border-[#27272A]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 {/* Start Date */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#8E8E93] block">من تاريخ:</label>
+                  <label className="text-[11px] font-bold text-slate-700 block">من تاريخ:</label>
                   <input
                     type="date"
                     value={filterStartDate}
                     onChange={(e) => setFilterStartDate(e.target.value)}
-                    className="w-full bg-[#121214] border border-[#27272A] rounded-lg text-xs px-3 py-2 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-xs px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600"
                   />
                 </div>
 
                 {/* End Date */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#8E8E93] block">إلى تاريخ:</label>
+                  <label className="text-[11px] font-bold text-slate-700 block">إلى تاريخ:</label>
                   <input
                     type="date"
                     value={filterEndDate}
                     onChange={(e) => setFilterEndDate(e.target.value)}
-                    className="w-full bg-[#121214] border border-[#27272A] rounded-lg text-xs px-3 py-2 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-xs px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600"
                   />
                 </div>
 
                 {/* Employee Filter */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#8E8E93] block">الموظف:</label>
+                  <label className="text-[11px] font-bold text-slate-700 block">الموظف:</label>
                   <select
                     value={filterEmployeeId}
                     onChange={(e) => setFilterEmployeeId(e.target.value)}
-                    className="w-full bg-[#121214] border border-[#27272A] rounded-lg text-xs px-3 py-2 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-xs px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                   >
                     <option value="all">كل الموظفين</option>
                     {employees.map(emp => (
@@ -3252,11 +3250,11 @@ export default function AdminPanel({
 
                 {/* Work Model Filter */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#8E8E93] block">نموذج العمل:</label>
+                  <label className="text-[11px] font-bold text-slate-700 block">نموذج العمل:</label>
                   <select
                     value={filterWorkModel}
                     onChange={(e) => setFilterWorkModel(e.target.value)}
-                    className="w-full bg-[#121214] border border-[#27272A] rounded-lg text-xs px-3 py-2 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-xs px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                   >
                     <option value="all">الكل</option>
                     <option value="on-site">حضوري</option>
@@ -3266,11 +3264,11 @@ export default function AdminPanel({
 
                 {/* Status Filter */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#8E8E93] block">حالة الحضور:</label>
+                  <label className="text-[11px] font-bold text-slate-700 block">حالة الحضور:</label>
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full bg-[#121214] border border-[#27272A] rounded-lg text-xs px-3 py-2 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-xs px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                   >
                     <option value="all">الكل</option>
                     <option value="حاضر">حاضر في الموعد</option>
@@ -3281,52 +3279,52 @@ export default function AdminPanel({
               </div>
 
               {/* Statistics of Selected Filter */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 bg-[#0F0F11]/55 border border-[#27272A]/80 p-4 rounded-xl">
-                <div className="text-center p-2 border-l border-[#27272A] last:border-0">
-                  <p className="text-[10px] text-[#8E8E93] font-semibold">إجمالي السجلات بالفترة</p>
-                  <p className="text-lg font-extrabold text-white mt-1">{filteredRecords.length}</p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 border border-slate-200 p-4 rounded-xl">
+                <div className="text-center p-2 border-l border-slate-200 last:border-0">
+                  <p className="text-[10px] text-slate-500 font-semibold">إجمالي السجلات بالفترة</p>
+                  <p className="text-lg font-extrabold text-slate-900 mt-1">{filteredRecords.length}</p>
                 </div>
-                <div className="text-center p-2 border-l border-[#27272A] last:border-0">
-                  <p className="text-[10px] text-[#8E8E93] font-semibold">أيام حضور الموعد</p>
-                  <p className="text-lg font-extrabold text-emerald-400 mt-1">
+                <div className="text-center p-2 border-l border-slate-200 last:border-0">
+                  <p className="text-[10px] text-slate-500 font-semibold">أيام حضور الموعد</p>
+                  <p className="text-lg font-extrabold text-emerald-600 mt-1">
                     {filteredRecords.filter(r => r.status === 'حاضر').length}
                   </p>
                 </div>
-                <div className="text-center p-2 border-l border-[#27272A] last:border-0">
-                  <p className="text-[10px] text-[#8E8E93] font-semibold">أيام حضور متأخر</p>
-                  <p className="text-lg font-extrabold text-amber-400 mt-1">
+                <div className="text-center p-2 border-l border-slate-200 last:border-0">
+                  <p className="text-[10px] text-slate-500 font-semibold">أيام حضور متأخر</p>
+                  <p className="text-lg font-extrabold text-amber-600 mt-1">
                     {filteredRecords.filter(r => r.status === 'متأخر').length}
                   </p>
                 </div>
-                <div className="text-center p-2 border-l border-[#27272A] last:border-0">
-                  <p className="text-[10px] text-[#8E8E93] font-semibold">أيام الغياب</p>
-                  <p className="text-lg font-extrabold text-rose-400 mt-1">
+                <div className="text-center p-2 border-l border-slate-200 last:border-0">
+                  <p className="text-[10px] text-slate-500 font-semibold">أيام الغياب</p>
+                  <p className="text-lg font-extrabold text-rose-600 mt-1">
                     {filteredRecords.filter(r => r.status === 'غياب').length}
                   </p>
                 </div>
                 <div className="text-center p-2 last:border-0 col-span-2 md:col-span-1">
-                  <p className="text-[10px] text-[#8E8E93] font-semibold">الساعات المنجزة بالفترة</p>
-                  <p className="text-lg font-extrabold text-blue-400 mt-1">
+                  <p className="text-[10px] text-slate-500 font-semibold">الساعات المنجزة بالفترة</p>
+                  <p className="text-lg font-extrabold text-indigo-600 mt-1">
                     {filteredRecords.reduce((acc, curr) => acc + (curr.checkOut ? curr.totalHours || 0 : 0), 0).toFixed(1)} س
                   </p>
                 </div>
               </div>
 
               {/* Report View Toggle Switcher */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#161618] border border-[#27272A]/80 p-3 rounded-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 border border-slate-200 p-3 rounded-xl">
                 <div className="text-right space-y-0.5">
-                  <p className="text-xs font-extrabold text-[#D4AF37]">طريقة عرض التقرير النشطة</p>
-                  <p className="text-[10px] text-[#8E8E93]">اختر طريقة العرض الأنسب لمراجعة بيانات المنشأة وتصديرها</p>
+                  <p className="text-xs font-extrabold text-indigo-600">طريقة عرض التقرير النشطة</p>
+                  <p className="text-[10px] text-slate-500">اختر طريقة العرض الأنسب لمراجعة بيانات المنشأة وتصديرها</p>
                 </div>
                 
-                <div className="flex bg-[#0A0A0B] p-1 rounded-lg border border-[#27272A] self-start sm:self-center">
+                <div className="flex bg-slate-200/80 p-1 rounded-lg border border-slate-300 self-start sm:self-center">
                   <button
                     type="button"
                     onClick={() => setReportViewMode('pivot')}
                     className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                       reportViewMode === 'pivot'
-                        ? 'bg-[#D4AF37] text-black font-extrabold shadow'
-                        : 'text-[#8E8E93] hover:text-white'
+                        ? 'bg-white text-slate-900 font-extrabold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     مصفوفة التحضير الذكية 📊 (موصى به)
@@ -3336,8 +3334,8 @@ export default function AdminPanel({
                     onClick={() => setReportViewMode('list')}
                     className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                       reportViewMode === 'list'
-                        ? 'bg-[#D4AF37] text-black font-extrabold shadow'
-                        : 'text-[#8E8E93] hover:text-white'
+                        ? 'bg-white text-slate-900 font-extrabold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     سجل السجلات التفصيلي (تعديل/حذف)
@@ -3346,16 +3344,16 @@ export default function AdminPanel({
               </div>
 
               {/* Dynamic Download Buttons Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0F0F11]/40 border border-[#27272A]/40 p-3 rounded-xl text-right">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-200 p-3 rounded-xl text-right">
                 <div className="space-y-0.5 text-right">
-                  <span className="text-xs font-bold text-white block">
+                  <span className="text-xs font-bold text-slate-900 block">
                     {reportViewMode === 'pivot' 
                       ? `يعرض مصفوفة الحضور المحورية لـ ${employees.length} موظفاً عبر الأيام المحددة`
                       : `تم العثور على ${filteredRecords.length} سجلاً حضور وانصراف تفصيلي`
                     }
                   </span>
                   {reportViewMode === 'pivot' && (
-                    <span className="text-[10px] text-[#8E8E93] block">
+                    <span className="text-[10px] text-slate-500 block">
                       * اضغط أو حرك مؤشر الماوس على خلايا المصفوفة لعرض التفاصيل الزمنية الدقيقة لكل تحضير. يتم تظليل عطلات نهاية الأسبوع بالرمادي.
                     </span>
                   )}
@@ -3382,9 +3380,9 @@ export default function AdminPanel({
                         exportToExcel(filteredRecords, title);
                       }
                     }}
-                    className="bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2 px-3.5 rounded-lg border border-[#27272A] flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs py-2 px-3.5 rounded-lg border border-slate-200 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                   >
-                    <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <Download className="w-3.5 h-3.5 text-emerald-600" />
                     <span>
                       {reportViewMode === 'pivot'
                         ? 'تصدير مصفوفة الحضور (Excel) 📊'
@@ -3415,9 +3413,9 @@ export default function AdminPanel({
                         exportToPDF(filteredRecords, title, subtitle);
                       }
                     }}
-                    className="bg-rose-950/30 hover:bg-rose-950/50 text-rose-300 font-bold text-xs py-2 px-3.5 rounded-lg border border-rose-900/40 flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs py-2 px-3.5 rounded-lg border border-rose-200 flex items-center gap-1.5 transition-all cursor-pointer"
                   >
-                    <FileText className="w-3.5 h-3.5 text-rose-400" />
+                    <FileText className="w-3.5 h-3.5 text-rose-600" />
                     <span>
                       {reportViewMode === 'pivot'
                         ? 'تحميل المصفوفة طباعة (PDF) 📄'
@@ -3432,31 +3430,31 @@ export default function AdminPanel({
               {reportViewMode === 'pivot' ? (
                 <div className="space-y-4">
                   {/* Legend guide */}
-                  <div className="flex flex-wrap items-center gap-3.5 bg-[#0F0F11]/60 border border-[#27272A]/50 p-3 rounded-xl text-right">
-                    <span className="text-[10px] font-bold text-[#8E8E93] ml-2">دليل رموز المصفوفة:</span>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
-                      <span className="w-4 h-4 rounded bg-emerald-950/50 border border-emerald-900 text-emerald-400 flex items-center justify-center text-[8px] font-bold">🏠</span>
+                  <div className="flex flex-wrap items-center gap-3.5 bg-slate-50 border border-slate-200 p-3 rounded-xl text-right">
+                    <span className="text-[10px] font-bold text-slate-500 ml-2">دليل رموز المصفوفة:</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-800">
+                      <span className="w-4 h-4 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center text-[8px] font-bold">🏠</span>
                       <span>مكتبي</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
-                      <span className="w-4 h-4 rounded bg-violet-950/50 border border-violet-900 text-violet-400 flex items-center justify-center text-[8px] font-bold">🌐</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-800">
+                      <span className="w-4 h-4 rounded bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center text-[8px] font-bold">🌐</span>
                       <span>عن بعد</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
-                      <span className="w-4 h-4 rounded bg-amber-950/50 border border-amber-900 text-amber-400 flex items-center justify-center text-[8px] font-bold">⏳</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-800">
+                      <span className="w-4 h-4 rounded bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center text-[8px] font-bold">⏳</span>
                       <span>تأخير</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#E4E4E7]">
-                      <span className="w-4 h-4 rounded bg-rose-950/50 border border-rose-900 text-rose-400 flex items-center justify-center text-[8px] font-bold">❌</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-800">
+                      <span className="w-4 h-4 rounded bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center text-[8px] font-bold">❌</span>
                       <span>غياب كلي</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#8E8E93]">
-                      <span className="w-4 h-4 rounded bg-[#161618] border border-[#27272A] flex items-center justify-center text-[8px] font-bold text-[#8E8E93]">-</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                      <span className="w-4 h-4 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">-</span>
                       <span>عطلة / لا سجل</span>
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#0F0F11] scrollbar-thin scrollbar-thumb-zinc-800">
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
                     {(() => {
                       const pivotDates = getDatesInRange(filterStartDate, filterEndDate);
                       const targetEmployees = employees.filter(emp => {
@@ -3466,7 +3464,7 @@ export default function AdminPanel({
 
                       if (pivotDates.length === 0) {
                         return (
-                          <div className="text-center py-12 text-[#8E8E93] text-sm">
+                          <div className="text-center py-12 text-slate-500 text-sm">
                             الرجاء اختيار تواريخ صحيحة لعرض مصفوفة الحضور.
                           </div>
                         );
@@ -3475,8 +3473,8 @@ export default function AdminPanel({
                       return (
                         <table className="w-full text-right border-collapse text-xs whitespace-nowrap">
                           <thead>
-                            <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
-                              <th className="px-3 py-2.5 text-right sticky right-0 bg-[#161618] z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.5)]">الموظف</th>
+                            <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                              <th className="px-3 py-2.5 text-right sticky right-0 bg-slate-100 z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] border-l border-slate-200">الموظف</th>
                               <th className="px-3 py-2.5 text-right">الوظيفة</th>
                               {pivotDates.map(dt => {
                                 const dayNum = dt.split('-')[2];
@@ -3484,22 +3482,22 @@ export default function AdminPanel({
                                 // Get name of day in Arabic
                                 const dName = new Date(dt).toLocaleDateString('ar-EG', { weekday: 'narrow' });
                                 return (
-                                  <th key={dt} className={`px-2 py-2 text-center border-r border-[#27272A] min-w-[36px] ${isWk ? 'bg-zinc-900/40 text-[#8E8E93]' : ''}`}>
-                                    <div className="text-[9px] font-normal text-[#8E8E93]">{dName}</div>
-                                    <div className="text-[10px] font-bold text-white">{dayNum}</div>
+                                  <th key={dt} className={`px-2 py-2 text-center border-r border-slate-200 min-w-[36px] ${isWk ? 'bg-slate-100/70 text-slate-400' : ''}`}>
+                                    <div className="text-[9px] font-normal text-slate-500">{dName}</div>
+                                    <div className="text-[10px] font-bold text-slate-900">{dayNum}</div>
                                   </th>
                                 );
                               })}
                               {/* Summary columns */}
-                              <th className="px-3 py-2.5 text-center bg-zinc-900 border-r border-[#27272A] text-[#D4AF37]">التحضير</th>
-                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-emerald-400">مكتبي</th>
-                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-violet-400">عن بعد</th>
-                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-amber-400">تأخير</th>
-                              <th className="px-2 py-2.5 text-center bg-zinc-900 text-rose-400">غياب</th>
-                              <th className="px-3 py-2.5 text-center bg-zinc-900 border-l border-[#27272A] text-white">الساعات</th>
+                              <th className="px-3 py-2.5 text-center bg-slate-100 border-r border-slate-200 text-indigo-700">التحضير</th>
+                              <th className="px-2 py-2.5 text-center bg-slate-100 text-emerald-700">مكتبي</th>
+                              <th className="px-2 py-2.5 text-center bg-slate-100 text-indigo-700">عن بعد</th>
+                              <th className="px-2 py-2.5 text-center bg-slate-100 text-amber-700">تأخير</th>
+                              <th className="px-2 py-2.5 text-center bg-slate-100 text-rose-700">غياب</th>
+                              <th className="px-3 py-2.5 text-center bg-slate-100 border-l border-slate-200 text-slate-900">الساعات</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                          <tbody className="divide-y divide-slate-200 text-slate-800">
                             {targetEmployees.map((emp) => {
                               const empRecords = attendanceRecords.filter(r => r.employeeId === emp.id);
                               
@@ -3510,17 +3508,17 @@ export default function AdminPanel({
                               let totalHours = 0;
 
                               return (
-                                <tr key={emp.id} className="hover:bg-[#121214]/40 transition-colors">
+                                <tr key={emp.id} className="hover:bg-slate-50/70 transition-colors">
                                   {/* Employee name sticky */}
-                                  <td className="px-3 py-2 font-bold sticky right-0 bg-[#0F0F11] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.5)] border-l border-[#27272A]/55">
+                                  <td className="px-3 py-2 font-bold sticky right-0 bg-white z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] border-l border-slate-200">
                                     <div className="flex items-center gap-2">
                                       <span className={`w-6 h-6 rounded-full ${emp.avatarColor || 'bg-slate-700'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
                                         {emp.name.split(' ').map(n => n[0]).join('')}
                                       </span>
-                                      <span className="text-white text-xs">{emp.name}</span>
+                                      <span className="text-slate-900 text-xs">{emp.name}</span>
                                     </div>
                                   </td>
-                                  <td className="px-3 py-2 text-[#8E8E93] text-[10px] font-medium border-l border-[#27272A]/55">{emp.role}</td>
+                                  <td className="px-3 py-2 text-slate-500 text-[10px] font-medium border-l border-slate-200">{emp.role}</td>
                                   
                                   {pivotDates.map(dt => {
                                     const rec = empRecords.find(r => r.date === dt);
@@ -3535,31 +3533,31 @@ export default function AdminPanel({
                                         if (rec.workModel === 'on-site') {
                                           countOnSite++;
                                           totalHours += rec.totalHours || 0;
-                                          bgClass = 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/40';
+                                          bgClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
                                           symbol = '🏠';
                                           tooltip = `مكتبي\nالحضور: ${rec.checkIn || '-'}\nالانصراف: ${rec.checkOut || '-'}\nالساعات: ${rec.checkOut ? rec.totalHours + ' س' : 'مفتوح'}`;
                                         } else {
                                           countRemote++;
                                           totalHours += rec.totalHours || 0;
-                                          bgClass = 'bg-violet-950/30 text-violet-400 border border-violet-900/40';
+                                          bgClass = 'bg-indigo-50 text-indigo-700 border border-indigo-200';
                                           symbol = '🌐';
                                           tooltip = `عن بعد\nالحضور: ${rec.checkIn || '-'}\nالانصراف: ${rec.checkOut || '-'}\nالساعات: ${rec.checkOut ? rec.totalHours + ' س' : 'مفتوح'}`;
                                         }
                                       } else if (rec.status === 'متأخر') {
                                         countLate++;
                                         totalHours += rec.totalHours || 0;
-                                        bgClass = 'bg-amber-950/30 text-amber-400 border border-amber-900/40';
+                                        bgClass = 'bg-amber-50 text-amber-700 border border-amber-200';
                                         symbol = '⏳';
                                         tooltip = `متأخر\nالحضور: ${rec.checkIn || '-'}\nالانصراف: ${rec.checkOut || '-'}\nالساعات: ${rec.checkOut ? rec.totalHours + ' س' : 'مفتوح'}`;
                                       } else if (rec.status === 'غياب') {
                                         countAbsent++;
-                                        bgClass = 'bg-rose-950/30 text-rose-400 border border-rose-900/40';
+                                        bgClass = 'bg-rose-50 text-rose-700 border border-rose-200';
                                         symbol = '❌';
                                         tooltip = 'غياب كلي عن العمل';
                                       }
 
                                       return (
-                                        <td key={dt} className="p-1 border-r border-[#27272A]/50 text-center">
+                                        <td key={dt} className="p-1 border-r border-slate-200 text-center">
                                           <div 
                                             title={tooltip}
                                             className={`inline-flex items-center justify-center w-6 h-6 rounded text-[9px] font-bold cursor-help transition-all hover:scale-115 ${bgClass}`}
@@ -3572,10 +3570,10 @@ export default function AdminPanel({
 
                                     // No record
                                     return (
-                                      <td key={dt} className={`p-1 border-r border-[#27272A]/50 text-center ${isWk ? 'bg-zinc-950/50' : ''}`}>
+                                      <td key={dt} className={`p-1 border-r border-slate-200 text-center ${isWk ? 'bg-slate-100/60' : ''}`}>
                                         <span 
                                           title={isWk ? 'نهاية عطلة الأسبوع (الجمعة / السبت)' : 'لا يوجد سجل تحضير مرصود'}
-                                          className={`text-[10px] ${isWk ? 'text-zinc-600 font-bold' : 'text-zinc-700'}`}
+                                          className={`text-[10px] ${isWk ? 'text-slate-400 font-bold' : 'text-slate-300'}`}
                                         >
                                           {isWk ? 'ع' : '-'}
                                         </span>
@@ -3584,14 +3582,14 @@ export default function AdminPanel({
                                   })}
 
                                   {/* Summaries */}
-                                  <td className="px-3 py-2 text-center border-r border-[#27272A] font-extrabold text-[#D4AF37] bg-zinc-900/20 font-mono text-[11px]">
+                                  <td className="px-3 py-2 text-center border-r border-slate-200 font-extrabold text-indigo-700 bg-indigo-50/40 font-mono text-[11px]">
                                     {countOnSite + countRemote + countLate} ي
                                   </td>
-                                  <td className="px-2 py-2 text-center text-emerald-400 font-bold bg-emerald-950/10 font-mono text-[11px]">{countOnSite}</td>
-                                  <td className="px-2 py-2 text-center text-violet-400 font-bold bg-violet-950/10 font-mono text-[11px]">{countRemote}</td>
-                                  <td className="px-2 py-2 text-center text-amber-400 font-bold bg-amber-950/10 font-mono text-[11px]">{countLate}</td>
-                                  <td className="px-2 py-2 text-center text-rose-400 font-bold bg-rose-950/10 font-mono text-[11px]">{countAbsent}</td>
-                                  <td className="px-3 py-2 text-center font-bold border-l border-[#27272A] bg-zinc-900/20 text-white font-mono text-[11px]">
+                                  <td className="px-2 py-2 text-center text-emerald-700 font-bold bg-emerald-50/40 font-mono text-[11px]">{countOnSite}</td>
+                                  <td className="px-2 py-2 text-center text-indigo-700 font-bold bg-indigo-50/40 font-mono text-[11px]">{countRemote}</td>
+                                  <td className="px-2 py-2 text-center text-amber-700 font-bold bg-amber-50/40 font-mono text-[11px]">{countLate}</td>
+                                  <td className="px-2 py-2 text-center text-rose-700 font-bold bg-rose-50/40 font-mono text-[11px]">{countAbsent}</td>
+                                  <td className="px-3 py-2 text-center font-bold border-l border-slate-200 bg-slate-100 text-slate-900 font-mono text-[11px]">
                                     {totalHours.toFixed(1)} س
                                   </td>
                                 </tr>
@@ -3605,15 +3603,15 @@ export default function AdminPanel({
                 </div>
               ) : (
                 /* List View Mode with Edit/Delete Actions */
-                <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#0F0F11]">
+                <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
                   {filteredRecords.length === 0 ? (
-                    <div className="text-center py-12 text-[#8E8E93] text-sm">
+                    <div className="text-center py-12 text-slate-500 text-sm">
                       لا توجد سجلات حضور وانصراف مرصودة تطابق الفلاتر المحددة لهذه الفترة.
                     </div>
                   ) : (
                     <table className="w-full min-w-[950px] text-right border-collapse text-xs whitespace-nowrap">
                       <thead>
-                        <tr className="bg-[#161618] border-b border-[#27272A] text-[#8E8E93] font-bold">
+                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
                           <th className="px-4 py-3 text-right">الموظف</th>
                           <th className="px-4 py-3 text-center">التاريخ</th>
                           <th className="px-4 py-3 text-center">نموذج العمل</th>
@@ -3624,37 +3622,37 @@ export default function AdminPanel({
                           <th className="px-4 py-3 text-center">الإجراءات</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#27272A] text-[#E4E4E7]">
+                      <tbody className="divide-y divide-slate-200 text-slate-800">
                         {filteredRecords.map((rec) => {
                           const emp = employees.find(e => e.id === rec.employeeId);
                           return (
-                            <tr key={rec.id} className="hover:bg-[#121214]/40 transition-colors">
+                            <tr key={rec.id} className="hover:bg-slate-50/70 transition-colors">
                               <td className="px-4 py-3 font-bold text-right">
                                 <div>
-                                  <p>{rec.employeeName}</p>
-                                  <p className="text-[10px] text-[#8E8E93] font-normal">{emp?.role || 'موظف'}</p>
+                                  <p className="text-slate-900">{rec.employeeName}</p>
+                                  <p className="text-[10px] text-slate-500 font-normal">{emp?.role || 'موظف'}</p>
                                 </div>
                               </td>
-                              <td className="px-4 py-3 text-center font-mono text-[#E4E4E7]">{rec.date}</td>
+                              <td className="px-4 py-3 text-center font-mono text-slate-700">{rec.date}</td>
                               <td className="px-4 py-3 text-center">
                                 {rec.workModel === 'on-site' ? (
-                                  <span className="bg-blue-950/20 text-blue-400 border border-blue-900/30 px-2 py-0.5 rounded-full text-[10px] font-bold">حضوري</span>
+                                  <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full text-[10px] font-bold">حضوري</span>
                                 ) : (
-                                  <span className="bg-violet-950/20 text-violet-400 border border-violet-900/30 px-2 py-0.5 rounded-full text-[10px] font-bold">عن بعد</span>
+                                  <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full text-[10px] font-bold">عن بعد</span>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-center font-mono text-emerald-400 font-semibold">{rec.checkIn || '-'}</td>
-                              <td className="px-4 py-3 text-center font-mono text-rose-400 font-semibold">{rec.checkOut || '-'}</td>
-                              <td className="px-4 py-3 text-center font-mono font-bold text-white">
+                              <td className="px-4 py-3 text-center font-mono text-emerald-600 font-semibold">{rec.checkIn || '-'}</td>
+                              <td className="px-4 py-3 text-center font-mono text-rose-600 font-semibold">{rec.checkOut || '-'}</td>
+                              <td className="px-4 py-3 text-center font-mono font-bold text-slate-900">
                                 {rec.checkOut ? `${rec.totalHours} س` : 'قيد العمل...'}
                               </td>
                               <td className="px-4 py-3 text-center">
                                 {rec.status === 'حاضر' ? (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-900/30 font-bold">حاضر</span>
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">حاضر</span>
                                 ) : rec.status === 'متأخر' ? (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/30 font-bold">متأخر</span>
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">متأخر</span>
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/40 text-rose-400 border border-rose-900/30 font-bold">غياب</span>
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">غياب</span>
                                 )}
                               </td>
                               <td className="px-4 py-3 text-center">
@@ -3671,7 +3669,7 @@ export default function AdminPanel({
                                       setEditRecWorkModel(rec.workModel || 'on-site');
                                       setEditRecError('');
                                     }}
-                                    className="p-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors cursor-pointer"
                                     title="تعديل هذا السجل"
                                   >
                                     <Edit className="w-3.5 h-3.5" />
@@ -3685,7 +3683,7 @@ export default function AdminPanel({
                                         onDeleteAttendance?.(rec.id);
                                       }
                                     }}
-                                    className="p-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:border-rose-400 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors cursor-pointer"
                                     title="حذف هذا السجل نهائياً"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -3709,60 +3707,58 @@ export default function AdminPanel({
         {activeTab === 'settings' && (
           <div className="max-w-3xl mx-auto space-y-6 animate-fade-in" id="admin-tab-settings">
             
-            <form onSubmit={handleSaveOfficeSettings} className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl space-y-5 text-right relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37] opacity-5 blur-[50px] pointer-events-none"></div>
-              
+            <form onSubmit={handleSaveOfficeSettings} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5 text-right relative overflow-hidden">
               <div>
-                <h3 className="text-lg font-bold text-[#E4E4E7] mb-1">إعدادات المنشأة وضوابط التحضير الذكي</h3>
-                <p className="text-xs text-[#8E8E93]">
+                <h3 className="text-lg font-bold text-slate-900 mb-1">إعدادات المنشأة وضوابط التحضير الذكي</h3>
+                <p className="text-xs text-slate-500">
                   قم بضبط مواقيت العمل الرسمية، وموقع المنشأة الجغرافي، ونطاق التحضير المسموح للموظفين.
                 </p>
               </div>
 
               {showSettingsSuccess && (
-                <div className="bg-emerald-950/30 border border-emerald-900/30 text-emerald-400 text-xs p-3.5 rounded-lg flex items-center gap-1.5 font-bold" id="settings-success-alert">
-                  <CheckCircle className="w-4.5 h-4.5 text-emerald-400" />
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs p-3.5 rounded-lg flex items-center gap-1.5 font-bold" id="settings-success-alert">
+                  <CheckCircle className="w-4.5 h-4.5 text-emerald-600" />
                   <span>تم حفظ الإعدادات بنجاح وتحديثها لجميع الموظفين فوراً!</span>
                 </div>
               )}
 
               {/* SECTION: Basic settings */}
-              <div className="space-y-4 pt-2 border-t border-[#27272A]/50">
+              <div className="space-y-4 pt-2 border-t border-slate-200">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">اسم مقر العمل / العنوان الرئيسي *</label>
+                  <label className="text-xs font-bold text-slate-700 block">اسم مقر العمل / العنوان الرئيسي *</label>
                   <input
                     id="settings-address-name"
                     type="text"
                     required
                     value={officeForm.addressName}
                     onChange={(e) => setOfficeForm({ ...officeForm, addressName: e.target.value })}
-                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900"
                   />
                 </div>
 
                 {/* Smart Map Link / Coordinates paste field */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">رابط مقر العمل (ضع رابط موقع خرائط Google أو الإحداثيات مباشرة) *</label>
+                  <label className="text-xs font-bold text-slate-700 block">رابط مقر العمل (ضع رابط موقع خرائط Google أو الإحداثيات مباشرة) *</label>
                   <input
                     id="settings-map-input"
                     type="text"
                     placeholder="ضع رابط الخريطة هنا (مثال: https://maps.app.goo.gl/... أو 24.7622,46.6409)"
                     value={locationInput}
                     onChange={handleMapLinkChange}
-                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] placeholder-[#8E8E93]/60"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 placeholder-slate-400"
                   />
                   {parseSuccess ? (
-                    <p className="text-[10px] font-bold text-emerald-400 mt-1 bg-emerald-950/20 p-2 rounded-lg border border-emerald-900/30">
+                    <p className="text-[10px] font-bold text-emerald-700 mt-1 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
                       ✓ تم استخراج الإحداثيات بنجاح تلقائياً! (خط العرض: {officeForm.latitude} | خط الطول: {officeForm.longitude})
                     </p>
                   ) : (
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">عند لصق أي رابط من خرائط Google، سيقوم النظام باستخراج الإحداثيات وتعبئة الحقول بالأسفل تلقائياً.</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">عند لصق أي رابط من خرائط Google، سيقوم النظام باستخراج الإحداثيات وتعبئة الحقول بالأسفل تلقائياً.</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">خط العرض (Latitude) *</label>
+                    <label className="text-xs font-bold text-slate-700 block">خط العرض (Latitude) *</label>
                     <input
                       id="settings-lat"
                       type="number"
@@ -3770,13 +3766,13 @@ export default function AdminPanel({
                       required
                       readOnly
                       value={officeForm.latitude}
-                      className="w-full bg-neutral-900/30 border border-[#27272A] rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none text-[#A1A1AA] cursor-not-allowed opacity-80"
+                      className="w-full bg-slate-100 border border-slate-200 rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none text-slate-600 cursor-not-allowed"
                       placeholder="تلقائي عبر الرابط"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">خط الطول (Longitude) *</label>
+                    <label className="text-xs font-bold text-slate-700 block">خط الطول (Longitude) *</label>
                     <input
                       id="settings-lng"
                       type="number"
@@ -3784,7 +3780,7 @@ export default function AdminPanel({
                       required
                       readOnly
                       value={officeForm.longitude}
-                      className="w-full bg-neutral-900/30 border border-[#27272A] rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none text-[#A1A1AA] cursor-not-allowed opacity-80"
+                      className="w-full bg-slate-100 border border-slate-200 rounded-lg text-sm px-3 py-2.5 font-mono focus:outline-none text-slate-600 cursor-not-allowed"
                       placeholder="تلقائي عبر الرابط"
                     />
                   </div>
@@ -3793,7 +3789,7 @@ export default function AdminPanel({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Radius Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">قطر نطاق التحضير المسموح *</label>
+                    <label className="text-xs font-bold text-slate-700 block">قطر نطاق التحضير المسموح *</label>
                     <div className="relative">
                       <input
                         id="settings-radius"
@@ -3803,44 +3799,44 @@ export default function AdminPanel({
                         max="10000"
                         value={officeForm.radius}
                         onChange={(e) => setOfficeForm({ ...officeForm, radius: Number(e.target.value) })}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm pr-3 pl-12 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm pr-3 pl-12 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900"
                       />
-                      <span className="absolute left-3 top-3 text-xs text-[#8E8E93] font-bold">متر</span>
+                      <span className="absolute left-3 top-3 text-xs text-slate-500 font-bold">متر</span>
                     </div>
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">القطر المسموح فيه للتحضير.</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">القطر المسموح فيه للتحضير.</p>
                   </div>
 
                   {/* Work start hour Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت بدء الدوام الافتراضي (أحد - خميس) *</label>
+                    <label className="text-xs font-bold text-slate-700 block">وقت بدء الدوام الافتراضي (أحد - خميس) *</label>
                     <input
-                        id="settings-work-start-time"
+                      id="settings-work-start-time"
                       type="time"
                       required
                       value={officeForm.workStartTime || '08:30'}
                       onChange={(e) => setOfficeForm({ ...officeForm, workStartTime: e.target.value })}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت بدء الدوام وحساب التأخير لبقية أيام الأسبوع.</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">وقت بدء الدوام وحساب التأخير لبقية أيام الأسبوع.</p>
                   </div>
 
                   {/* Work end hour Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت نهاية الدوام الافتراضي *</label>
+                    <label className="text-xs font-bold text-slate-700 block">وقت نهاية الدوام الافتراضي *</label>
                     <input
                       id="settings-work-end-time"
                       type="time"
                       required
                       value={officeForm.workEndTime || '16:30'}
                       onChange={(e) => setOfficeForm({ ...officeForm, workEndTime: e.target.value })}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] text-left font-mono"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 text-left font-mono"
                     />
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">وقت انتهاء الدوام والانصراف التلقائي للأيام العادية.</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">وقت انتهاء الدوام والانصراف التلقائي للأيام العادية.</p>
                   </div>
 
                   {/* Late Grace Period Setting */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">مهلة التأخير المسموحة *</label>
+                    <label className="text-xs font-bold text-slate-700 block">مهلة التأخير المسموحة *</label>
                     <div className="relative">
                       <input
                         id="settings-late-grace-period"
@@ -3850,31 +3846,31 @@ export default function AdminPanel({
                         max="180"
                         value={officeForm.lateGracePeriod !== undefined ? officeForm.lateGracePeriod : 10}
                         onChange={(e) => setOfficeForm({ ...officeForm, lateGracePeriod: Number(e.target.value) })}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm pr-3 pl-14 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm pr-3 pl-14 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900"
                       />
-                      <span className="absolute left-3 top-3 text-xs text-[#8E8E93] font-bold font-sans">دقيقة</span>
+                      <span className="absolute left-3 top-3 text-xs text-slate-500 font-bold font-sans">دقيقة</span>
                     </div>
-                    <p className="text-[10px] text-[#8E8E93] mt-0.5">مهلة إضافية بعد بداية الدوام لا يُسجل فيها متأخراً.</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">مهلة إضافية بعد بداية الدوام لا يُسجل فيها متأخراً.</p>
                   </div>
                 </div>
 
                 {/* SATURDAY CUSTOM SCHEDULE EXCEPTION */}
-                <div className="mt-4 pt-4 border-t border-[#27272A]/80 bg-[#161619]/60 rounded-xl p-4 border border-[#27272A]">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#27272A]/60">
+                <div className="mt-4 pt-4 border-t border-slate-200 bg-amber-50/40 rounded-xl p-4 border border-amber-200/80">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200/60">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700 shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-extrabold text-[#E4E4E7] flex items-center gap-2">
+                        <h4 className="text-xs font-extrabold text-slate-900 flex items-center gap-2">
                           <span>استثناء دوام يوم السبت (أوقات مخصصة)</span>
                           {officeForm.enableSaturdayCustomSchedule && (
-                            <span className="bg-amber-500/20 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            <span className="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
                               مفعّل
                             </span>
                           )}
                         </h4>
-                        <p className="text-[11px] text-[#8E8E93]">
+                        <p className="text-[11px] text-slate-500">
                           تخصيص ساعات عمل وفترة سماح خاصة بيوم السبت تختلف عن باقي أيام الأسبوع
                         </p>
                       </div>
@@ -3887,8 +3883,8 @@ export default function AdminPanel({
                         onChange={(e) => setOfficeForm({ ...officeForm, enableSaturdayCustomSchedule: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-[#27272A] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"></div>
-                      <span className="mr-2 text-xs font-bold text-[#E4E4E7]">
+                      <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      <span className="mr-2 text-xs font-bold text-slate-700">
                         {officeForm.enableSaturdayCustomSchedule ? 'مفعل' : 'معطل'}
                       </span>
                     </label>
@@ -3897,33 +3893,33 @@ export default function AdminPanel({
                   {officeForm.enableSaturdayCustomSchedule ? (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-amber-200/90 block">وقت بدء دوام السبت *</label>
+                        <label className="text-[11px] font-bold text-amber-900 block">وقت بدء دوام السبت *</label>
                         <input
                           id="settings-sat-start-time"
                           type="time"
                           required={officeForm.enableSaturdayCustomSchedule}
                           value={officeForm.saturdayStartTime || '09:00'}
                           onChange={(e) => setOfficeForm({ ...officeForm, saturdayStartTime: e.target.value })}
-                          className="w-full bg-[#0F0F11] border border-amber-500/30 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-amber-100 text-left font-mono"
+                          className="w-full bg-white border border-amber-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 text-left font-mono"
                         />
-                        <p className="text-[9px] text-[#8E8E93]">بداية الحساب ليوم السبت فقط.</p>
+                        <p className="text-[9px] text-slate-500">بداية الحساب ليوم السبت فقط.</p>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-amber-200/90 block">وقت نهاية دوام السبت *</label>
+                        <label className="text-[11px] font-bold text-amber-900 block">وقت نهاية دوام السبت *</label>
                         <input
                           id="settings-sat-end-time"
                           type="time"
                           required={officeForm.enableSaturdayCustomSchedule}
                           value={officeForm.saturdayEndTime || '14:00'}
                           onChange={(e) => setOfficeForm({ ...officeForm, saturdayEndTime: e.target.value })}
-                          className="w-full bg-[#0F0F11] border border-amber-500/30 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-[#D4AF37] text-amber-100 text-left font-mono"
+                          className="w-full bg-white border border-amber-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 text-left font-mono"
                         />
-                        <p className="text-[9px] text-[#8E8E93]">الانصراف التلقائي ليوم السبت.</p>
+                        <p className="text-[9px] text-slate-500">الانصراف التلقائي ليوم السبت.</p>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-amber-200/90 block">مهلة التأخير ليوم السبت *</label>
+                        <label className="text-[11px] font-bold text-amber-900 block">مهلة التأخير ليوم السبت *</label>
                         <div className="relative">
                           <input
                             id="settings-sat-grace-period"
@@ -3933,15 +3929,15 @@ export default function AdminPanel({
                             max="180"
                             value={officeForm.saturdayGracePeriod !== undefined ? officeForm.saturdayGracePeriod : 15}
                             onChange={(e) => setOfficeForm({ ...officeForm, saturdayGracePeriod: Number(e.target.value) })}
-                            className="w-full bg-[#0F0F11] border border-amber-500/30 rounded-lg text-sm pr-3 pl-14 py-2 focus:outline-none focus:border-[#D4AF37] text-amber-100 font-mono"
+                            className="w-full bg-white border border-amber-300 rounded-lg text-sm pr-3 pl-14 py-2 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                           />
-                          <span className="absolute left-3 top-2.5 text-[11px] text-[#8E8E93] font-bold">دقيقة</span>
+                          <span className="absolute left-3 top-2.5 text-[11px] text-slate-500 font-bold">دقيقة</span>
                         </div>
-                        <p className="text-[9px] text-[#8E8E93]">سماح التأخير المخصص للسبت.</p>
+                        <p className="text-[9px] text-slate-500">سماح التأخير المخصص للسبت.</p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-[#8E8E93] pt-2 italic">
+                    <p className="text-[11px] text-slate-500 pt-2 italic">
                       عند التعطيل، يُعامل يوم السبت كعطلة نهاية أسبوع أو يتبع ساعات الدوام الافتراضية المحددة أعلاه.
                     </p>
                   )}
@@ -3951,9 +3947,9 @@ export default function AdminPanel({
               <button
                 id="btn-save-settings"
                 type="submit"
-                className="w-full bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-[#D4AF37]/10"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
               >
-                <Save className="w-4 h-4 text-slate-950" />
+                <Save className="w-4 h-4 text-white" />
                 <span>حفظ التغييرات وتحديث قواعد الدوام</span>
               </button>
             </form>
@@ -3981,65 +3977,63 @@ export default function AdminPanel({
                   setTimeout(() => setCredSuccess(''), 3000);
                 }
               }} 
-              className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 shadow-xl space-y-5 text-right relative overflow-hidden"
+              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5 text-right relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37] opacity-5 blur-[50px] pointer-events-none"></div>
-              
               <div>
-                <h3 className="text-lg font-bold text-[#E4E4E7] mb-1 flex items-center justify-start gap-2">
-                  <Key className="w-5 h-5 text-[#D4AF37]" />
+                <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center justify-start gap-2">
+                  <Key className="w-5 h-5 text-indigo-600" />
                   <span>تعديل اسم المؤسسة وبيانات حساب مدير النظام</span>
                 </h3>
-                <p className="text-xs text-[#8E8E93]">
+                <p className="text-xs text-slate-500">
                   قم بتحديث اسم المؤسسة أو المشروع، بالإضافة إلى اسم المستخدم وكلمة المرور الخاصة بلوحة تحكم الإدارة.
                 </p>
               </div>
 
               {credError && (
-                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-lg font-bold">
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3 rounded-lg font-bold">
                   {credError}
                 </div>
               )}
 
               {credSuccess && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3 rounded-lg font-bold">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs p-3 rounded-lg font-bold">
                   {credSuccess}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-[#27272A]/50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-200">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">اسم المؤسسة أو المشروع *</label>
+                  <label className="text-xs font-bold text-slate-700 block">اسم المؤسسة أو المشروع *</label>
                   <input
                     type="text"
                     required
                     value={compName}
                     onChange={(e) => setCompName(e.target.value)}
-                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900"
                     placeholder="مثال: شركة نيوليب"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">اسم مستخدم المدير الجديد *</label>
+                  <label className="text-xs font-bold text-slate-700 block">اسم مستخدم المدير الجديد *</label>
                   <input
                     type="text"
                     required
                     value={adminUser}
                     onChange={(e) => setAdminUser(e.target.value)}
-                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                     placeholder="اسم المستخدم"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">كلمة المرور الجديدة *</label>
+                  <label className="text-xs font-bold text-slate-700 block">كلمة المرور الجديدة *</label>
                   <input
                     type="text"
                     required
                     value={adminPass}
                     onChange={(e) => setAdminPass(e.target.value)}
-                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-[#D4AF37] text-[#E4E4E7] font-mono"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:border-indigo-600 text-slate-900 font-mono"
                     placeholder="كلمة المرور"
                   />
                 </div>
@@ -4047,9 +4041,9 @@ export default function AdminPanel({
 
               <button
                 type="submit"
-                className="w-full bg-[#1A1C1E] hover:bg-[#27272A] text-[#D4AF37] border border-[#D4AF37]/30 hover:border-[#D4AF37]/50 font-extrabold text-xs py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
               >
-                <Save className="w-4 h-4 animate-pulse" />
+                <Save className="w-4 h-4 text-white" />
                 <span>حفظ بيانات دخول المدير الجديدة واسم المؤسسة</span>
               </button>
             </form>
@@ -4061,27 +4055,27 @@ export default function AdminPanel({
         {/* GLOBAL MODAL 1: EDIT ATTENDANCE RECORD (ADMIN ONLY) */}
         {/* ========================================== */}
         {editingRecord && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
-            <div className="bg-[#121214] rounded-2xl border border-[#27272A] p-6 w-full max-w-lg shadow-2xl relative text-right">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-lg shadow-xl relative text-right">
               <button 
                 type="button"
                 onClick={() => setEditingRecord(null)}
-                className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer"
+                className="absolute left-4 top-4 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1 rounded-lg hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <h4 className="text-base font-extrabold text-[#D4AF37] mb-2 flex items-center gap-2">
-                <Edit className="w-5 h-5 text-[#D4AF37]" />
+              <h4 className="text-base font-extrabold text-indigo-600 mb-2 flex items-center gap-2">
+                <Edit className="w-5 h-5 text-indigo-600" />
                 <span>تعديل سجل حضور الموظف</span>
               </h4>
-              <p className="text-xs text-[#8E8E93] mb-4">
-                أنت تقوم الآن بتعديل سجل حضور الموظف <span className="text-white font-bold">{editingRecord.employeeName}</span>. سيقوم النظام بإعادة حساب ساعات العمل المنجزة تلقائياً بناءً على الوقت المدخل.
+              <p className="text-xs text-slate-500 mb-4">
+                أنت تقوم الآن بتعديل سجل حضور الموظف <span className="text-slate-900 font-bold">{editingRecord.employeeName}</span>. سيقوم النظام بإعادة حساب ساعات العمل المنجزة تلقائياً بناءً على الوقت المدخل.
               </p>
 
               <form onSubmit={handleSaveEditRecord} className="space-y-4">
                 {editRecError && (
-                  <div className="bg-rose-950/30 border border-rose-900/40 text-rose-400 text-xs p-3 rounded-lg font-bold">
+                  <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3 rounded-lg font-bold">
                     {editRecError}
                   </div>
                 )}
@@ -4089,23 +4083,23 @@ export default function AdminPanel({
                 <div className="grid grid-cols-2 gap-3">
                   {/* Date */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
+                    <label className="text-xs font-bold text-slate-700 block">التاريخ:</label>
                     <input
                       type="date"
                       required
                       value={editRecDate}
                       onChange={(e) => setEditRecDate(e.target.value)}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600"
                     />
                   </div>
 
                   {/* Work Model */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">طبيعة العمل:</label>
+                    <label className="text-xs font-bold text-slate-700 block">طبيعة العمل:</label>
                     <select
                       value={editRecWorkModel}
                       onChange={(e) => setEditRecWorkModel(e.target.value as 'on-site' | 'remote')}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                     >
                       <option value="on-site">حضوري</option>
                       <option value="remote">عن بعد</option>
@@ -4116,30 +4110,30 @@ export default function AdminPanel({
                 <div className="grid grid-cols-2 gap-3">
                   {/* Check In */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت الحضور (التحضير):</label>
+                    <label className="text-xs font-bold text-slate-700 block">وقت الحضور (التحضير):</label>
                     <input
                       type="time"
                       value={editRecCheckIn}
                       onChange={(e) => setEditRecCheckIn(e.target.value)}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] font-mono"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600 font-mono"
                     />
                   </div>
 
                   {/* Check Out */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">وقت الانصراف:</label>
+                    <label className="text-xs font-bold text-slate-700 block">وقت الانصراف:</label>
                     <input
                       type="time"
                       value={editRecCheckOut}
                       onChange={(e) => setEditRecCheckOut(e.target.value)}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-lg text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] font-mono"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600 font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Status selection */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">حالة الحضور الإجمالية:</label>
+                  <label className="text-xs font-bold text-slate-700 block">حالة الحضور الإجمالية:</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['حاضر', 'متأخر', 'غياب'] as const).map((status) => (
                       <button
@@ -4157,11 +4151,11 @@ export default function AdminPanel({
                         className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                           editRecStatus === status
                             ? status === 'حاضر'
-                              ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400'
+                              ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
                               : status === 'متأخر'
-                              ? 'bg-amber-950/30 border-amber-500 text-amber-400'
-                              : 'bg-rose-950/30 border-rose-500 text-rose-400'
-                            : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                              ? 'bg-amber-50 border-amber-500 text-amber-700'
+                              : 'bg-rose-50 border-rose-500 text-rose-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
                         }`}
                       >
                         {status}
@@ -4171,17 +4165,17 @@ export default function AdminPanel({
                 </div>
 
                 {/* Modal Buttons */}
-                <div className="flex gap-2 pt-3 border-t border-[#27272A]">
+                <div className="flex gap-2 pt-3 border-t border-slate-200">
                   <button
                     type="submit"
-                    className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-2.5 rounded-lg transition-colors cursor-pointer"
                   >
                     حفظ سجل التحضير
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingRecord(null)}
-                    className="flex-1 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-2.5 rounded-lg border border-[#27272A] transition-colors cursor-pointer"
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                   >
                     إلغاء الأمر
                   </button>
@@ -4195,40 +4189,40 @@ export default function AdminPanel({
         {/* GLOBAL MODAL 2: PROFESSIONAL ADMIN ATTENDANCE MODAL */}
         {/* ========================================== */}
         {isAdminAttModalOpen && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-lg p-6 relative shadow-2xl text-right overflow-hidden">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 relative shadow-xl text-right overflow-hidden">
               <button
                 type="button"
                 onClick={() => setIsAdminAttModalOpen(false)}
-                className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+                className="absolute left-4 top-4 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1 rounded-lg hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
 
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-base font-extrabold text-[#E4E4E7]">
+                  <h4 className="text-base font-extrabold text-slate-900">
                     صلاحية التحضير والإنصراف الإداري
                   </h4>
-                  <p className="text-xs text-[#8E8E93]">
+                  <p className="text-xs text-slate-500">
                     تسجيل حضور أو انصراف إداري للموظفين بصورة مباشرة واحترافية
                   </p>
                 </div>
               </div>
 
               {adminAttSuccessMsg && (
-                <div className="bg-emerald-950/40 border border-emerald-900/40 text-emerald-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>{adminAttSuccessMsg}</span>
                 </div>
               )}
 
               {adminAttError && (
-                <div className="bg-rose-950/40 border border-rose-900/40 text-rose-400 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3.5 rounded-xl font-bold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>{adminAttError}</span>
                 </div>
               )}
@@ -4237,7 +4231,7 @@ export default function AdminPanel({
                 {/* Employee & Date */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">اختيار الموظف:</label>
+                    <label className="text-xs font-bold text-slate-700 block">اختيار الموظف:</label>
                     <select
                       value={adminAttEmployeeId}
                       onChange={(e) => {
@@ -4247,7 +4241,7 @@ export default function AdminPanel({
                           setAdminAttWorkModel(selected.workModel || 'on-site');
                         }
                       }}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                     >
                       {employees.map(emp => (
                         <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
@@ -4256,28 +4250,28 @@ export default function AdminPanel({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">التاريخ:</label>
+                    <label className="text-xs font-bold text-slate-700 block">التاريخ:</label>
                     <input
                       type="date"
                       required
                       value={adminAttDate}
                       onChange={(e) => setAdminAttDate(e.target.value)}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600"
                     />
                   </div>
                 </div>
 
                 {/* Action Mode Toggle */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">نوع الإجراء الإداري:</label>
+                  <label className="text-xs font-bold text-slate-700 block">نوع الإجراء الإداري:</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setAdminAttMode('check-in')}
                       className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                         adminAttMode === 'check-in'
-                          ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400 shadow-sm'
-                          : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <LogIn className="w-3.5 h-3.5" />
@@ -4289,8 +4283,8 @@ export default function AdminPanel({
                       onClick={() => setAdminAttMode('check-out')}
                       className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                         adminAttMode === 'check-out'
-                          ? 'bg-rose-950/50 border-rose-500 text-rose-400 shadow-sm'
-                          : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                          ? 'bg-rose-50 border-rose-500 text-rose-700 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <LogOut className="w-3.5 h-3.5" />
@@ -4302,8 +4296,8 @@ export default function AdminPanel({
                       onClick={() => setAdminAttMode('both')}
                       className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                         adminAttMode === 'both'
-                          ? 'bg-amber-950/50 border-amber-500 text-amber-400 shadow-sm'
-                          : 'bg-[#0F0F11] border-[#27272A] text-[#8E8E93] hover:text-[#E4E4E7]'
+                          ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <UserCheck className="w-3.5 h-3.5" />
@@ -4316,38 +4310,38 @@ export default function AdminPanel({
                 <div className="grid grid-cols-2 gap-3">
                   {(adminAttMode === 'check-in' || adminAttMode === 'both') && (
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-emerald-400 block">وقت الحضور:</label>
+                      <label className="text-xs font-bold text-emerald-700 block">وقت الحضور:</label>
                       <input
                         type="time"
                         required
                         value={adminAttCheckIn}
                         onChange={(e) => setAdminAttCheckIn(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   )}
 
                   {(adminAttMode === 'check-out' || adminAttMode === 'both') && (
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-rose-400 block">وقت الانصراف:</label>
+                      <label className="text-xs font-bold text-rose-700 block">وقت الانصراف:</label>
                       <input
                         type="time"
                         required
                         value={adminAttCheckOut}
                         onChange={(e) => setAdminAttCheckOut(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-white font-mono focus:outline-none focus:border-rose-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-rose-500"
                       />
                     </div>
                   )}
 
                   {adminAttMode === 'check-out' && (
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-400 block">وقت الحضور المسجل:</label>
+                      <label className="text-xs font-bold text-slate-500 block">وقت الحضور المسجل:</label>
                       <input
                         type="time"
                         value={adminAttCheckIn}
                         onChange={(e) => setAdminAttCheckIn(e.target.value)}
-                        className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-zinc-300 font-mono focus:outline-none focus:border-[#D4AF37]"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-700 font-mono focus:outline-none focus:border-indigo-600"
                       />
                     </div>
                   )}
@@ -4356,11 +4350,11 @@ export default function AdminPanel({
                 {/* Status & Work Model */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">حالة التحضير:</label>
+                    <label className="text-xs font-bold text-slate-700 block">حالة التحضير:</label>
                     <select
                       value={adminAttStatus}
                       onChange={(e) => setAdminAttStatus(e.target.value as any)}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                     >
                       <option value="حاضر">حاضر (في الوقت)</option>
                       <option value="متأخر">متأخر</option>
@@ -4369,11 +4363,11 @@ export default function AdminPanel({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#8E8E93] block">نموذج العمل:</label>
+                    <label className="text-xs font-bold text-slate-700 block">نموذج العمل:</label>
                     <select
                       value={adminAttWorkModel}
                       onChange={(e) => setAdminAttWorkModel(e.target.value as any)}
-                      className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
                     >
                       <option value="on-site">حضوري (ميداني/مكتبي)</option>
                       <option value="remote">عن بعد</option>
@@ -4383,21 +4377,21 @@ export default function AdminPanel({
 
                 {/* Admin Notes */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#8E8E93] block">ملاحظات الإدارة (اختياري):</label>
+                  <label className="text-xs font-bold text-slate-700 block">ملاحظات الإدارة (اختياري):</label>
                   <input
                     type="text"
                     value={adminAttNotes}
                     onChange={(e) => setAdminAttNotes(e.target.value)}
                     placeholder="مثال: تسجيل دخول بطلب مباشر من الموظف / تعديل تقني"
-                    className="w-full bg-[#0F0F11] border border-[#27272A] rounded-xl text-xs px-3 py-2.5 text-[#E4E4E7] placeholder-[#52525B] focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600"
                   />
                 </div>
 
                 {/* Submit Actions */}
-                <div className="flex gap-2 pt-3 border-t border-[#27272A]">
+                <div className="flex gap-2 pt-3 border-t border-slate-200">
                   <button
                     type="submit"
-                    className="flex-1 bg-[#D4AF37] hover:bg-[#F3C63F] text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#D4AF37]/10 flex items-center justify-center gap-1.5"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
                   >
                     <CheckCircle className="w-4 h-4" />
                     <span>تأكيد وتسجيل الإجراء الإداري</span>
@@ -4405,7 +4399,7 @@ export default function AdminPanel({
                   <button
                     type="button"
                     onClick={() => setIsAdminAttModalOpen(false)}
-                    className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
+                    className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl border border-slate-200 transition-colors cursor-pointer"
                   >
                     إلغاء
                   </button>
@@ -4419,12 +4413,12 @@ export default function AdminPanel({
         {/* GLOBAL MODAL 3: QUICK ACTION ATTENDANCE CONFIRMATION */}
         {/* ========================================== */}
         {confirmAttAction && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-[#121214] border border-[#27272A] rounded-2xl w-full max-w-md p-6 relative shadow-2xl text-right">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 relative shadow-xl text-right">
               <button
                 type="button"
                 onClick={() => setConfirmAttAction(null)}
-                className="absolute left-4 top-4 text-[#8E8E93] hover:text-[#E4E4E7] transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+                className="absolute left-4 top-4 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1 rounded-lg hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -4432,33 +4426,33 @@ export default function AdminPanel({
               <div className="flex items-center gap-3 mb-4">
                 <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
                   confirmAttAction.type === 'check-in' 
-                    ? 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-400' 
-                    : 'bg-rose-950/80 border border-rose-500/40 text-rose-400'
+                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' 
+                    : 'bg-rose-50 border border-rose-200 text-rose-700'
                 }`}>
                   {confirmAttAction.type === 'check-in' ? <UserCheck className="w-6 h-6" /> : <UserX className="w-6 h-6" />}
                 </div>
                 <div>
-                  <h4 className="text-base font-extrabold text-[#E4E4E7]">
+                  <h4 className="text-base font-extrabold text-slate-900">
                     {confirmAttAction.type === 'check-in' ? 'تأكيد تسجيل حضور إداري' : 'تأكيد تسجيل انصراف إداري'}
                   </h4>
-                  <p className="text-xs text-[#8E8E93]">
+                  <p className="text-xs text-slate-500">
                     يرجى التأكيد لتسجيل الإجراء مباشرة لليوم
                   </p>
                 </div>
               </div>
 
-              <div className="bg-[#0F0F11] border border-[#27272A] rounded-xl p-4 mb-5 space-y-2.5 text-xs">
-                <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
-                  <span className="text-[#8E8E93]">اسم الموظف:</span>
-                  <span className="font-bold text-[#E4E4E7] text-sm">{confirmAttAction.empName}</span>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-5 space-y-2.5 text-xs">
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                  <span className="text-slate-500">اسم الموظف:</span>
+                  <span className="font-bold text-slate-900 text-sm">{confirmAttAction.empName}</span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b border-[#1F1F22]">
-                  <span className="text-[#8E8E93]">الوقت الحالي:</span>
-                  <span className="font-mono font-bold text-[#D4AF37] text-sm">{getFormattedCurrentTime()}</span>
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                  <span className="text-slate-500">الوقت الحالي:</span>
+                  <span className="font-mono font-bold text-indigo-600 text-sm">{getFormattedCurrentTime()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[#8E8E93]">نوع الإجراء:</span>
-                  <span className={`font-extrabold ${confirmAttAction.type === 'check-in' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className="text-slate-500">نوع الإجراء:</span>
+                  <span className={`font-extrabold ${confirmAttAction.type === 'check-in' ? 'text-emerald-700' : 'text-rose-700'}`}>
                     {confirmAttAction.type === 'check-in' ? 'تسجيل دخول (حضور)' : 'تسجيل خروج (انصراف)'}
                   </span>
                 </div>
@@ -4468,10 +4462,10 @@ export default function AdminPanel({
                 <button
                   type="button"
                   onClick={executeConfirmedAdminAttendance}
-                  className={`flex-1 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5 ${
                     confirmAttAction.type === 'check-in'
-                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
-                      : 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      : 'bg-rose-600 hover:bg-rose-700 text-white'
                   }`}
                 >
                   <Check className="w-4 h-4" />
@@ -4480,7 +4474,7 @@ export default function AdminPanel({
                 <button
                   type="button"
                   onClick={() => setConfirmAttAction(null)}
-                  className="px-4 bg-[#1A1C1E] hover:bg-[#27272A] text-[#E4E4E7] font-bold text-xs py-3 rounded-xl border border-[#27272A] transition-colors cursor-pointer"
+                  className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl border border-slate-200 transition-colors cursor-pointer"
                 >
                   إلغاء
                 </button>
