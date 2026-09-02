@@ -126,7 +126,7 @@ export default function App() {
     const savedSuperAdminActive = localStorage.getItem(`hader_super_admin_active_${targetTenantId}`);
     const savedEmpId = localStorage.getItem(`hader_logged_in_emp_id_${targetTenantId}`);
 
-    let targetPortal: 'employee' | 'admin' | 'superadmin' = 'admin';
+    let targetPortal: 'employee' | 'admin' | 'superadmin' = 'superadmin';
 
     if (urlPortal === 'employee') {
       targetPortal = 'employee';
@@ -135,16 +135,15 @@ export default function App() {
     } else if (urlPortal === 'admin') {
       targetPortal = 'admin';
     } else {
-      // No portal specified in the URL
-      if (savedSuperAdminActive === 'true' || savedRole === 'superadmin') {
-        targetPortal = 'superadmin';
-      } else if (savedRole === 'admin') {
+      // No portal specified in the URL -> Default is Super Admin
+      if (savedRole === 'admin') {
         targetPortal = 'admin';
       } else if (savedRole === 'employee' && savedEmpId) {
         // Safe employee session resumption
         targetPortal = 'employee';
       } else {
-        targetPortal = 'admin';
+        // Default directly to Super Admin dashboard
+        targetPortal = 'superadmin';
       }
     }
 
@@ -1067,6 +1066,25 @@ export default function App() {
     setIsEmployeePortalMode(false);
   };
 
+  // Direct switch from Super Admin to specific Tenant/Project view
+  const handleNavigateToTenant = (tenantId: string, portal: 'admin' | 'employee') => {
+    setActiveTenantId(tenantId);
+    localStorage.setItem('hader_active_tenant_id', tenantId);
+    localStorage.setItem(`hader_super_admin_active_${tenantId}`, 'true');
+
+    if (portal === 'admin') {
+      setIsSuperAdminMode(false);
+      setIsEmployeePortalMode(false);
+      setSelectedUser('admin');
+      localStorage.setItem(`hader_logged_in_role_${tenantId}`, 'admin');
+    } else {
+      setIsSuperAdminMode(false);
+      setIsEmployeePortalMode(true);
+      setSelectedUser('');
+      localStorage.setItem(`hader_logged_in_role_${tenantId}`, 'employee');
+    }
+  };
+
   // 5. Update Super Admin Credentials
   const handleUpdateSuperAdminCredentials = (user: string, pass: string) => {
     setSuperAdminUsername(user);
@@ -1384,6 +1402,7 @@ export default function App() {
             superAdminUsername={superAdminUsername}
             superAdminPassword={superAdminPassword}
             onUpdateSuperAdminCredentials={handleUpdateSuperAdminCredentials}
+            onNavigateToTenant={handleNavigateToTenant}
           />
         ) : isEmployeePortalMode ? (
           selectedUser && employees.some(e => e.id === selectedUser) ? (
@@ -1767,8 +1786,8 @@ export default function App() {
               </form>
             </div>
 
-            {/* Switch to Employee Portal Link */}
-            <div className="text-center">
+            {/* Switch Links */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
               <button
                 type="button"
                 onClick={() => {
@@ -1779,7 +1798,22 @@ export default function App() {
                 className="text-xs text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer inline-flex items-center gap-1.5 font-bold"
               >
                 <Laptop className="w-3.5 h-3.5" />
-                <span>الدخول لبوابة الخدمة الذاتية للموظفين (التحضير الفوري)</span>
+                <span>الدخول لبوابة الخدمة الذاتية للموظفين</span>
+              </button>
+
+              <span className="text-slate-300 hidden sm:inline">•</span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSuperAdminMode(true);
+                  setSelectedUser('admin');
+                  setIsEmployeePortalMode(false);
+                }}
+                className="text-xs text-slate-500 hover:text-slate-800 hover:underline cursor-pointer inline-flex items-center gap-1.5 font-bold"
+              >
+                <Shield className="w-3.5 h-3.5 text-indigo-600" />
+                <span>لوحة المصمم العام (Super Admin)</span>
               </button>
             </div>
           </div>

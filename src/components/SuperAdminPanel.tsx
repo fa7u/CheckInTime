@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Building2, Users, Shield, Plus, Edit, Trash2, Copy, 
-  Check, X, Link, Search, Calendar, Landmark, Key, Compass, ExternalLink 
+  Check, X, Link, Search, Calendar, Landmark, Key, Compass, ExternalLink, ArrowRight, FolderKanban, LogIn
 } from 'lucide-react';
 import { Tenant } from '../types';
 
@@ -14,6 +14,7 @@ interface SuperAdminPanelProps {
   superAdminUsername: string;
   superAdminPassword: string;
   onUpdateSuperAdminCredentials: (user: string, pass: string) => void;
+  onNavigateToTenant?: (tenantId: string, portal: 'admin' | 'employee') => void;
 }
 
 export default function SuperAdminPanel({
@@ -25,6 +26,7 @@ export default function SuperAdminPanel({
   superAdminUsername,
   superAdminPassword,
   onUpdateSuperAdminCredentials,
+  onNavigateToTenant,
 }: SuperAdminPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -38,6 +40,7 @@ export default function SuperAdminPanel({
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showProjectsModal, setShowProjectsModal] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   
   // Add form fields
@@ -230,10 +233,19 @@ export default function SuperAdminPanel({
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-900">لوحة تحكم المصمم العام (Super Admin)</h2>
-            <p className="text-xs text-slate-500 mt-1">تتيح لك تهيئة المؤسسات، وإصدار روابط وحسابات العملاء لإدارتها بشكل مستقل كلياً.</p>
+            <p className="text-xs text-slate-500 mt-1">تتيح لك تهيئة المؤسسات، وإصدار روابط وحسابات العملاء، والتنقل بين واجهات المشاريع مباشرة.</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Direct Projects Modal Button */}
+          <button
+            type="button"
+            onClick={() => setShowProjectsModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+          >
+            <FolderKanban className="w-4 h-4" />
+            <span>استعراض ودخول واجهات المشاريع ({activeTenantsCount})</span>
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -246,7 +258,7 @@ export default function SuperAdminPanel({
             className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
             <Key className="w-4 h-4" />
-            <span>تعديل حساب المصمم (Super Admin)</span>
+            <span>حساب المصمم</span>
           </button>
           <button
             type="button"
@@ -254,7 +266,7 @@ export default function SuperAdminPanel({
             className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
             <X className="w-4 h-4" />
-            <span>تسجيل الخروج من الإدارة العامة</span>
+            <span>تسجيل الخروج</span>
           </button>
         </div>
       </div>
@@ -483,10 +495,36 @@ export default function SuperAdminPanel({
                           </div>
                         ) : (
                           <>
+                            {/* Direct Jump to Project Admin View */}
+                            {onNavigateToTenant && (
+                              <button
+                                type="button"
+                                onClick={() => onNavigateToTenant(tenant.id, 'admin')}
+                                className="bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                                title="دخول لوحة إدارة هذا المشروع"
+                              >
+                                <LogIn className="w-3.5 h-3.5" />
+                                <span>دخول الإدارة</span>
+                              </button>
+                            )}
+
+                            {/* Direct Jump to Project Employee Portal */}
+                            {onNavigateToTenant && (
+                              <button
+                                type="button"
+                                onClick={() => onNavigateToTenant(tenant.id, 'employee')}
+                                className="bg-slate-50 hover:bg-slate-800 text-slate-700 hover:text-white border border-slate-200 text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                                title="دخول بوابة موظفي هذا المشروع"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                                <span>بوابة الموظفين</span>
+                              </button>
+                            )}
+
                             <button
                               type="button"
                               onClick={() => handleStartEdit(tenant)}
-                              className="text-indigo-600 hover:text-indigo-800 p-2 hover:bg-indigo-50 rounded-xl transition-all cursor-pointer"
+                              className="text-slate-600 hover:text-indigo-800 p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
                               title="تعديل بيانات المؤسسة"
                             >
                               <Edit className="w-4 h-4" />
@@ -869,6 +907,106 @@ export default function SuperAdminPanel({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* PROJECTS BROWSER & DIRECT SWITCHER MODAL */}
+      {showProjectsModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 w-full max-w-2xl shadow-2xl relative text-right max-h-[90vh] flex flex-col">
+            
+            <button 
+              type="button"
+              onClick={() => setShowProjectsModal(false)}
+              className="absolute left-4 top-4 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 pb-4 border-b border-slate-100 shrink-0">
+              <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-2xs">
+                <FolderKanban className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">دخول واجهات المشاريع والشركات</h3>
+                <p className="text-xs text-slate-500 mt-0.5">اختر المؤسسة أو المشروع للدخول مباشرة إلى لوحة الإدارة أو بوابة الموظفين</p>
+              </div>
+            </div>
+
+            {/* List of projects */}
+            <div className="overflow-y-auto py-4 space-y-3.5 flex-1 pr-1 pl-1">
+              {tenants.filter(t => t.id !== 'default').length === 0 ? (
+                <div className="text-center py-10 text-slate-400">
+                  <Building2 className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                  <p className="text-sm font-bold text-slate-700">لا توجد مشاريع مضافة حالياً.</p>
+                  <p className="text-xs text-slate-400 mt-1">يمكنك إضافة أول مشروع من زر "إنشاء مؤسسة / مشروع جديد" في اللوحة.</p>
+                </div>
+              ) : (
+                tenants.filter(t => t.id !== 'default').map((tenant) => (
+                  <div 
+                    key={tenant.id} 
+                    className="p-4 rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-indigo-300 transition-all shadow-2xs hover:shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 bg-white border border-slate-200 rounded-xl flex items-center justify-center shrink-0 text-indigo-600 shadow-2xs">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">{tenant.companyName}</h4>
+                        <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
+                          <span>المدير: <strong className="text-slate-700 font-semibold">{tenant.adminName}</strong></span>
+                          <span>•</span>
+                          <span className="font-mono text-slate-400">ID: {tenant.id}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {onNavigateToTenant && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowProjectsModal(false);
+                              onNavigateToTenant(tenant.id, 'admin');
+                            }}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                          >
+                            <LogIn className="w-3.5 h-3.5" />
+                            <span>لوحة الإدارة</span>
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowProjectsModal(false);
+                              onNavigateToTenant(tenant.id, 'employee');
+                            }}
+                            className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                          >
+                            <Users className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>بوابة الموظفين</span>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between shrink-0">
+              <span className="text-xs text-slate-500">إجمالي المشاريع: <strong className="text-slate-800">{activeTenantsCount}</strong></span>
+              <button
+                type="button"
+                onClick={() => setShowProjectsModal(false)}
+                className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+              >
+                إغلاق
+              </button>
+            </div>
+
           </div>
         </div>
       )}
