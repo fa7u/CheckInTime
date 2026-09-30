@@ -729,6 +729,7 @@ export default function AdminPanel({
 
     const rows = records.map(rec => {
       const emp = employees.find(e => e.id === rec.employeeId);
+      const hrs = getHoursWorked(rec);
       return [
         rec.employeeName || (emp ? emp.name : 'موظف غير معروف'),
         emp ? emp.role : 'موظف',
@@ -736,7 +737,7 @@ export default function AdminPanel({
         rec.workModel === 'on-site' ? 'حضوري' : 'عن بعد',
         rec.checkIn || '-',
         rec.checkOut || '-',
-        rec.checkOut ? `${rec.totalHours} ساعة` : 'قيد العمل...',
+        rec.checkOut ? `${hrs.toFixed(1)} ساعة` : (rec.checkIn ? `${hrs.toFixed(1)} ساعة (قيد العمل)` : '0 ساعة'),
         rec.status,
         rec.isApproved ? 'معتمد' : 'بانتظار الاعتماد'
       ];
@@ -767,9 +768,7 @@ export default function AdminPanel({
     
     let totalHours = 0;
     records.forEach(r => {
-      if (r.checkOut) {
-        totalHours += r.totalHours || 0;
-      }
+      totalHours += getHoursWorked(r);
     });
 
     const printWindow = window.open('', '_blank');
@@ -782,19 +781,21 @@ export default function AdminPanel({
       const emp = employees.find(e => e.id === rec.employeeId);
       const role = emp ? emp.role : 'موظف';
       const modelText = rec.workModel === 'on-site' ? 'حضوري' : 'عن بعد';
-      const statusColor = rec.status === 'حاضر' ? 'color: #10b981;' : rec.status === 'متأخر' ? 'color: #f59e0b;' : 'color: #ef4444;';
+      const statusColor = rec.status === 'حاضر' ? 'color: #059669;' : rec.status === 'متأخر' ? 'color: #d97706;' : 'color: #dc2626;';
+      const hrs = getHoursWorked(rec);
+      const hrsText = rec.checkOut ? `${hrs.toFixed(1)} س` : (rec.checkIn ? `${hrs.toFixed(1)} س (قيد العمل)` : '-');
       
       return `
-        <tr style="border-bottom: 1px solid #e5e7eb; font-size: 11px;">
-          <td style="padding: 10px; font-weight: bold; text-align: center; border: 1px solid #e5e7eb;">${idx + 1}</td>
-          <td style="padding: 10px; text-align: right; font-weight: bold; border: 1px solid #e5e7eb;">${rec.employeeName}</td>
-          <td style="padding: 10px; text-align: right; color: #4b5563; border: 1px solid #e5e7eb;">${role}</td>
-          <td style="padding: 10px; text-align: center; font-family: monospace; border: 1px solid #e5e7eb;">${rec.date}</td>
-          <td style="padding: 10px; text-align: center; border: 1px solid #e5e7eb;">${modelText}</td>
-          <td style="padding: 10px; text-align: center; font-family: monospace; border: 1px solid #e5e7eb;">${rec.checkIn || '-'}</td>
-          <td style="padding: 10px; text-align: center; font-family: monospace; border: 1px solid #e5e7eb;">${rec.checkOut || '-'}</td>
-          <td style="padding: 10px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb;">${rec.checkOut ? rec.totalHours + ' س' : 'قيد العمل'}</td>
-          <td style="padding: 10px; text-align: center; font-weight: bold; ${statusColor} border: 1px solid #e5e7eb;">${rec.status}</td>
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 6px 4px; font-weight: bold; text-align: center; border: 1px solid #e5e7eb; font-size: 9px;">${idx + 1}</td>
+          <td style="padding: 6px 6px; text-align: right; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9.5px; word-break: break-word;">${rec.employeeName}</td>
+          <td style="padding: 6px 6px; text-align: right; color: #4b5563; border: 1px solid #e5e7eb; font-size: 9px;">${role}</td>
+          <td style="padding: 6px 4px; text-align: center; font-family: monospace; border: 1px solid #e5e7eb; font-size: 9px;">${rec.date}</td>
+          <td style="padding: 6px 4px; text-align: center; border: 1px solid #e5e7eb; font-size: 9px;">${modelText}</td>
+          <td style="padding: 6px 4px; text-align: center; font-family: monospace; border: 1px solid #e5e7eb; font-size: 9px;">${rec.checkIn || '-'}</td>
+          <td style="padding: 6px 4px; text-align: center; font-family: monospace; border: 1px solid #e5e7eb; font-size: 9px;">${rec.checkOut || '-'}</td>
+          <td style="padding: 6px 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #2563eb;">${hrsText}</td>
+          <td style="padding: 6px 4px; text-align: center; font-weight: bold; ${statusColor} border: 1px solid #e5e7eb; font-size: 9px;">${rec.status}</td>
         </tr>
       `;
     }).join('');
@@ -807,195 +808,213 @@ export default function AdminPanel({
         <title>${title}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-          body {
+          @page {
+            size: A4 landscape;
+            margin: 6mm 8mm;
+          }
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          html, body {
             font-family: 'Cairo', sans-serif;
             color: #1f2937;
             margin: 0;
-            padding: 40px;
+            padding: 0;
             background-color: #ffffff;
             direction: rtl;
+            width: 100%;
+          }
+          .report-container {
+            width: 100%;
+            max-width: 100%;
+            padding: 4px;
+            margin: 0 auto;
           }
           .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid #4F46E5;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            border-bottom: 2px solid #4F46E5;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
           }
           .logo-area {
             text-align: right;
           }
           .company-name {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 800;
             color: #111827;
             margin: 0;
           }
           .company-sub {
-            font-size: 11px;
+            font-size: 10px;
             color: #6b7280;
-            margin: 5px 0 0 0;
+            margin: 2px 0 0 0;
           }
           .report-meta {
             text-align: left;
           }
           .report-title {
-            font-size: 22px;
+            font-size: 17px;
             font-weight: 800;
             color: #111827;
             margin: 0;
           }
           .report-subtitle {
-            font-size: 13px;
+            font-size: 11px;
             color: #4F46E5;
             font-weight: 600;
-            margin: 5px 0 0 0;
+            margin: 2px 0 0 0;
           }
           .meta-info {
-            font-size: 10px;
+            font-size: 9px;
             color: #4b5563;
-            margin-top: 8px;
+            margin-top: 3px;
           }
           .stats-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-bottom: 14px;
           }
           .stat-card {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 6px;
+            padding: 6px 4px;
             text-align: center;
           }
           .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #6b7280;
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
           }
           .stat-value {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 700;
             color: #111827;
           }
           .records-table {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
-            margin-bottom: 40px;
-            font-size: 11px;
+            margin-bottom: 18px;
+            font-size: 9.5px;
           }
           .records-table th {
-            background-color: #111827;
-            color: #ffffff;
-            padding: 10px;
+            background-color: #111827 !important;
+            color: #ffffff !important;
+            padding: 6px 4px;
             font-weight: bold;
             text-align: right;
-            border: 1px solid #e5e7eb;
-          }
-          .records-table th:nth-child(1),
-          .records-table th:nth-child(4),
-          .records-table th:nth-child(5),
-          .records-table th:nth-child(6),
-          .records-table th:nth-child(7),
-          .records-table th:nth-child(8),
-          .records-table th:nth-child(9) {
-            text-align: center;
+            border: 1px solid #374151;
+            font-size: 9.5px;
           }
           .signatures-section {
-            margin-top: 50px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
             page-break-inside: avoid;
           }
           .signature-box {
-            width: 230px;
+            width: 200px;
             text-align: center;
             border-top: 1.5px solid #d1d5db;
-            padding-top: 10px;
-            font-size: 11px;
+            padding-top: 6px;
+            font-size: 9.5px;
             color: #374151;
           }
           .signature-title {
             font-weight: bold;
-            margin-bottom: 25px;
+            margin-bottom: 14px;
           }
           @media print {
             body {
-              padding: 15px;
+              padding: 0;
+            }
+            .records-table tr {
+              page-break-inside: avoid;
+            }
+            .records-table thead {
+              display: table-header-group;
             }
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <div class="logo-area">
-            <h1 class="company-name">نظام checkInTime لضبط الحضور والانصراف</h1>
-            <p class="company-sub">لوحة المراقبة والإشراف الإداري المتكاملة</p>
-          </div>
-          <div class="report-meta">
-            <h2 class="report-title">${title}</h2>
-            <p class="report-subtitle">${subtitle}</p>
-            <div class="meta-info">
-              تاريخ استخراج التقرير: ${new Date().toLocaleDateString('ar-EG')} | الوقت: ${new Date().toLocaleTimeString('ar-EG')}
+        <div class="report-container">
+          <div class="header">
+            <div class="logo-area">
+              <h1 class="company-name">نظام checkInTime لضبط الحضور والانصراف</h1>
+              <p class="company-sub">لوحة المراقبة والإشراف الإداري المتكاملة</p>
+            </div>
+            <div class="report-meta">
+              <h2 class="report-title">${title}</h2>
+              <p class="report-subtitle">${subtitle}</p>
+              <div class="meta-info">
+                تاريخ استخراج التقرير: ${new Date().toLocaleDateString('ar-EG')} | الوقت: ${new Date().toLocaleTimeString('ar-EG')}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">إجمالي السجلات</div>
-            <div class="stat-value" style="color: #111827;">${totalRecords}</div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">إجمالي السجلات</div>
+              <div class="stat-value" style="color: #111827;">${totalRecords}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">حضور في الموعد</div>
+              <div class="stat-value" style="color: #10b981;">${presents}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">تأخير مرصود</div>
+              <div class="stat-value" style="color: #f59e0b;">${lates}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">غياب كلي</div>
+              <div class="stat-value" style="color: #ef4444;">${absences}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">ساعات العمل المنجزة</div>
+              <div class="stat-value" style="color: #3b82f6;">${totalHours.toFixed(1)} س</div>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">حضور في الموعد</div>
-            <div class="stat-value" style="color: #10b981;">${presents}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">تأخير مرصود</div>
-            <div class="stat-value" style="color: #f59e0b;">${lates}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">غياب كلي</div>
-            <div class="stat-value" style="color: #ef4444;">${absences}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">ساعات العمل المنجزة</div>
-            <div class="stat-value" style="color: #3b82f6;">${totalHours.toFixed(1)} س</div>
-          </div>
-        </div>
 
-        <table class="records-table">
-          <thead>
-            <tr>
-              <th style="width: 40px; text-align: center;">م</th>
-              <th>الموظف</th>
-              <th>الدور الوظيفي</th>
-              <th style="text-align: center;">التاريخ</th>
-              <th style="text-align: center;">نموذج العمل</th>
-              <th style="text-align: center;">حضور</th>
-              <th style="text-align: center;">انصراف</th>
-              <th style="text-align: center;">ساعات العمل</th>
-              <th style="text-align: center;">الحالة</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${recordsHtml}
-          </tbody>
-        </table>
+          <table class="records-table">
+            <thead>
+              <tr>
+                <th style="width: 4%; text-align: center;">م</th>
+                <th style="width: 17%; text-align: right;">الموظف</th>
+                <th style="width: 13%; text-align: right;">الدور الوظيفي</th>
+                <th style="width: 10%; text-align: center;">التاريخ</th>
+                <th style="width: 10%; text-align: center;">نموذج العمل</th>
+                <th style="width: 11%; text-align: center;">حضور</th>
+                <th style="width: 11%; text-align: center;">انصراف</th>
+                <th style="width: 12%; text-align: center;">ساعات العمل</th>
+                <th style="width: 12%; text-align: center;">الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recordsHtml}
+            </tbody>
+          </table>
 
-        <div class="signatures-section">
-          <div class="signature-box">
-            <div class="signature-title">إدارة الموارد البشرية</div>
-            <p>الاسم: ....................................</p>
-            <p>التوقيع: ..................................</p>
-          </div>
-          <div class="signature-box">
-            <div class="signature-title">الاعتماد والختم الرسمي</div>
-            <p>الاسم: ....................................</p>
-            <p>التوقيع: ..................................</p>
+          <div class="signatures-section">
+            <div class="signature-box">
+              <div class="signature-title">إدارة الموارد البشرية</div>
+              <p>الاسم: ....................................</p>
+              <p>التوقيع: ..................................</p>
+            </div>
+            <div class="signature-box">
+              <div class="signature-title">الاعتماد والختم الرسمي</div>
+              <p>الاسم: ....................................</p>
+              <p>التوقيع: ..................................</p>
+            </div>
           </div>
         </div>
 
@@ -1049,19 +1068,20 @@ export default function AdminPanel({
           return 'غير مسجل';
         }
         
+        const hrs = getHoursWorked(rec);
         if (rec.status === 'حاضر') {
           if (rec.workModel === 'on-site') {
             countOnSite++;
-            totalHours += rec.totalHours || 0;
+            totalHours += hrs;
             return 'حاضر (مكتب)';
           } else {
             countRemote++;
-            totalHours += rec.totalHours || 0;
+            totalHours += hrs;
             return 'حاضر (عن بعد)';
           }
         } else if (rec.status === 'متأخر') {
           countLate++;
-          totalHours += rec.totalHours || 0;
+          totalHours += hrs;
           return `متأخر (${rec.checkIn || ''})`;
         } else if (rec.status === 'غياب') {
           countAbsent++;
@@ -1114,10 +1134,14 @@ export default function AdminPanel({
       return;
     }
 
+    const totalDays = dates.length || 1;
+    // 22% for meta columns, 19.5% for summaries, 58.5% distributed evenly across the days
+    const dayWidthPercent = (58.5 / totalDays).toFixed(2);
+
     const datesHeadersHtml = dates.map(dt => {
       const dayNum = dt.split('-')[2];
       const isWk = isWeekend(dt);
-      return `<th style="text-align: center; font-size: 8px; padding: 4px; border: 1px solid #e5e7eb; min-width: 18px; ${isWk ? 'background-color: #f3f4f6;' : ''}">${dayNum}</th>`;
+      return `<th style="width: ${dayWidthPercent}%; text-align: center; font-size: 7px; padding: 2px 0px; border: 1px solid #d1d5db; ${isWk ? 'background-color: #e5e7eb; color: #4b5563;' : ''}">${dayNum}</th>`;
     }).join('');
 
     const rowsHtml = targetEmployees.map((emp, idx) => {
@@ -1137,21 +1161,22 @@ export default function AdminPanel({
         let cellStyle = 'color: #9ca3af;';
         
         if (rec) {
+          const hrs = getHoursWorked(rec);
           if (rec.status === 'حاضر') {
             if (rec.workModel === 'on-site') {
               countOnSite++;
-              totalHours += rec.totalHours || 0;
+              totalHours += hrs;
               cellText = 'ح';
               cellStyle = 'background-color: #d1fae5; color: #065f46; font-weight: bold;';
             } else {
               countRemote++;
-              totalHours += rec.totalHours || 0;
+              totalHours += hrs;
               cellText = 'ع';
               cellStyle = 'background-color: #ede9fe; color: #5b21b6; font-weight: bold;';
             }
           } else if (rec.status === 'متأخر') {
             countLate++;
-            totalHours += rec.totalHours || 0;
+            totalHours += hrs;
             cellText = 'ت';
             cellStyle = 'background-color: #fef3c7; color: #92400e; font-weight: bold;';
           } else if (rec.status === 'غياب') {
@@ -1160,27 +1185,27 @@ export default function AdminPanel({
             cellStyle = 'background-color: #fee2e2; color: #991b1b; font-weight: bold;';
           }
         } else if (isWk) {
-          cellText = 'عطلة';
-          cellStyle = 'background-color: #f3f4f6; color: #9ca3af; font-size: 7px;';
+          cellText = 'ع';
+          cellStyle = 'background-color: #f3f4f6; color: #9ca3af; font-size: 6.5px;';
         }
 
-        return `<td style="text-align: center; padding: 4px; font-size: 9px; border: 1px solid #e5e7eb; ${cellStyle}">${cellText}</td>`;
+        return `<td style="width: ${dayWidthPercent}%; text-align: center; padding: 2px 0px; font-size: 7.5px; border: 1px solid #e5e7eb; ${cellStyle}">${cellText}</td>`;
       }).join('');
 
       const totalActiveDays = countOnSite + countRemote + countLate;
 
       return `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-          <td style="padding: 4px; font-weight: bold; text-align: center; border: 1px solid #e5e7eb; font-size: 9px;">${idx + 1}</td>
-          <td style="padding: 4px; text-align: right; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; white-space: nowrap;">${emp.name}</td>
-          <td style="padding: 4px; text-align: right; color: #4b5563; border: 1px solid #e5e7eb; font-size: 8px; white-space: nowrap;">${emp.role}</td>
+          <td style="width: 2.2%; padding: 2px 0px; font-weight: bold; text-align: center; border: 1px solid #e5e7eb; font-size: 7.5px;">${idx + 1}</td>
+          <td style="width: 11.5%; padding: 2px 3px; text-align: right; font-weight: bold; border: 1px solid #e5e7eb; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${emp.name}</td>
+          <td style="width: 8.3%; padding: 2px 3px; text-align: right; color: #4b5563; border: 1px solid #e5e7eb; font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${emp.role}</td>
           ${cellsHtml}
-          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; background-color: #f9fafb;">${totalActiveDays}</td>
-          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #059669; background-color: #f9fafb;">${countOnSite}</td>
-          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #7c3aed; background-color: #f9fafb;">${countRemote}</td>
-          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #d97706; background-color: #f9fafb;">${countLate}</td>
-          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; color: #dc2626; background-color: #f9fafb;">${countAbsent}</td>
-          <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; background-color: #f9fafb;">${totalHours.toFixed(1)} س</td>
+          <td style="width: 3.5%; padding: 2px 0px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 7.5px; background-color: #f9fafb;">${totalActiveDays}</td>
+          <td style="width: 3.2%; padding: 2px 0px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 7.5px; color: #059669; background-color: #f9fafb;">${countOnSite}</td>
+          <td style="width: 3.2%; padding: 2px 0px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 7.5px; color: #7c3aed; background-color: #f9fafb;">${countRemote}</td>
+          <td style="width: 3.2%; padding: 2px 0px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 7.5px; color: #d97706; background-color: #f9fafb;">${countLate}</td>
+          <td style="width: 3.2%; padding: 2px 0px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 7.5px; color: #dc2626; background-color: #f9fafb;">${countAbsent}</td>
+          <td style="width: 3.2%; padding: 2px 0px; text-align: center; font-weight: bold; border: 1px solid #e5e7eb; font-size: 7.5px; background-color: #f9fafb; color: #2563eb;">${totalHours.toFixed(1)} س</td>
         </tr>
       `;
     }).join('');
@@ -1195,35 +1220,48 @@ export default function AdminPanel({
           @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
           @page {
             size: A4 landscape;
-            margin: 8mm;
+            margin: 4mm 5mm;
           }
-          body {
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          html, body {
             font-family: 'Cairo', sans-serif;
             color: #1f2937;
             margin: 0;
-            padding: 5px;
+            padding: 0;
             background-color: #ffffff;
             direction: rtl;
+            width: 100%;
+          }
+          .sheet-wrapper {
+            width: 100%;
+            max-width: 100%;
+            padding: 2px;
+            margin: 0 auto;
           }
           .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #4F46E5;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
           }
           .logo-area {
             text-align: right;
           }
           .company-name {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             color: #111827;
             margin: 0;
           }
           .company-sub {
-            font-size: 9px;
+            font-size: 8.5px;
             color: #6b7280;
             margin: 2px 0 0 0;
           }
@@ -1231,30 +1269,30 @@ export default function AdminPanel({
             text-align: left;
           }
           .report-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             color: #111827;
             margin: 0;
           }
           .report-subtitle {
-            font-size: 10px;
+            font-size: 9px;
             color: #4F46E5;
             font-weight: 600;
             margin: 2px 0 0 0;
           }
           .meta-info {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #4b5563;
-            margin-top: 4px;
+            margin-top: 2px;
           }
           .legend {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 8px;
-            font-size: 8px;
+            font-size: 7.5px;
             font-weight: bold;
             background-color: #f9fafb;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 4px;
             border: 1px solid #e5e7eb;
           }
@@ -1264,106 +1302,123 @@ export default function AdminPanel({
             gap: 3px;
           }
           .legend-box {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 2px;
             display: inline-block;
             border: 1px solid rgba(0,0,0,0.1);
           }
           .records-table {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 9px;
+            margin-bottom: 12px;
+            font-size: 8px;
           }
           .records-table th {
-            background-color: #111827;
-            color: #ffffff;
-            padding: 4px;
+            background-color: #111827 !important;
+            color: #ffffff !important;
             font-weight: bold;
-            text-align: right;
-            border: 1px solid #e5e7eb;
-            font-size: 9px;
+            border: 1px solid #4b5563;
           }
           .records-table th.center {
             text-align: center;
           }
+          .records-table td {
+            vertical-align: middle;
+          }
           .signatures-section {
-            margin-top: 20px;
+            margin-top: 15px;
             display: flex;
             justify-content: space-between;
             page-break-inside: avoid;
           }
           .signature-box {
-            width: 180px;
+            width: 160px;
             text-align: center;
-            border-top: 1px solid #d1d5db;
+            border-top: 1px solid #9ca3af;
             padding-top: 4px;
-            font-size: 9px;
+            font-size: 8px;
             color: #374151;
           }
           .signature-title {
             font-weight: bold;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            .sheet-wrapper {
+              zoom: 0.94;
+            }
+            .records-table tr {
+              page-break-inside: avoid;
+            }
+            .records-table thead {
+              display: table-header-group;
+            }
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <div class="logo-area">
-            <h1 class="company-name">نظام checkInTime لضبط الحضور والانصراف</h1>
-            <p class="company-sub">جدول مصفوفة الحضور والانصراف الشهرية المجمعة</p>
-          </div>
-          <div class="report-meta">
-            <h2 class="report-title">${title}</h2>
-            <p class="report-subtitle">${subtitle}</p>
-            <div class="meta-info">
-              تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}
+        <div class="sheet-wrapper">
+          <div class="header">
+            <div class="logo-area">
+              <h1 class="company-name">نظام checkInTime لضبط الحضور والانصراف</h1>
+              <p class="company-sub">جدول مصفوفة الحضور والانصراف الشهرية المجمعة</p>
+            </div>
+            <div class="report-meta">
+              <h2 class="report-title">${title}</h2>
+              <p class="report-subtitle">${subtitle}</p>
+              <div class="meta-info">
+                تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="legend">
-          <span>دليل الرموز:</span>
-          <div class="legend-item"><span class="legend-box" style="background-color: #d1fae5;"></span> <span>ح: حضور مكتب</span></div>
-          <div class="legend-item"><span class="legend-box" style="background-color: #ede9fe;"></span> <span>ع: حضور عن بعد</span></div>
-          <div class="legend-item"><span class="legend-box" style="background-color: #fef3c7;"></span> <span>ت: تأخير</span></div>
-          <div class="legend-item"><span class="legend-box" style="background-color: #fee2e2;"></span> <span>غ: غياب كلي</span></div>
-          <div class="legend-item"><span class="legend-box" style="background-color: #f3f4f6;"></span> <span>عطلة: نهاية الأسبوع</span></div>
-        </div>
-
-        <table class="records-table">
-          <thead>
-            <tr>
-              <th rowspan="2" style="width: 25px; text-align: center; border: 1px solid #e5e7eb;">م</th>
-              <th rowspan="2" style="width: 100px; text-align: right; border: 1px solid #e5e7eb;">الموظف</th>
-              <th rowspan="2" style="width: 80px; text-align: right; border: 1px solid #e5e7eb;">الوظيفة</th>
-              <th colspan="${dates.length}" class="center" style="border: 1px solid #e5e7eb;">أيام الشهر</th>
-              <th colspan="6" class="center" style="border: 1px solid #e5e7eb; background-color: #1f2937;">ملخص الأداء بالفترة</th>
-            </tr>
-            <tr>
-              ${datesHeadersHtml}
-              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">التحضير</th>
-              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">مكتبي</th>
-              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">عن بعد</th>
-              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">تأخير</th>
-              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 30px;">غياب</th>
-              <th class="center" style="border: 1px solid #e5e7eb; background-color: #374151; width: 40px;">الساعات</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-
-        <div class="signatures-section">
-          <div class="signature-box">
-            <div class="signature-title">مسؤول الموارد البشرية</div>
-            <div>التوقيع: ...................................</div>
+          <div class="legend">
+            <span>دليل الرموز:</span>
+            <div class="legend-item"><span class="legend-box" style="background-color: #d1fae5;"></span> <span>ح: حضور مكتب</span></div>
+            <div class="legend-item"><span class="legend-box" style="background-color: #ede9fe;"></span> <span>ع: حضور عن بعد</span></div>
+            <div class="legend-item"><span class="legend-box" style="background-color: #fef3c7;"></span> <span>ت: تأخير</span></div>
+            <div class="legend-item"><span class="legend-box" style="background-color: #fee2e2;"></span> <span>غ: غياب كلي</span></div>
+            <div class="legend-item"><span class="legend-box" style="background-color: #f3f4f6;"></span> <span>ع: عطلة أسبوعية</span></div>
           </div>
-          <div class="signature-box">
-            <div class="signature-title">المدير العام للمنشأة</div>
-            <div>التوقيع: ...................................</div>
+
+          <table class="records-table">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 2.2%; text-align: center; border: 1px solid #d1d5db; font-size: 7.5px; padding: 2px 0px;">م</th>
+                <th rowspan="2" style="width: 11.5%; text-align: right; border: 1px solid #d1d5db; font-size: 7.5px; padding: 2px 3px;">الموظف</th>
+                <th rowspan="2" style="width: 8.3%; text-align: right; border: 1px solid #d1d5db; font-size: 7.5px; padding: 2px 3px;">الوظيفة</th>
+                <th colspan="${dates.length}" class="center" style="border: 1px solid #d1d5db; font-size: 7.5px; padding: 2px 0px;">أيام الشهر (${dates.length} يوم)</th>
+                <th colspan="6" class="center" style="border: 1px solid #d1d5db; background-color: #1f2937; font-size: 7.5px; padding: 2px 0px;">ملخص الأداء بالفترة</th>
+              </tr>
+              <tr>
+                ${datesHeadersHtml}
+                <th class="center" style="width: 3.5%; border: 1px solid #d1d5db; background-color: #374151; font-size: 7px; padding: 2px 0px;">التحضير</th>
+                <th class="center" style="width: 3.2%; border: 1px solid #d1d5db; background-color: #374151; font-size: 7px; padding: 2px 0px;">مكتبي</th>
+                <th class="center" style="width: 3.2%; border: 1px solid #d1d5db; background-color: #374151; font-size: 7px; padding: 2px 0px;">عن بعد</th>
+                <th class="center" style="width: 3.2%; border: 1px solid #d1d5db; background-color: #374151; font-size: 7px; padding: 2px 0px;">تأخير</th>
+                <th class="center" style="width: 3.2%; border: 1px solid #d1d5db; background-color: #374151; font-size: 7px; padding: 2px 0px;">غياب</th>
+                <th class="center" style="width: 3.2%; border: 1px solid #d1d5db; background-color: #374151; font-size: 7px; padding: 2px 0px;">الساعات</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+
+          <div class="signatures-section">
+            <div class="signature-box">
+              <div class="signature-title">مسؤول الموارد البشرية</div>
+              <div>التوقيع: ...................................</div>
+            </div>
+            <div class="signature-box">
+              <div class="signature-title">المدير العام للمنشأة</div>
+              <div>التوقيع: ...................................</div>
+            </div>
           </div>
         </div>
 
